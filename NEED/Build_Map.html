@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ravashing Build Map</title>
+<style>
+:root{--bg:#f6f5f1;--panel:#fff;--soft:#efede6;--ink:#1c1c1a;--mute:#66665f;--line:#d6d3c8;--accent:#2c5fd8;--red:#d23b3b;--ag:#e9e7df;--build:#fbfaf7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#161615;--panel:#212120;--soft:#2a2a28;--ink:#ecebe6;--mute:#a3a29a;--line:#3d3d39;--accent:#7ea2ff;--red:#ff6b6b;--ag:#262624;--build:#1c1c1b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 14px;max-width:80ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--mute);margin:10px 0 14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:22px;height:0;border-top:3px solid}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.tabs button,.chip,.tools button{font:inherit;font-size:13.5px;padding:7px 13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;cursor:pointer}
+.tabs button[aria-selected=true],.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tools{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--mute);margin:0 0 8px;flex-wrap:wrap}
+.tools label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+section[hidden]{display:none}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+svg{display:block;width:100%;min-width:900px;height:auto}
+svg text{font-family:inherit;fill:var(--ink)}
+.node{cursor:pointer}
+.node rect{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.node.ag rect{fill:var(--ag)}
+.node.sel rect{stroke:var(--accent);stroke-width:3.5}
+.node:hover rect,.node:focus rect{stroke:var(--accent)}
+.node:focus{outline:none}
+.nt{font-size:13.5px;font-weight:600}
+.ns{font-size:10.5px;fill:var(--mute)!important}
+.zone{fill:var(--build);stroke:var(--line);stroke-dasharray:4 4}
+.zone.ag{fill:var(--soft)}
+.zl{font-size:11px;letter-spacing:.06em;fill:var(--mute)!important;font-weight:600;paint-order:stroke;stroke:var(--build);stroke-width:5px;stroke-linejoin:round}
+.edge{fill:none;stroke-linecap:round}
+.lbl rect{fill:var(--panel);stroke:var(--line)}
+.lbl text{font-size:10px}
+.b{display:inline-block;width:1.1em;text-align:center;color:var(--mute)}
+.b.bc{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h3{margin:0 0 6px;font-size:14px}
+.card ul{margin:0;padding:0;list-style:none;font-size:13.5px}
+.card li{padding:3px 0}
+.ch{display:inline-flex;gap:4px;flex-wrap:wrap;margin-left:4px;vertical-align:middle}
+.ch i{font-style:normal;font-size:11px;padding:0 6px;border-radius:999px;border:1px solid;line-height:1.6}
+.hint{color:var(--mute);margin:14px 2px}
+.dhead{margin:14px 0 0;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.dhead h2{margin:0 0 4px;font-size:17px}
+.dhead p{margin:0;color:var(--mute)}
+.notes{margin:14px 0 0;padding:12px 16px 12px 30px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--red);border-radius:12px;font-size:14px}
+.notes li{margin:3px 0}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;text-align:left}
+th{background:var(--soft);position:sticky;top:0;font-weight:600}
+td:first-child,th:first-child{position:sticky;left:0;background:var(--soft);font-weight:600;white-space:nowrap;z-index:1}
+.wf{table-layout:fixed;min-width:860px}
+.wf td,.wf th{min-width:0;font-size:12px;overflow-wrap:anywhere}
+.wf th:first-child,.wf td:first-child{width:92px}
+.wf td.p{background:var(--panel)}
+.steps{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 4px}
+.steps span{background:var(--panel);border:1px solid var(--line);padding:4px 10px;border-radius:8px;font-size:13px}
+.steps em{color:var(--mute);font-style:normal}
+.org{margin:0;padding:0;list-style:none}
+.org li{padding:3px 0 3px 12px;border-left:2px solid var(--line);margin-left:var(--l,0);font-size:13.5px}
+.org li.o{border-left-style:dashed;margin-left:0;margin-top:6px;color:var(--mute)}
+.meta{font-size:12.5px;color:var(--mute);margin:0 0 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.chip{font-size:12.5px;padding:4px 10px}
+.fine{font-size:12.5px;color:var(--mute);margin-top:18px}
+#qgrid{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.qs{margin:0;padding-left:20px;font-size:13.5px}
+.qs li{margin:0 0 10px}
+.tg{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;margin-right:6px;color:var(--mute);background:var(--soft)}
+.st{color:var(--accent)}
+.lbl circle{fill:var(--panel);stroke:var(--line)}
+.printonly{display:none}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+.sheet h2{margin:0 0 2px;font-size:19px}
+.sheet h3{margin:12px 0 4px;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
+.sheet p{margin:2px 0}
+.sheet .id{display:flex;gap:18px;margin:10px 0 2px;font-size:13px}
+.sheet .id span{flex:1;border-bottom:1px solid var(--ink);padding-bottom:1px}
+.sheet ul{margin:0;padding:0;list-style:none;font-size:13px}
+.sheet li{padding:2px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+.ans{border-bottom:1px dotted var(--mute);height:24px}
+.num{color:var(--mute);font-size:11px}
+.keylist{columns:2;column-gap:24px;font-size:11px;padding:0;margin:6px 0 0;list-style:none}
+.keylist li{break-inside:avoid;margin:0 0 3px}
+@media (max-width:640px){.two{grid-template-columns:1fr}}
+#svgw{min-width:1300px}
+#svgw .nt{font-size:15px}#svgw .nt.big{font-size:19px}#svgw .ns{font-size:11.5px}#svgw .ns.pmn{font-weight:600;fill:var(--ink)!important;font-size:13px}#svgw .lbl text{font-size:11px}
+.node.pmx rect{stroke:var(--accent);stroke-width:3;fill:var(--panel)}
+.node.dim rect{stroke-dasharray:4 3}.node.dim text{opacity:.7}
+.chipbox{fill:var(--soft);stroke:var(--line);pointer-events:none}
+.zone.br{fill:var(--soft)}
+body[data-pdf] #svgw{display:block;width:100%;height:652px;min-width:0}
+body[data-pdf] #svgw .nt{font-size:16.5px}body[data-pdf] #svgw .nt.big{font-size:21px}body[data-pdf] #svgw .ns{font-size:13.5px}body[data-pdf] #svgw .ns.pmn{font-size:15px}body[data-pdf] #svgw .lbl text{font-size:13.5px}
+@page land{size:A4 landscape;margin:6mm}
+@page port{size:A4 portrait;margin:6mm}
+h4.dm,.sheet h4,.det h4{margin:8px 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--mute)}
+.rdr{color:var(--mute);font-size:.92em;margin:1px 0 3px 22px}
+.pg{break-after:page;page-break-after:always}
+.pg:last-child{break-after:auto;page-break-after:auto}
+.pg.land{page:land}.pg.port{page:port}
+body[data-pdf]{--bg:#fff;--panel:#fff;--soft:#f1f1ee;--ink:#000;--mute:#444;--line:#8c8c8c;--accent:#000;--ag:#ececec;--build:#fff;--red:#b00000;background:#fff;color:#000;font-size:11px;line-height:1.35;margin:0}
+body[data-pdf=map],body[data-pdf=whole],body[data-pdf=work],body[data-pdf=flows]{width:1072px}
+body[data-pdf=questions]{width:742px}
+body[data-pdf] .pg.land{width:1072px}
+body[data-pdf] .pg.port{width:742px}
+body[data-pdf] main{max-width:none;padding:0;margin:0}
+body[data-pdf] h1{font-size:17px;margin:0 0 2px}
+body[data-pdf] .subp{margin:0 0 6px;color:#444;font-size:10.5px}
+body[data-pdf] .cf{margin:2px 0 8px;font-size:10.5px;color:#222}
+body[data-pdf] .legend{font-size:10.5px;margin:4px 0 4px}
+body[data-pdf] #svg{display:block;width:100%;height:628px;min-width:0}
+body[data-pdf] .nt{font-size:15px}
+body[data-pdf] .ns{font-size:11.5px}
+body[data-pdf] .lbl text{font-size:11.5px}
+body[data-pdf] table{font-size:10.5px}
+body[data-pdf] th,body[data-pdf] td{padding:4px 6px}
+body[data-pdf] th{position:static;background:#e8e8e4}
+body[data-pdf] td:first-child,body[data-pdf] th:first-child{position:static}
+body[data-pdf] tr{break-inside:avoid}
+body[data-pdf] .kt{table-layout:fixed}
+body[data-pdf] .kt th:nth-child(1){width:30px}
+body[data-pdf] .kt th:nth-child(2){width:88px}
+body[data-pdf] .kt th:nth-child(3){width:96px}
+body[data-pdf] .kt th:nth-child(4){width:30%}
+body[data-pdf] .kt th:nth-child(5){width:200px}
+body[data-pdf] .kt th:nth-child(6){width:18%}
+body[data-pdf] .kt th:nth-child(7){width:130px}
+body[data-pdf] .wf{min-width:0}
+body[data-pdf] .wf td,body[data-pdf] .wf th{font-size:10px;padding:3px 5px;line-height:1.3}
+body[data-pdf] .steps span{font-size:11px}
+body[data-pdf] .sh{margin:10px 0 0;font-size:12px}
+body[data-pdf] .dets{display:block}
+body[data-pdf] .det{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:0 18px;break-inside:avoid;margin:0 0 9px;border:1px solid #8c8c8c;border-radius:6px;padding:6px 9px}
+body[data-pdf] .det>h3{grid-column:1/-1}
+body[data-pdf] .det>div{min-width:0}
+body[data-pdf] .det h3{margin:0 0 2px;font-size:13px}
+body[data-pdf] .det p{margin:0 0 3px;font-size:10.5px}
+body[data-pdf] .det ul{list-style:none;margin:0;padding:0;font-size:10.5px}
+body[data-pdf] .det li{padding:1.5px 0}
+body[data-pdf] .org li{font-size:10.5px}
+body[data-pdf] .notes{display:block!important;margin:10px 0 0;font-size:12px}
+body[data-pdf] .qdoc .grid{display:block;column-count:2;column-gap:16px}
+body[data-pdf] .qdoc .card{break-inside:avoid;margin:0 0 10px;padding:8px 10px;border-radius:6px}
+body[data-pdf] .qs{font-size:11px}
+@media print{
+ :root,:root:not([data-theme=light]){--bg:#fff;--panel:#fff;--soft:#f1f1ee;--ink:#000;--mute:#444;--line:#8c8c8c;--accent:#000;--ag:#ececec;--build:#fff;--red:#b00000}
+ body{background:#fff;font-size:10.5pt}
+ main{max-width:none;padding:0}
+ .tabs,.tools,.chips,.notes,#detail,.hint,.fine{display:none!important}
+ .scroll{overflow:visible;border:0}
+ svg{min-width:0}
+ .nt{font-size:15px}.ns{font-size:11.5px}.lbl text{font-size:11px}
+ .printonly{display:block}
+ .keylist{font-size:12px}
+ #key{break-before:page;page-break-before:always}
+ .card,.sheet li,tr{break-inside:avoid}
+ th,td:first-child,th:first-child{position:static}
+ .sheet{border:0;border-radius:0;padding:0;margin:0;break-after:page;page-break-after:always}
+ .sheet:last-child{break-after:auto;page-break-after:auto}
+ .qh{break-before:page;page-break-before:always}
+ body[data-tab=sheets] h1,body[data-tab=sheets] .sub,body[data-tab=sheets] .legend{display:none}
+ #t-map,#t-work,#t-flows{page:land}
+ #t-sheets,#t-people,#t-qs{page:port}
+}
+@media (max-width:640px){main{padding:14px 12px 40px}h1{font-size:19px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Ravashing Build: work, people and data</h1>
+<p class="sub">Drawn from what Ali (PM), Akhil (Procurement), Adiraj, Prateek (via Narendra, including his seam note of 6 Nov) and Narendra have said, plus assumptions from similar companies, marked as such. This is a picture of how Build works today, not a design. Updated 6 Nov 2026. Confidential: contains real names.</p>
+<div class="legend" id="legend"></div>
+<div class="tabs" role="tablist" id="tabs"></div>
+
+<section id="t-map">
+  <div class="tools">
+    <label><input type="checkbox" id="alllbl"> Show all flow labels</label>
+    <button id="clr" type="button">Clear selection</button>
+    <span>Click any box to see its people, data and flows. On a phone, scroll the map sideways.</span>
+  </div>
+  <div class="scroll"><svg id="svg" viewBox="0 0 1000 660" role="img" aria-label="Map of departments and the data flowing between them"></svg></div>
+  <div id="detail"></div>
+  <ul class="notes">
+    <li><b>Design doubts bypass the PM.</b> Red lines show talks that skip the PM. In the case Ali described, Carpentry changed the work after talking to Design, and Branding kept the old design.</li>
+    <li><b>Procurement and Furniture are Agency now</b> (Prateek, via Narendra, 6 Nov). They stay on the map only where they touch Build. The PM arranges furniture and stock with Logistics directly.</li>
+    <li><b>Site status lives in WhatsApp,</b> and stand lists in one Excel per PM. Nothing joins them.</li>
+    <li><b>Labour (own and outside) is recorded almost nowhere.</b> Only Carpentry and Paint have someone hired for it.</li>
+  </ul>
+  <div class="printonly" id="key"></div>
+</section>
+
+<section id="t-whole" hidden>
+  <div class="tools">
+    <label><input type="checkbox" id="allw"> Show all flow labels</label>
+    <button id="clrw" type="button">Clear selection</button>
+    <span>Agency on the left, Build on the right, the PM in the middle as the bridge. Click any box. On a phone, scroll the map sideways.</span>
+  </div>
+  <div class="scroll"><svg id="svgw" viewBox="0 56 1600 980" role="img" aria-label="Map of the whole company: Agency, the project manager as the bridge, and Build"></svg></div>
+  <div id="detailw"></div>
+  <p class="fine">Build side: from our talks with Ali and others (confirmed, told or guessed, as marked). Agency side: only from Prateek's flowchart and two notes (told, not confirmed) plus our guesses. Marketing and HR are drawn dimmed because we know nothing about how they connect. Procurement and Furniture sit inside the Agency, with Prateek.</p>
+  <div class="printonly" id="keyw"></div>
+</section>
+
+<section id="t-work" hidden>
+  <p class="hint">Read left to right. Columns are stages; Build-area work runs in parallel. A blank cell means nothing is known yet.</p>
+  <div class="scroll"><table class="wf" id="wf"></table></div>
+  <h3 style="margin:18px 0 0;font-size:15px">Site steps a PM tracks, walking from stand to stand</h3>
+  <div class="steps" id="steps"></div>
+  <p class="fine">Handoff, from Prateek's chart: after WON four tracks run before release. Technicals (Design: 2D drawings, finishes). Coordination (organisers, venues, approvals, passes; waits for the technicals). Graphics (sizes via the rep, mock-up, print proof). Purchasing (from the 3D render: stock or new to buy). The PM checks the handover pack, the rep gives the go-ahead, and the PM releases to Production.</p>
+  <p class="fine">Steps confirmed by Ali (PM, 5 Nov 2026). The order and the full list are not confirmed. "Standing" is assumed to mean sanding.</p>
+</section>
+
+<section id="t-people" hidden>
+  <p class="hint">Top of each list is the head. Dashed line: outside people. Team sizes are guesses from similar companies, not Ravashing data. Heads' titles are unknown unless stated; "Foreman" is Ali's word for the head of Carpentry, Paint, Electric and Graphics (now Branding).</p>
+  <div class="grid" id="people"></div>
+</section>
+
+<section id="t-flows" hidden>
+  <div class="chips" id="fchips"></div>
+  <div class="scroll"><table id="ftab"></table></div>
+</section>
+
+<section id="t-qs" hidden>
+  <p class="hint">Short list: a few questions per department, each one built to fill a part of this map. The tag says which part. ★ marks the questions to ask first if you only have ten minutes. Longer lists are in interview_sheets/ if a talk goes well. Ask people about their last real stand, and tell me what you heard in your own words, with who said it.</p>
+  <div class="tools"><label><input type="checkbox" id="starred"> Only the ★ questions (ten-minute version)</label> <span id="qcount"></span></div>
+  <div class="chips" id="qchips"></div>
+  <div class="grid" id="qgrid"></div>
+</section>
+
+<section id="t-sheets" hidden>
+  <p class="hint">One page per department, made for printing: print in portrait. It shows what we think we know (so they can correct it), then the questions with lines for the answers. Pick one department with the buttons to print just that page, or print all. Each page has the flow numbers from the map.</p>
+  <div class="chips" id="schips"></div>
+  <div id="sheets"></div>
+</section>
+
+<p class="fine">No headcounts, prices or client names appear here, because none have been given. Assumed items come from how similar exhibition and fit-out companies usually work. Each one is a question for the real department.</p>
+</main>
+<script>
+const PDF=new URLSearchParams(location.search).get("pdf"),HAND=!!PDF;
+const CH={paper:["Paper printout","#b07a16"],whatsapp:["WhatsApp","#1f9d52"],email:["Email / shared files","#3b74dc"],excel:["Excel / list","#8f5fc9"],talk:["Phone / in person","#d3609a"]};
+const CF={c:["Confirmed by someone doing that work","●"],t:["Told by someone else, not yet confirmed","◐"],a:["Assumed from similar companies","○"]};
+const RED="#d23b3b";
+const N={
+ top:{n:"Top Managers",s:"Prateek, Tareeq, Raveena",x:430,y:14,w:200,h:50,ag:1},
+ design:{n:"Design",s:"Agency · head: Kaleem",x:20,y:95,w:165,h:60,ag:1},
+ sales:{n:"Sales & Accounts",s:"Agency · rep, PO, invoice",x:20,y:215,w:165,h:60,ag:1},
+ coord:{n:"Project Coordinators",s:"Agency · organiser, passes",x:20,y:335,w:165,h:60,ag:1},
+ client:{n:"Client",s:"outside",x:20,y:455,w:165,h:60,ag:1},
+ pm:{n:"Project Management",s:"Aman → PMs · the hub",x:250,y:300,w:190,h:80},
+ carp:{n:"Carpentry",s:"starts first",x:540,y:150,w:180,h:58},
+ graph:{n:"Branding",s:"Printing, Acrylic, CNC",x:770,y:150,w:180,h:58},
+ paint:{n:"Water Paint",s:"Build area and site",x:540,y:235,w:180,h:58},
+ elec:{n:"Electric",s:"wiring, lights, AV",x:770,y:235,w:180,h:58},
+ spray:{n:"Spray Paint",s:"Build area, rarely site",x:540,y:320,w:180,h:58},
+ proc:{n:"Procurement",s:"Agency · + Inventory store",x:470,y:530,w:190,h:70,ag:1},
+ furn:{n:"Furniture",s:"Agency · own database",x:250,y:530,w:170,h:70,ag:1},
+ log:{n:"Logistics",s:"trucks · loading · people",x:770,y:520,w:190,h:70}
+};
+const G={trades:{n:"the five trades",x:525,y:105,w:450,h:290}};
+const TR=["carp","paint","spray","elec","graph"],BUILD=["pm","carp","paint","spray","elec","graph","log"];
+const isT=x=>TR.includes(x);
+const nm=x=>(N[x]||G[x]).n;
+// f,t,label,full text,channels,channel assumed?,confidence,kind,options
+const E=[
+["design","pm","Technicals + BOQ","Technicals (3D design, 2D plan, colour codes, item and AV lists, special elements) and the BOQ",["email","whatsapp"],1,"c","main"],
+["sales","pm","Job no., PO","The rep gives the go-ahead to release; PO and advance received, job number opened",["email","whatsapp"],1,"t","main"],
+["coord","pm","Show dates, passes, stand info","Show dates, build-up windows, passes, organiser approvals, and stand information (the Sales team sends stand information too)",["whatsapp"],0,"t","main"],
+["client","pm","Changes, sign-off","Change requests during the build; walk-through and sign-off",["whatsapp"],0,"t","main"],
+["pm","trades","Technicals","Printed technicals pack for Carpentry, Water Paint, Spray Paint, Electric and Branding",["paper","whatsapp"],1,"c","main"],
+["pm","proc","BOQ","BOQ: list of items and quantities (Prateek's note says there is no per-stand BOQ: Procurement reads the 3D render; open)",["email","excel"],1,"c","main"],
+["trades","pm","Progress","Progress of each stand and people counts per trade; also what goes back up to the PM: build schedule, site dates, client questions",["talk","whatsapp"],1,"t","main"],
+["proc","pm","Delays, shortages","Missing items and late deliveries",["whatsapp","talk"],1,"a","minor"],
+["proc","trades","Stock issued","Items and materials from the store for the five trades",["talk","paper"],1,"t","main"],
+["trades","proc","Material requests","Requests for items not on the BOQ, such as unique client items",["whatsapp","talk"],1,"a","minor"],
+["pm","furn","Furniture per stand","Which furniture each stand needs; ready or short (Furniture is Agency side)",["whatsapp","excel"],1,"a","minor",{bi:1}],
+["trades","log","Packed stand, load list","Dismantled, labelled stand parts and a signed load list",["paper","talk"],1,"t","main"],
+["pm","log","Load, trucks, passes","Ready-to-load signal; furniture and stock to load, also before the site; truck left, reached, offloaded; venue slots and passes handed down from the Coordinators",["whatsapp","talk"],0,"t","main",{bi:1}],
+["log","proc","Returns, scrap","Items back from the show; scrap",["talk"],1,"a","minor"],
+["pm","sales","Site changes, lessons","Updates go to Sales and the top managers (told); site changes for the final invoice; lessons learned",["whatsapp","excel"],1,"t","minor"],
+["pm","top","Reports","Updates to the boss (told, not clear which top manager); progress and status reports",["whatsapp","excel"],1,"t","minor"],
+["design","carp","Doubts, direct","The Carpentry foreman gets design doubts answered by Design directly. The PM is not told, so Branding kept the old design",["talk","whatsapp"],1,"t","problem",{bi:1,n:"Doubts about a drawing are sometimes answered by Design directly; the PM may not hear about the change"}],
+["design","graph","Measurement doubts","Branding (graphics) asks Design about measurements (Adiraj); it also gets drawings from the PM (Ali); Graphics says it gets a zip file from Design",["whatsapp"],1,"t","problem",{bi:1,bend:-95,n:"Questions to Design about measurements, besides the drawings that come from the PM"}],
+["carp","paint","Parts ready","Some parts are ready, so Paint starts primer",["talk"],1,"t","minor"],
+["carp","elec","Parts ready","Some parts are ready, so Electric starts fixing",["talk"],1,"t","minor"],
+["carp","graph","Panel sizes, CNC","Sizes the graphics must fit; CNC cut files and cut parts for Carpentry (CNC sits under Branding)",["talk"],1,"a","minor",{bi:1}],
+["paint","spray","Which parts, colours","Which parts are sprayed and which are water-painted; colour codes; order of work on a stand",["talk"],1,"a","minor",{bi:1}],
+["elec","graph","Lightboxes, LED","Cut-outs and power points for lightboxes and LED graphics; sizes",["talk"],1,"a","minor",{bi:1}],
+["log","trades","Truck times, load list","Truck schedule and loading times to the trades; the trades pack to the load list",["whatsapp","talk"],1,"a","minor"]
+].map((a,i)=>({id:i,f:a[0],t:a[1],l:a[2],d:a[3],ch:a[4],cq:a[5],c:a[6],k:a[7],...(a[8]||{})}));
+const R=["The PM who owns the stand; Aman sees it too", "The PM who owns the stand; Aman", "The PMs on that show; Aman", "The PM who owns the stand", "Each trade's foreman, who passes it to the workers", "The buyer or store keeper who does the stock check", "The PM who owns the stand", "The PM who owns the stand", "The foreman, and the workers who collect from the store", "The buyer or store keeper", "The furniture coordinator; the PM", "The transport planner or dispatcher; loaders use the load list", "The transport planner or dispatcher; the PM", "The store keeper (Inventory)", "Accounts (final invoice) and Sales", "Top Managers", "The Carpentry foreman; the designer at Design who answers", "The Branding foreman or designer; Design", "The Paint foreman", "The Electric foreman", "The Branding foreman; the Carpentry foreman", "The Water Paint and Spray Paint heads", "The Electric and Branding heads", "Each trade's foreman"];
+E.forEach((e,i)=>e.r=R[i]);
+const D={
+ pm:{s:"Hub between Agency and Build: everything crosses through the PM (Prateek). Four PMs plus Aman; no assistants; no standard Excel list. Each PM owns individual stands; Aman allocates them and arranges outside help. Runs the site. Also coordinates furniture and inventory with Logistics, before the site too (Narendra, 6 Nov).",f:"01_Project_Management.md",cr:[["Stand list, one Excel per PM","c"],["Site status updates (WhatsApp)","c"],["Printed technicals pack for each trade","t"],["Handover sheet","t"],["Job file, photos, lessons learned","t"]],kp:[["Excel stand lists, one per PM","c"],["WhatsApp groups for stands and for site","c"],["Printouts of technicals","t"]]},
+ carp:{s:"Starts first, together with Branding. Builds the structure and the stand mock-up at the Build area. Foremen rarely go to site. Keeps no data of its own: the PMs keep it (told, 6 Nov).",f:"02_Carpentry.md",cr:[["Structure parts","t"],["Stand mock-up","t"],["Load list (with Logistics)","t"],["Progress updates","t"]],kp:[["Labour information, partly (one person hired)","t"],["Job or cut lists","a"],["WhatsApp groups","a"]]},
+ paint:{s:"Water Paint department: water paint and primer once parts are ready, at the Build area and on site too (Narendra, 6 Nov). Spray Paint is a separate department.",f:"03_Water_Paint.md",cr:[["Primed and painted parts","t"],["Progress updates","t"],["Paint usage record","a"]],kp:[["Labour information (shared person with Carpentry)","t"],["Colour codes, from the technicals","t"]]},
+ spray:{s:"Separate department from Water Paint. Mostly at the Build area, rarely on site (Narendra, 6 Nov).",f:"04_Spray_Paint.md",cr:[["Sprayed parts","a"],["Progress updates","a"]],kp:[["Colour codes, from the technicals","a"],["Spray area schedule","a"]]},
+ elec:{s:"Joins once parts are ready. Small electric fixing at the Build area, with no progress update; progress is tracked on site, by the PMs. AV and lighting are outsourced. Orders material from Procurement (told).",f:"05_Electric.md",cr:[["Wired, lit, tested stand","t"],["Progress updates","t"],["Test record","a"]],kp:[["Electrical list and plan","a"],["Equipment (lights, cables) record","a"]]},
+ graph:{s:"Branding department with three sub-departments: Graphics, CNC and Logo (Narendra, 6 Nov; the person spoken to said Graphics and CNC are one team). Gets a zip file from Design. Makes prints and fits graphics on site. Who does the graphic mock-up and print proof is open: Prateek\'s note puts them with Design (Agency), the print itself with Build.",f:"06_Branding.md",cr:[["Graphic mock-up and logo mock-up","t"],["Printed panels, banners, stickers, lightbox fabric","t"],["Print files","a"]],kp:[["Print files and versions","a"],["Status for the PM","t"]]},
+ proc:{s:"Agency side (Prateek will take care of it, via Narendra, 6 Nov). Checks stock for the trades, orders what's missing (delays are rare). Inventory sits under Procurement. Prateek\'s note: it reads the 3D render and owns the stock list. Out of Build scope; mapped only where it touches Build.",f:"",cr:[["Stock check against the BOQ","t"],["Purchase orders","a"],["Vendor list","a"],["Delivery notes","a"]],kp:[["Inventory (stock list)","c"],["Vendor details","a"]]},
+ furn:{s:"Agency side (Prateek will take care of it, via Narendra, 6 Nov). Prateek\'s note: part of Procurement\'s inventory, not its own database. The PM coordinates furniture with Logistics directly. Out of Build scope.",f:"",cr:[["Own furniture database","t"],["Furniture allocated to each stand","a"]],kp:[["Furniture database","t"]]},
+ log:{s:"Comes in when every department is ready. Loads, moves stands to the event, and moves people. Not yet confirmed as a team of its own.",f:"07_Logistics.md",cr:[["Truck schedule","t"],["Load list (with Carpentry)","t"],["Delivery notes","a"],["Transport and return records","a"]],kp:[["Truck bookings","a"],["Driver and vehicle records","a"]]},
+ design:{s:"Agency. Releases technicals and answers doubts. Head designer: Kaleem, who OKs graphic mock-ups (board). Prateek\'s note: the graphic mock-up and print proof are agency work under the Head of Design.",f:""},
+ sales:{s:"Agency. The rep (sales) owns the client and gives the go-ahead to release the build. Opens the job number, receives the PO and advance, issues the final invoice against site changes.",f:""},
+ coord:{s:"Agency (Narendra, 6 Nov). Handle organiser and venue approvals and passes. Build depends on their dates.",f:""},
+ client:{s:"Outside. Asks for changes, signs off at handover. Often in a WhatsApp group with Sales and the PM.",f:""},
+ top:{s:"Three people: Prateek, Tareeq and Raveena (Prateek via Narendra, 6 Nov). They see both Agency and Build. What they look at is unknown (ask Prateek).",f:""}
+};
+// level, text, confidence; level "o" = outside people
+const P={
+ pm:[[0,"Top Managers, 3 people (see both halves)","t"],[1,"General Manager above Production (HR chart: Tariq)","c"],[2,"Aman, head manager of the PMs: allocates stands, arranges outside help","c"],[3,"Project Managers: 3 listed with Aman, each owns stands (HR chart; Ali said four PMs)","c"],[3,"Production Coordination, 2 people, between the PMs and the divisions: role not known","c"],["o","No assistants for PMs (told)","t"],["o","Outside PMs hired at peak times, number unknown","t"]],
+ carp:[[0,"Foreman, 1 (HR chart: Jayson): head of Carpentry","c"],[1,"Three senior carpenters; one runs a machine (HR chart, told)","c"],[2,"Carpenters, 21 (HR chart)","c"],["o","Outside carpentry labour at peak, number unknown","t"],["o","Labour-record person, 1, shared with Water Paint","t"],["o","Above the foreman: Production Coordination and Aman (HR chart)","c"]],
+ paint:[[0,"Head of Water Painter: not named on the HR chart","a"],[1,"Water painters, 9 (HR chart)","c"],["o","Outside painters, ≈ 4–15 at peak (guess)","a"],["o","Labour-record person, 1, shared with Carpentry","t"],["o","Above: Production Coordination and Aman (HR chart)","c"]],
+ spray:[[0,"Head of Spray Painter, 1 (HR chart: Kayum Ali)","c"],[1,"Spray painters, 2 (HR chart)","c"],["o","Outside spray painters at peak (not known)","a"],["o","Above: Production Coordination and Aman (HR chart)","c"]],
+ elec:[[0,"Foreman, 1 (HR chart: Happy): head of Electric","c"],[1,"Senior electrician, 1 (HR chart)","c"],[2,"Electricians, 5 (HR chart)","c"],["o","AV and lighting technicians: completely outsourced (told)","t"],["o","No helpers (told)","t"],["o","Above: Production Coordination and Aman (HR chart)","c"]],
+ graph:[[0,"Head of Printing, Acrylic and CNC (HR chart: Jasvir): sits under the General Manager","c"],[1,"Printing (graphics), 3 (HR chart)","c"],[1,"Acrylic, 1 (HR chart)","c"],[1,"CNC, 1 (HR chart)","c"],["o","Logo: not on the HR chart; assumed to be acrylic work","a"],["o","Outside graphic labour at peak, number unknown","a"]],
+ log:[[0,"Head of Transport (HR chart: Zain)","c"],[1,"Drivers and loaders, 6 (HR chart)","c"],["o","Who plans the trucks? (to find out)","a"],["o","Hired trucks and drivers, at peak","a"],["o","Freight agents for overseas jobs","a"],["o","Above: Production Coordination and Aman (HR chart)","c"]]
+};
+// guesses from similar fit-out companies, not Ravashing data
+const SZ={pm:"Aman plus 3 PMs (HR chart, 6 Nov); outside PMs at peak, number unknown",carp:"1 foreman plus 24 (HR chart)",paint:"9 water painters (HR chart); no head named",spray:"3 including the head (HR chart)",elec:"7 including the foreman (HR chart); AV and lighting outsourced",graph:"5 plus the head: Printing 3, Acrylic 1, CNC 1 (HR chart)",log:"7 including the head, Transport (HR chart); hired trucks at peak (guess)"};
+const DM={
+ pm:[["Each PM keeps their own stand list in Excel; there is no standard list (told)","c"],["Aman probably collects an overview","a"]],
+ carp:[["Nobody in Carpentry: the PMs keep the information (told). The labour-record person keeps labour information","t"]],
+ paint:[["The same labour-record person keeps labour information","t"],["Water Paint: nobody else known","a"]],
+ spray:[["The foreman keeps colours, spray schedule and progress notes","a"]],
+ elec:[["Nobody: the PMs track on-site progress. There is no progress update from the Build area (told)","t"]],
+ graph:[["The head of Branding, or the designer / prepress person, keeps print files and print orders","a"]],
+ log:[["The transport planner / dispatcher keeps bookings, load lists and delivery notes","a"]]
+};
+const AGP=[[0,"Design: head designer Kaleem","t"],[0,"Sales & Accounts","t"],[0,"Project Coordinators (Agency)","t"],[0,"Top Managers","t"],[0,"Client","t"]];
+const W={ph:["Handoff","Build area: start","Build area: mock-up","Pack & move","On site: build-up","Show & handover","Dismantle & return","Close"],
+rows:[
+["Agency",[["WON. Four tracks start: technicals, coordination, graphics, purchasing (Procurement and Furniture are Agency). The rep gives the go-ahead","t"],["Design answers doubts","t"],0,0,["Coordinators: passes, venue rules","a"],["Client walk-through and sign-off (Sales + site team)","t"],0,["Accounts: final invoice vs PO and site changes","t"]]],
+["PM",[["Collects technicals + BOQ; checks the handover pack; releases to Production","t"],["Hands technicals to trades; Procurement is Agency; tracks progress","c"],["Tracks mock-up; goes to Design for changes","c"],["Confirms ready to load; coordinates furniture and stock with Logistics","t"],["Walks stands; tracks steps; WhatsApp status","c"],["Handover sheet","t"],["Tracks what is kept and what is scrapped; passes stock and furniture back through Logistics","a"],["Files job, photos, lessons learned","t"]]],
+["Carpentry",[0,["Starts structure: wood, metal, acrylic (CNC is under Branding)","t"],["Completes the stand mock-up","t"],["Dismantles, labels, load list","t"],["Structure, platform (often outside labour)","t"],0,["Dismantle; parts back to Build area","a"],0]],
+["Water Paint",[0,["Primer once parts are ready","t"],["Water paint","t"],0,["Water paint, putty, sanding, first coat on site","t"],0,0,0]],
+["Spray Paint",[0,["Spray work once parts are ready","a"],["Spraying","a"],0,["Rarely on site","t"],0,0,0]],
+["Electric",[0,["Small electric fixing once parts are ready","t"],["Wiring, lighting, AV fitted and tested","t"],0,["Electric work and fitting","t"],0,["Disconnect; equipment back","a"],0]],
+["Branding",[0,["Graphics, CNC and Logo start with Carpentry, from Design's zip file","t"],["Prints; mock-up OK'd","t"],["Prints packed","a"],["Logo and graphics fitted","t"],0,0,0]],
+["Logistics",[0,0,0,["Loads; moves stand, furniture and people; trucks scheduled","t"],["Truck reached; offload","t"],0,["Return transport; scrap removal","a"],0]]
+]};
+const STEPS=["Truck reached","Offloaded","Space identified","Platform work","Electric work","Structure work","Putty","Sanding (?)","Paint first coat","Electric fitting","Logo work"];
+
+// tag = which part of the map the answer fills; 1 = ask first
+const QN={pm:"Project Management: Ali and other PMs",aman:"Project Management: Aman, head of PMs",carp:"Carpentry",paint:"Water Paint",elec:"Electric",graph:"Branding (Graphics, CNC, Logo)",spray:"Spray Paint",log:"Logistics",prateek:"Prateek (not a department)"};
+const Q={
+pm:[
+["People",1,"How many stands does one PM handle at a time, normally and at the most? Who looks after your stands when you are at another show? How many outside PMs do we hire at the busiest time, and who arranges them?"],
+["Flows",1,"What do you receive from Design, Sales and the Coordinators (files, dates, passes)? How does each one reach you? Open one real technicals pack with me: what do you call the BOQ in it, and are colour codes (Pantones) on it? Do you check a handover pack before you release to Production: what is in it, who is the rep who gives the go-ahead, and what happens if something is missing?"],
+["Flows",0,"What exactly do you hand to each trade and to Logistics? How do you arrange furniture and stock with Logistics (before the site too), and how do you pass on the venue slots and passes from the Coordinators? When something changes, how do you tell them? What do you send back to the rep and the client: build schedule, site dates, questions?"],
+["Records",1,"When you update Sales and the boss, who is the boss here, how do you send it (WhatsApp?) and who writes it down? Can you show me your Excel and one WhatsApp group for a stand? What is in each column, who else can see them, and where do the photos go?"],
+["Work",0,"At the Build area, how do you know how far each stand has got? How early can you tell it will be late?"],
+["Site",0,"On site with 10 or 20 stands: how many PMs are there, how do you note each step, and who guides the workers at a stand when you are at another one? How do you brief outside labour or outside PMs?"],
+["Problem",1,"Is it normal for a foreman to talk to Design directly? What would stop the old-design mistake from happening again, without everything having to go through you?"],
+["Close",0,"How does a stand end: handover sheet, sign-off, photos, and what you tell Accounts about site changes? And what one thing do you wish you could see on your phone each morning?"]],
+aman:[
+["People",1,"What does Production Coordination (two people between the PMs and the divisions) do, and what do they write down? What can you decide yourself, and what must go to the General Manager or the top managers?"],
+["Work",1,"How do you give a stand to a PM? How do you see all stands and every PM's load today?"],
+["Capacity",1,"When two stands need the same people or machines, who decides? When did you last bring in outside people for work, labour or PMs?"],
+["Capacity",0,"Which outside companies do you use, who keeps the list, who approves and pays, and how many outside people do you have at the busiest time?"],
+["Flows",0,"What do you report to the Top Managers, and how often? What do you need from each department, and when?"],
+["Problem",0,"How do you find out a stand is in trouble? Which shows are coming next month, and how many stands are in each?"]],
+carp:[
+["People",1,"The chart shows three senior carpenters under the foreman: who leads what, and which machine does each run? Who gives you your daily work: the PM or Production Coordination? Who does the metal work? How many outside carpenters do we use at the busiest time?"],
+["Work",0,"Take your last stand, from getting the technicals to the mock-up. How did you decide Paint and Electric could start, and who said the mock-up was good?"],
+["Flows",1,"Who gives you the technicals? Last time you had a doubt about a drawing, who did you ask, and did you tell the PM?"],
+["Flows",0,"Which other departments do you talk to (Paint, Spray Paint, Electric, Branding, Logistics) and about what? Phone, WhatsApp, paper or in person?"],
+["Records",1,"What do you write down: progress, materials, who worked, hours? Today the PMs keep your information. What do you tell the PM about progress, and how (phone, WhatsApp)? What would you need if you kept a simple list yourself? Can you show me anything you write down?"],
+["Capacity",0,"How many stands at once is too many? Who decides which goes first, and when do you use outside carpenters? What do your people do on site, and who guides outside workers there?"],
+["Problem",1,"What went wrong most recently, and who noticed first? What one thing do you wish you could see quickly?"]],
+paint:[
+["People",1,"Who heads Water Paint, and is there a manager above him? How many people are in the team (ours and outside, normally and at the busiest)? Who keeps the labour information?"],
+["Work",0,"Take your last stand, from the first parts arriving to finished. What do you paint (water paint and primer), and how is it different from spray paint? What is done here, and what is left for site?"],
+["Flows",1,"How do you know a part is ready for you, and where do the colours come from? If the colour changes, how do you hear? Which departments do you talk to, and how?"],
+["Records",1,"What do you write down: paint used, colours, who worked, hours? Who keeps these records, and where? Can you show me?"],
+["Capacity",0,"How many stands at once? Who decides which goes first, and when do you use outside painters? Who paints on site, and who briefs them on colours? How do you work with Spray Paint?"],
+["Problem",1,"What went wrong most recently, and who noticed first? What one thing do you wish you could see quickly?"]],
+spray:[
+["People",1,"Who is the foreman, and is there a manager above him? How many people are in the team (ours and outside, normally and at the busiest)? Why is spray paint a separate department from Paint?"],
+["Work",0,"Take your last stand: when do parts reach you, where do you spray, and how long do they dry? Is the spray area or drying time ever a limit? What makes you spray on site in the rare cases, and who decides?"],
+["Flows",1,"How do you know a part is ready for you, and who gives you the colours? If a colour changes, how do you hear? How do you work with Paint and Carpentry, and who do you tell when you finish?"],
+["Records",1,"What do you write down: paint used, colours, who worked, hours? Who keeps these records, and where? Can you show me?"],
+["Capacity",0,"How many stands at once? Who decides which goes first, and when do you use outside spray painters?"],
+["Problem",1,"What went wrong most recently, and who noticed first? What one thing do you wish you could see quickly?"]],
+elec:[
+["People",1,"Who gives you your daily work: the PM or Production Coordination? Who are the outside AV and lighting people, who books them, and how many do we use at the busiest time? When the six electricians are all busy, who does the extra work?"],
+["Work",0,"What do you fit at the Build area, and what is left for site? Who makes the plan for sockets and lights, and how do you test your work?"],
+["Flows",1,"How do you know a stand is ready for you? If the electrical plan changes, how do you hear? Which departments do you talk to, and how?"],
+["Records",1,"On site, does anyone besides the PM note your progress? Which lights, cables and AV items do we own, reuse or hire, and who tracks where they are? How do you ask Procurement for material?"],
+["Capacity",0,"How many stands at once? Who decides which goes first, and when do you use outside electricians? Who connects to the venue power and tests before opening?"],
+["Problem",1,"What went wrong most recently, and who noticed first? What one thing do you wish you could see quickly?"]],
+graph:[
+["People",1,"On the HR chart this department is called Printing, Acrylic and CNC, with no Branding box. Is Branding the same department? Where does Logo fit: is it the acrylic work? How many outside people do we use at the busiest time?"],
+["Work",0,"Take your last stand, from the zip file you get from Design to graphics on the stand. What is in the zip? What do you print yourselves and what goes outside? What are the graphic and logo mock-ups, and who approves them?"],
+["Flows",1,"Who gives you the technicals and the logo? Has the client already approved the sizes and the print proof before you start? Who do you ask about measurements? How do you hear a design changed, and has anything been printed twice?"],
+["Flows",0,"How do you tell the PM your progress, and how do you agree sizes with Carpentry? Which other departments do you talk to, and how?"],
+["Records",1,"Where are the final print files kept, who keeps them, and how do you know which version was printed? What else do you write down?"],
+["Parts",0,"What does each part do: Graphics, CNC, Logo? What does CNC cut, and for whom (Carpentry too)? How does a finished logo reach the stand?"],
+["Site",0,"Who fits the graphics on site? What happens if one does not fit? How many stands at once, and when do you use outside people?"],
+["Problem",1,"What went wrong most recently, and who noticed first? What one thing do you wish you could see quickly?"]],
+log:[
+["People",1,"The chart shows Transport as 7 people. Does Transport do only trucks and loading, or also site work? Who plans the trucks and keeps the bookings? Are the vehicles ours or hired, and who do you take work from: the PM or Production Coordination?"],
+["Work",0,"Take the last stand you sent. How did you know it was ready, who made the load list, and who checked it at the site?"],
+["Flows",1,"Do you get venue slots and passes from the PM or from the Coordinators? How do the PM and you arrange furniture and stock to load? How does the PM learn the truck has left, reached and offloaded? Which other departments do you talk to?"],
+["Records",1,"What do you write down: bookings, load lists, costs for each stand? Who writes it, and where? Is there one place where all coming site dates can be seen?"],
+["After",0,"Does your work stop at delivery, or do you help build? Who is in charge at site? After the show, what comes back, who checks it, and who removes the scrap and at what cost?"],
+["Overseas",0,"For jobs outside the UAE, how does the stand get there? Who handles shipping and customs, and who travels?"],
+["Problem",1,"How many stands do you move in the same week, and who decides which goes first? What went wrong most recently?"]],
+prateek:[
+["People",1,"Your seam note says Procurement lives on both sides, and the HR chart puts the Furniture division inside Production, but we were told Procurement and Furniture are Agency. Which is right for each? Is Branding the Printing, Acrylic and CNC department?"],
+["People",1,"What does each top manager look at? When PMs update the boss, who is that? Who settles it when department heads disagree?"],
+["Flows",1,"What is in the handover pack today, who builds it, and in what form? Your clash note says there is no BOQ per stand and no colour codes on the drawings, but our PMs say both arrive. Can we open one real technicals pack together?"],
+["Flows",1,"After release, how should a design change reach Build? What are the DMS and the Build Spec, and when will they exist? Who raises a change order? What must Build send back (schedule, site dates, client questions), and to whom?"],
+["Edge",1,"When will Stand Studio be live? If it is late, can Build start with stands typed in by hand?"],
+["Edge",1,"Which side of the dashed line is the PM: RAVS or Build? What do RAVS and AI engineer stand for? Who agreed that your map wins up to release, and may Build add to the handover pack?"],
+["Money",0,"Who in Build may see prices? Does anyone compare planned and actual cost? Which accounting software does Accounts use?"],
+["Outside",0,"How often do we use outside companies, which ones, and who keeps the list? Would outside people ever use our system? Who builds our stands overseas?"],
+["Limits",1,"What would success look like, and by when? Can I have the approved tools list (Annex A), any data rules, the budget for phones and Wi-Fi, and the name of my backup person?"]]
+};
+const qHtml=(keys,star)=>keys.map(k=>`<div class="card"><h3>${QN[k]}</h3><ol class="qs">${Q[k].filter(q=>!star||q[1]).map(q=>`<li><span class="tg">${q[0]}</span>${q[1]?'<b class="st" title="Ask this one first">★</b> ':""}${q[2]}</li>`).join("")}</ol></div>`).join("");
+const $=s=>document.querySelector(s);
+const bd=c=>`<span class="b b${c}" title="${CF[c][0]}">${CF[c][1]}</span>`;
+const chips=e=>`<span class="ch">${e.ch.map(k=>`<i style="color:${CH[k][1]}" title="${CH[k][0]}${e.cq?' (channel assumed)':''}">${CH[k][0]}${e.cq?'?':''}</i>`).join("")}</span>`;
+const mem=(x,id)=>x===id||(x==="trades"&&isT(id));
+const col=e=>e.k==="problem"?RED:CH[e.ch[0]][1];
+function partnersOf(id){const s=new Set();E.forEach(e=>{if(!(mem(e.f,id)||mem(e.t,id)))return;const o=mem(e.f,id)?e.t:e.f;(o==="trades"?TR:[o]).forEach(y=>{if(y!==id)s.add(y)})});return s}
+let sel=null,all=false;
+
+function geom(e,M=N,LL=E){
+ const a=M[e.f]||G[e.f],b=M[e.t]||G[e.t],ca=[a.x+a.w/2,a.y+a.h/2],cb=[b.x+b.w/2,b.y+b.h/2];
+ const dx=cb[0]-ca[0],dy=cb[1]-ca[1],L=Math.hypot(dx,dy)||1,px=-dy/L,py=dx/L;
+ let ctrl=null;if(e.bend)ctrl=[(ca[0]+cb[0])/2+px*e.bend,(ca[1]+cb[1])/2+py*e.bend];
+ const clip=(r,to)=>{const cx=r.x+r.w/2,cy=r.y+r.h/2,x=to[0]-cx,y=to[1]-cy,s=Math.min(x?r.w/2/Math.abs(x):1e9,y?r.h/2/Math.abs(y):1e9);return[cx+x*s,cy+y*s]};
+ const p0=clip(a,ctrl||cb),p1=clip(b,ctrl||ca);
+ const rev=LL.some(o=>o.f===e.t&&o.t===e.f)&&!e.bi,off=rev?7:0;
+ p0[0]+=px*off;p0[1]+=py*off;p1[0]+=px*off;p1[1]+=py*off;
+ const mid=ctrl?[(p0[0]+2*ctrl[0]+p1[0])/4,(p0[1]+2*ctrl[1]+p1[1])/4]:[(p0[0]+p1[0])/2,(p0[1]+p1[1])/2];
+ const d=ctrl?`M${p0[0]},${p0[1]} Q${ctrl[0]},${ctrl[1]} ${p1[0]},${p1[1]}`:`M${p0[0]},${p0[1]} L${p1[0]},${p1[1]}`;
+ return{d,mid,p0,p1,ctrl};
+}
+function labelSpots(LS=E,M=N,X=[[G.trades.x+8,G.trades.y+1,160,20],[G.trades.x+8,G.trades.y+G.trades.h-20,290,18],[16,80,180,16],[230,80,130,16],[240,503,380,16]],W=998,H=658,cw=PDF?6.2:5.4,fh=PDF?19:18){
+ const placed=[],out={};
+ const obs=Object.values(M).filter(n=>!n.grp).map(n=>[n.x-2,n.y-2,n.w+4,n.h+4]).concat(X);
+ const hit=(a,b)=>a[0]<b[0]+b[2]&&a[0]+a[2]>b[0]&&a[1]<b[1]+b[3]&&a[1]+a[3]>b[1];
+ [...LS].sort((a,b)=>(a.k==="minor")-(b.k==="minor")).forEach(e=>{
+  const g=geom(e,M,LS),T=`${e.id+1} ${e.l}`,w=T.length*cw+14,L=Math.hypot(g.p1[0]-g.p0[0],g.p1[1]-g.p0[1])||1;
+  const at=u=>g.ctrl?[(1-u)*(1-u)*g.p0[0]+2*(1-u)*u*g.ctrl[0]+u*u*g.p1[0],(1-u)*(1-u)*g.p0[1]+2*(1-u)*u*g.ctrl[1]+u*u*g.p1[1]]:[g.p0[0]+(g.p1[0]-g.p0[0])*u,g.p0[1]+(g.p1[1]-g.p0[1])*u];
+  const nx=-(g.p1[1]-g.p0[1])/L,ny=(g.p1[0]-g.p0[0])/L;
+  let best=null,bs=1e9;
+  for(const off of [0,14,-14,28,-28,42,-42,56,-56,70,-70,84,-84,98,-98])for(const u of [.5,.45,.55,.4,.6,.35,.65,.3,.7,.25,.75,.2,.8,.15,.85,.1,.9]){
+   const c=at(u),x=c[0]+nx*off,y=c[1]+ny*off,r=[x-w/2,y-fh/2,w,fh];let s=0;
+   placed.forEach(p=>{if(hit(r,p))s+=8});obs.forEach(o=>{if(hit(r,o))s+=6});
+   if(r[0]<2||r[0]+w>W-2||r[1]<2||r[1]+fh>H-2)s+=5;
+   s+=Math.abs(off)/14*.15+Math.abs(u-.5);
+   if(s<bs){bs=s;best={x,y,w,h:fh,T,m:g.mid,r,q:c}}
+  }
+  placed.push(best.r);out[e.id]=best;
+ });
+ return out;
+}
+function drawMap(){
+ const cols=[...new Set(E.map(col))],SP=labelSpots();let lh="";
+ let h=`<defs>${cols.map(c=>`<marker id="m${c.slice(1)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9z" fill="${c}"/></marker>`).join("")}</defs>`;
+ h+=`<rect class="zone ag" x="8" y="74" width="196" height="466" rx="14"/><text class="zl" x="20" y="92">AGENCY · Prateek's side</text>`;
+ h+=`<rect class="zone" x="222" y="74" width="772" height="572" rx="14"/><text class="zl" x="236" y="92">BUILD · this project</text><rect class="zone ag" x="236" y="500" width="440" height="136" rx="12"/><text class="zl" x="248" y="518">AGENCY · Procurement and Furniture (Prateek takes them)</text>`;
+ h+=`<rect class="zone" x="${G.trades.x}" y="${G.trades.y}" width="${G.trades.w}" height="${G.trades.h}" rx="12" style="fill:var(--soft)"/><text class="zl" x="${G.trades.x+12}" y="${G.trades.y+16}">TRADES</text><text class="zl" x="${G.trades.x+12}" y="${G.trades.y+G.trades.h-9}">separate departments, each with its own foreman (to confirm)</text>`;
+ const touch=e=>sel&&(mem(e.f,sel)||mem(e.t,sel));
+ E.forEach(e=>{
+  const g=geom(e),c=col(e),w={c:3.4,t:2.3,a:1.7}[e.c]+(e.k==="problem"?.6:0),on=touch(e),op=sel?(on?1:.08):(e.k==="minor"?.55:.85);
+  h+=`<path class="edge" d="${g.d}" stroke="${c}" stroke-width="${w}" ${e.c==="a"?'stroke-dasharray="6 5"':""} opacity="${op}" marker-end="url(#m${c.slice(1)})" ${e.bi?`marker-start="url(#m${c.slice(1)})"`:""}><title>${nm(e.f)} → ${nm(e.t)}: ${e.d}</title></path>`;
+ });
+ E.forEach(e=>{
+  const sp=SP[e.id];
+  if(!(all||touch(e))){lh+=`<g class="lbl" opacity="${sel?.12:.95}"><circle cx="${sp.m[0]}" cy="${sp.m[1]}" r="8.5"/><text x="${sp.m[0]}" y="${sp.m[1]+3.2}" text-anchor="middle">${e.id+1}</text></g>`;return}
+  const nn=`${e.id+1}`;
+  lh+=(Math.hypot(sp.x-sp.q[0],sp.y-sp.q[1])>16?`<line x1="${sp.q[0]}" y1="${sp.q[1]}" x2="${sp.x}" y2="${sp.y}" stroke="${col(e)}" stroke-width="1.2" stroke-dasharray="3 2" opacity="${sel&&!touch(e)?.12:.9}"/>`:"")+`<g class="lbl" opacity="${sel&&!touch(e)?.15:1}"><rect x="${sp.x-sp.w/2}" y="${sp.y-sp.h/2}" width="${sp.w}" height="${sp.h}" rx="${sp.h/2}"/><text x="${sp.x}" y="${sp.y+4}" text-anchor="middle"><tspan font-weight="700">${nn}</tspan> ${e.l}</text></g>`;
+ });
+ Object.entries(N).forEach(([id,n])=>{
+  const cut=(s,m)=>s.length>m?s.slice(0,m-1)+"…":s;
+  h+=`<g class="node${n.ag?" ag":""}${sel===id?" sel":""}" data-id="${id}" tabindex="0" role="button" aria-label="${n.n}"><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="10"/><text class="nt" x="${n.x+n.w/2}" y="${n.y+n.h/2-(n.h>55?2:1)}" text-anchor="middle">${n.n}</text><text class="ns" x="${n.x+n.w/2}" y="${n.y+n.h/2+15}" text-anchor="middle">${n.s}</text></g>`;
+ });
+ $("#svg").innerHTML=h+lh;
+}
+// ---- Whole company map: Agency + Build, with the PM as the bridge ----
+const NW={
+ client:{n:"Client",s:"outside",x:20,y:250,w:170,h:64,ag:1},
+ org:{n:"Organisers & venues",s:"outside",x:20,y:470,w:170,h:64,ag:1},
+ mkt:{n:"Marketing",s:"Agency · leads (not studied)",x:225,y:100,w:175,h:62,ag:1,dim:1},
+ est:{n:"Estimation",s:"Agency · estimate, quote",x:440,y:100,w:175,h:62,ag:1},
+ hr:{n:"HR",s:"Agency · people (not studied)",x:635,y:100,w:175,h:62,ag:1,dim:1},
+ sales:{n:"Sales (the rep)",s:"Agency · client, go-ahead",x:225,y:250,w:175,h:62,ag:1},
+ design:{n:"Design",s:"Agency · head: Kaleem",x:440,y:240,w:175,h:62,ag:1},
+ fin:{n:"Finance / Accounts",s:"Agency · PO, invoice",x:225,y:380,w:175,h:62,ag:1},
+ coord:{n:"Project Coordination",s:"Agency · organiser, passes",x:225,y:470,w:175,h:62,ag:1},
+ proc:{n:"Procurement",s:"Agency · + Inventory store",x:625,y:570,w:175,h:62,ag:1},
+ furn:{n:"Furniture",s:"Agency · inside the stock list",x:625,y:700,w:175,h:62,ag:1},
+ top:{n:"Top Managers",s:"Prateek, Tareeq, Raveena",x:880,y:100,w:230,h:58,ag:1},
+ pm:{n:"Project Management",s:"",x:880,y:330,w:230,h:170,pm:1,lines:["Aman, head of the PMs","4 PMs · no assistants","Excel lists · WhatsApp","the only tie between the halves"]},
+ trades:{n:"the five trades",x:1165,y:110,w:410,h:420,grp:1},
+ carp:{...N.carp,x:1180,y:150,w:180,h:60},
+ graph:{n:"Branding",s:"Printing, Acrylic and CNC dept",x:1380,y:150,w:180,h:160,chips:["Printing (graphics)","Acrylic (logo?)","CNC"]},
+ paint:{...N.paint,x:1180,y:260,w:180,h:60},
+ spray:{...N.spray,x:1180,y:370,w:180,h:60},
+ elec:{...N.elec,x:1380,y:350,w:180,h:60},
+ log:{...N.log,x:1290,y:600,w:230,h:70}
+};
+const VY=1.3,ty=y=>Math.round(70+(y-70)*VY);
+Object.values(NW).forEach(n=>{n.y=ty(n.y);if(n.grp)n.h=Math.round(n.h*VY)});
+// f, t, label, full text, channels, channel assumed?, confidence, kind, options
+const AE=[
+["client","sales","Lead, brief, quote","The client talks only to the rep: lead, brief, design changes, quote, negotiation (Prateek's chart and note)",["email","whatsapp"],1,"t","main",{bi:1}],
+["mkt","sales","Leads","Leads reach the rep (our guess; Marketing is not studied yet)",["email"],1,"a","minor"],
+["sales","design","Brief, design loop","The rep passes the brief to Design; the client's changes come back through the rep until Design is approved (Prateek's chart)",["email","talk"],1,"t","main",{bi:1}],
+["design","est","Approved design","Once the design is approved, Estimation costs it (Prateek's chart)",["email"],1,"t","main"],
+["est","sales","Estimate, quote","The estimate becomes the quote; a drastic change loops back to Estimation to recost (Prateek's chart)",["email","excel"],1,"t","main",{bi:1}],
+["sales","fin","PO, advance, invoice","PO and advance received; final invoice (our guess)",["email"],1,"a","minor"],
+["design","coord","Technicals","Coordination waits for the technicals before it starts (Prateek's chart)",["email"],1,"t","main"],
+["coord","org","Approvals, passes, slots","Organiser and venue approvals, gate passes and venue slots (Prateek's chart)",["email","whatsapp"],1,"t","main",{bi:1}],
+["design","proc","3D render","Procurement reads the 3D render to split stock, reusable and new to buy (Prateek's note)",["email"],1,"t","main"],
+["furn","proc","One stock list","Furniture is a category inside Procurement's inventory: one list, one owner (Prateek's note)",["excel"],1,"t","minor"],
+["hr","pm","Outside labour, PMs","Aman arranges outside labour and outside PMs; what HR does here is not known",["whatsapp"],1,"a","minor",{bi:1}],
+["pm","design","Doubts, via the PM","Prateek's rule: every doubt goes to the PM, who takes it to Design. Not yet how it works today",["whatsapp"],1,"a","minor",{bi:1}],
+["coord","log","Slots, passes (direct?)","Loading-bay times and vehicle passes may go straight to Logistics. Prateek's rule says the PM passes them down",["whatsapp","email"],1,"a","problem",{n:"Slots and passes may reach Logistics directly; the rule says through the PM"}],
+["furn","log","Furniture to load","Furniture ready to load, and back after the show. The PM coordinates it, before the site too (Narendra)",["talk"],1,"a","minor",{bi:1}],
+["fin","log","Truck, driver payments","Payment of hired trucks and drivers (our guess)",["email"],1,"a","minor"],
+["fin","proc","Purchase payments","Payment of orders and vendors (our guess; both are Agency)",["email"],1,"a","minor"],
+["hr","trades","Workers, labour records","Outside workers and who records their hours: the one hired labour-record person for Carpentry and Paint (our guess for HR's part)",["whatsapp"],1,"a","minor"],
+["design","trades","Colours, finishes, plans","Colour codes, finishes, electrical and AV plans. By the rule these go through the PM (our guess for what Design sends)",["email"],1,"a","minor"]
+].map((a,i)=>({id:E.length+i,f:a[0],t:a[1],l:a[2],d:a[3],ch:a[4],cq:a[5],c:a[6],k:a[7],...(a[8]||{})}));
+const RW=["The rep", "The rep", "Design, and the rep", "Estimation", "The rep, and Estimation when recosting", "Accounts", "Project Coordination", "Project Coordination; the organiser or venue", "The buyer or store keeper", "The buyer or store keeper", "Aman; HR", "The PM; the designer", "Logistics", "Logistics; the PM", "Accounts", "Accounts; the buyer", "The labour-record person; Aman", "Each trade's foreman"];
+AE.forEach((e,i)=>e.r=RW[i]);
+// per-flow tweaks for this layout (bend curves a line around boxes)
+const WO={3:{bend:110},17:{bend:-55},8:{bend:130},9:{bend:130},40:{bend:-90},41:{bend:-130}};
+const EV=E.concat(AE).map(e=>({...e,...(WO[e.id]||{})}));
+const nmw=x=>NW[x].n;
+let selw=null,allw=false;
+const WX=[[215,74,300,18],[612,ty(542),200,16],[858,74,150,16],[1160,74,220,16],[1177,112,80,16],[1177,ty(512),330,16],[20,ty(222),170,14],[858,ty(786)-12,300,16]];
+function drawWhole(){
+ const SP=labelSpots(EV,NW,WX,1600,1036,PDF?7.3:5.9,PDF?23:18),cols=[...new Set(EV.map(col))];let lh="";
+ let h=`<defs>${cols.map(c=>`<marker id="w${c.slice(1)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9z" fill="${c}"/></marker>`).join("")}</defs>`;
+ h+=`<rect class="zone ag" x="205" y="70" width="630" height="${ty(800)-70}" rx="16"/><text class="zl" x="219" y="90">AGENCY · Prateek's side</text>`;
+ h+=`<rect class="zone" x="605" y="${ty(540)}" width="212" height="${Math.round(250*VY)}" rx="12" style="fill:var(--build)"/><text class="zl" x="617" y="${ty(540)+18}">Prateek takes these</text>`;
+ h+=`<rect class="zone br" x="845" y="70" width="295" height="${ty(800)-70}" rx="16"/><text class="zl" x="860" y="90">THE BRIDGE</text><text class="zl" x="860" y="${ty(786)}">every flow between the halves crosses the PM</text>`;
+ h+=`<rect class="zone" x="1150" y="70" width="440" height="${ty(800)-70}" rx="16"/><text class="zl" x="1164" y="90">BUILD · this project</text>`;
+ h+=`<rect class="zone" x="${NW.trades.x}" y="${NW.trades.y}" width="${NW.trades.w}" height="${NW.trades.h}" rx="12" style="fill:var(--soft)"/><text class="zl" x="1177" y="126">TRADES</text><text class="zl" x="1177" y="${ty(522)}">separate departments, each with its own foreman (to confirm)</text>`;
+ h+=`<text class="zl" x="20" y="${ty(236)}">OUTSIDE</text>`;
+ const touch=e=>selw&&(mem(e.f,selw)||mem(e.t,selw));
+ EV.forEach(e=>{
+  const g=geom(e,NW,EV),c=col(e),w={c:3.4,t:2.3,a:1.7}[e.c]+(e.k==="problem"?.6:0),on=touch(e),op=selw?(on?1:.08):(e.k==="minor"?.55:.85),mk=`url(#w${c.slice(1)})`;
+  h+=`<path class="edge" d="${g.d}" stroke="${c}" stroke-width="${w}" ${e.c==="a"?'stroke-dasharray="6 5"':""} opacity="${op}" marker-end="${mk}" ${e.bi?`marker-start="${mk}"`:""}><title>${nmw(e.f)} → ${nmw(e.t)}: ${e.d}</title></path>`;
+ });
+ EV.forEach(e=>{
+  const sp=SP[e.id];
+  if(!(allw||touch(e))){lh+=`<g class="lbl" opacity="${selw?.12:.95}"><circle cx="${sp.m[0]}" cy="${sp.m[1]}" r="9.5"/><text x="${sp.m[0]}" y="${sp.m[1]+3.6}" text-anchor="middle">${e.id+1}</text></g>`;return}
+  lh+=(Math.hypot(sp.x-sp.q[0],sp.y-sp.q[1])>16?`<line x1="${sp.q[0]}" y1="${sp.q[1]}" x2="${sp.x}" y2="${sp.y}" stroke="${col(e)}" stroke-width="1.2" stroke-dasharray="3 2" opacity="${selw&&!touch(e)?.12:.9}"/>`:"")+`<g class="lbl" opacity="${selw&&!touch(e)?.15:1}"><rect x="${sp.x-sp.w/2}" y="${sp.y-sp.h/2}" width="${sp.w}" height="${sp.h}" rx="${sp.h/2}"/><text x="${sp.x}" y="${sp.y+4.2}" text-anchor="middle"><tspan font-weight="700">${e.id+1}</tspan> ${e.l}</text></g>`;
+ });
+ Object.entries(NW).forEach(([id,n])=>{
+  if(n.grp)return;
+  const cx=n.x+n.w/2,cy=n.y+n.h/2;
+  let t;
+  if(n.pm)t=`<text class="nt big" x="${cx}" y="${n.y+40}" text-anchor="middle">${n.n}</text>${n.lines.map((l,i)=>`<text class="ns${i?"":" pmn"}" x="${cx}" y="${n.y+72+i*24}" text-anchor="middle">${l}</text>`).join("")}`;
+  else if(n.chips)t=`<text class="nt" x="${cx}" y="${n.y+26}" text-anchor="middle">${n.n}</text><text class="ns" x="${cx}" y="${n.y+43}" text-anchor="middle">${n.s}</text>${n.chips.map((c,i)=>`<rect class="chipbox" x="${n.x+16}" y="${n.y+58+i*32}" width="${n.w-32}" height="26" rx="7"/><text class="ns" x="${cx}" y="${n.y+75+i*32}" text-anchor="middle">${c}</text>`).join("")}`;
+  else t=`<text class="nt" x="${cx}" y="${cy-2}" text-anchor="middle">${n.n}</text><text class="ns" x="${cx}" y="${cy+15}" text-anchor="middle">${n.s}</text>`;
+  h+=`<g class="node${n.ag?" ag":""}${n.pm?" pmx":""}${n.dim?" dim":""}${selw===id?" sel":""}" data-id="${id}" tabindex="0" role="button" aria-label="${n.n}"><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="${n.pm?16:10}"/>${t}</g>`;
+ });
+ $("#svgw").innerHTML=h+lh;
+}
+function drawWholeDetail(){
+ const el=$("#detailw");
+ if(!selw){el.innerHTML=`<div class="dhead"><h2>Click any box</h2><p>to see every flow into and out of it, who reads it, and how sure we are. Solid thick = confirmed, solid thin = told, dashed = our guess. Flows 1–${E.length} are the Build map. Flows ${E.length+1}–${EV.length} are the Agency side, from Prateek's chart and notes (told) or our guess; nobody on the Agency side has been interviewed by us.</p></div>`;return}
+ const n=NW[selw],d=D[selw],rows=EV.filter(e=>mem(e.f,selw)||mem(e.t,selw));
+ el.innerHTML=`<div class="dhead"><h2>${n.n}</h2><p>${d?d.s:"Agency side, not studied by us yet."}</p></div><div class="card" style="margin-top:12px"><h3>Flows (${rows.length})</h3>${list(rows.map(e=>`<li>${bd(e.c)} <b>${e.id+1} ${mem(e.f,selw)?"→":"←"} ${nmw(mem(e.f,selw)?e.t:e.f)}</b>${e.bi?" (both ways)":""}: ${dd(e)}${chips(e)}${rdr(e)}</li>`))}</div>`;
+}
+const drawKeyW=()=>{$("#keyw").innerHTML=`<h3 style="margin:10px 0 2px;font-size:13px">Key to the numbered flows (● confirmed, ◐ told, ○ our guess)</h3><ol class="keylist">${EV.map(e=>`<li><b>${e.id+1}</b> ${nmw(e.f)} ${e.bi?"⇄":"→"} ${nmw(e.t)}: ${e.n||clean(e.d)}. Read by: ${e.r}. ${CF[e.c][1]}</li>`).join("")}</ol>`};
+function wholeAll(){drawWhole();drawWholeDetail()}
+function list(items){return items.length?`<ul>${items.join("")}</ul>`:`<p class="meta">Nothing known yet.</p>`}
+function drawDetail(){
+ const el=$("#detail");
+ if(!sel){el.innerHTML=`<p class="hint">Select a box to see who works there, what data it needs, creates and passes on, and the channels it uses.</p>`;return}
+ const n=N[sel],d=D[sel],p=P[sel];
+ const rec=E.filter(e=>mem(e.t,sel)||(e.bi&&mem(e.f,sel))),snd=E.filter(e=>mem(e.f,sel)||(e.bi&&mem(e.t,sel)));
+ const other=(e)=>{const o=mem(e.f,sel)?e.t:e.f;return nm(o)};
+ const fl=(e,x)=>`<li>${bd(e.c)} <b>${x}</b>: ${dd(e)}${chips(e)}${rdr(e)}</li>`;
+ const ppl=p?`<ul class="org">${p.map(r=>r[0]==="o"?`<li class="o">${bd(r[2])} ${r[1]}</li>`:`<li style="--l:${r[0]*14}px">${bd(r[2])} ${r[1]}</li>`).join("")}</ul>`:`<p class="meta">Outside Build: not mapped here.</p>`;
+ const partners=partnersOf(sel);
+ const bp=[...partners].filter(x=>BUILD.includes(x)).length,ap=partners.size-bp;
+ let h=`<div class="dhead"><h2>${n.n}</h2><p>${d.s}</p>${BUILD.includes(sel)?`<p class="meta" style="margin-top:6px">Team size (our guess): ${SZ[sel]} · Data flows with ${bp} Build department${bp===1?"":"s"} and ${ap} Agency or outside contact${ap===1?"":"s"}${d.f?` · Questions: interview_sheets/${d.f}`:""}</p>`:""}</div><div class="grid">`;
+ h+=`<div class="card"><h3>People and hierarchy</h3>${ppl}${DM[sel]?`<h4 class="dm">Data manager: who keeps the records</h4>${dmHtml(sel)}`:""}</div>`;
+ h+=`<div class="card"><h3>Needs (receives)</h3>${list(rec.map(e=>fl(e,other(e))))}</div>`;
+ h+=`<div class="card"><h3>Passes on (sends)</h3>${list(snd.map(e=>fl(e,other(e))))}</div>`;
+ if(d.cr)h+=`<div class="card"><h3>Creates</h3>${list(d.cr.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}</div><div class="card"><h3>Keeps records in</h3>${list(d.kp.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}</div>`;
+ if(Q[sel])h+=qHtml(sel==="pm"?["pm","aman"]:[sel],false);
+ el.innerHTML=h+"</div>";
+}
+function drawWork(){
+ $("#wf").innerHTML=`<tr><th></th>${W.ph.map(p=>`<th>${p}</th>`).join("")}</tr>`+W.rows.map(r=>`<tr><td>${r[0]}</td>${r[1].map(c=>c?`<td class="p">${bd(c[1])} ${c[0]}</td>`:`<td></td>`).join("")}</tr>`).join("");
+ $("#steps").innerHTML=STEPS.map((s,i)=>`${i?"<em>→</em>":""}<span>${s}</span>`).join("");
+}
+function drawPeople(){
+ const bpart=id=>[...partnersOf(id)].filter(x=>BUILD.includes(x)).length;
+ $("#people").innerHTML=BUILD.map(id=>`<div class="card"><h3>${nm(id)}</h3><p class="meta">Team size (our guess): ${SZ[id]} · talks to ${bpart(id)} other Build departments</p>${orgHtml(P[id])}<h4 class="dm">Data manager: who keeps the records</h4>${dmHtml(id)}</div>`).join("")+`<div class="card"><h3>Agency neighbours</h3><p class="meta">Not part of this project, but Build depends on them</p><ul class="org">${AGP.map(r=>`<li>${bd(r[2])} ${r[1]}</li>`).join("")}</ul></div>`;
+}
+let fsel="all";
+function flowRows(rows,nf=nm){return `<thead><tr><th>#</th><th>From</th><th>To</th><th>Data</th><th>Channel</th><th>Who reads it on arrival (our guess)</th><th>Status</th></tr></thead><tbody>`+rows.map(e=>`<tr><td>${e.id+1}</td><td>${nf(e.f)}</td><td>${nf(e.t)}${e.bi?" (both ways)":""}</td><td>${dd(e)}</td><td>${chips(e)}</td><td>${e.r||""}</td><td>${bd(e.c)} ${CF[e.c][0]}</td></tr>`).join("")+"</tbody>"}
+function drawFlows(){
+ const ids=["all",...BUILD,"design","sales","coord","client","top","proc","furn"];
+ $("#fchips").innerHTML=ids.map(i=>`<button type="button" class="chip${fsel===i?" on":""}" data-f="${i}">${i==="all"?"All flows":nm(i)}</button>`).join("");
+ const rows=E.filter(e=>fsel==="all"||mem(e.f,fsel)||mem(e.t,fsel));
+ $("#ftab").innerHTML=flowRows(rows);
+}
+let qsel="all",ssel="all";
+const QS={pm:"Project Management (PMs)",aman:"Aman (head of PMs)",carp:"Carpentry",paint:"Water Paint",spray:"Spray Paint",elec:"Electric",graph:"Branding",log:"Logistics",prateek:"Prateek"};
+const SH=["pm","carp","paint","spray","elec","graph","log","prateek"];
+const chipBar=(items,cur,a)=>items.map(([i,l])=>`<button type="button" class="chip${cur===i?" on":""}" data-${a}="${i}">${l}</button>`).join("");
+// handout wording: drop who-said-it notes
+const clean=s=>s.replace(/\s*\((Ali|Adiraj|Narendra|board|Jason|Happy|HR chart)[^)]*\)/g,"");
+const dd=e=>HAND?(e.n||clean(e.d)):e.d;
+const rdr=e=>e.r?`<div class="rdr">Read by: ${e.r}</div>`:"";
+const orgHtml=p=>`<ul class="org">${p.map(r=>{const t=HAND?clean(r[1]):r[1];return r[0]==="o"?`<li class="o">${bd(r[2])} ${t}</li>`:`<li style="--l:${r[0]*14}px">${bd(r[2])} ${t}</li>`}).join("")}</ul>`;
+const dmHtml=id=>list(DM[id].map(r=>`<li>${bd(r[1])} ${r[0]}</li>`));
+function detBlock(id){
+ const n=N[id],d=D[id],p=P[id],rec=E.filter(e=>mem(e.t,id)||(e.bi&&mem(e.f,id))),snd=E.filter(e=>mem(e.f,id)||(e.bi&&mem(e.t,id)));
+ const fl=e=>`<li><span class="num">#${e.id+1}</span> ${bd(e.c)} <b>${nm(mem(e.f,id)?e.t:e.f)}</b>: ${e.l}</li>`;
+ let c1=`<p>${clean(d.s)}</p>`;
+ if(p)c1+=`<p class="meta">Team size (our guess): ${SZ[id]}</p><h4>People and hierarchy</h4>${orgHtml(p)}<h4>Data manager: who keeps the records</h4>${dmHtml(id)}`;
+ const cr=d.cr?`<h4>Creates</h4>${list(d.cr.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}`:"",kp=d.kp?`<h4>Keeps records in</h4>${list(d.kp.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}`:"";
+ return `<section class="det"><h3>${n.n}</h3><div>${c1}</div><div><h4>Needs (receives)</h4>${list(rec.map(fl))}${cr}</div><div><h4>Passes on (sends)</h4>${list(snd.map(fl))}${kp}</div></section>`;
+}
+// PDF pages: open this file with ?pdf=map|work|flows|questions and print to A4
+function pdfMode(m){
+ const LEG=$("#legend").innerHTML,NOTES=document.querySelector(".notes").outerHTML,main=document.querySelector("main");
+ document.body.dataset.pdf=m;
+ const sub=`<p class="subp">Ravashing Exhibitions &amp; Events, Build side · 6 Nov 2026 · Confidential</p>`;
+ const cf=`<p class="cf">${CF.c[1]} confirmed by someone doing that work &nbsp; ${CF.t[1]} told to us, not yet confirmed &nbsp; ${CF.a[1]} our guess from similar companies. A ? after a channel means the channel is a guess. Team sizes are guesses.</p>`;
+ const S={
+  map:`<div class="pg land"><h1>Map: how work and data move between departments</h1>${sub}<div class="legend">${LEG}</div><svg id="svg" viewBox="0 0 1000 660"></svg></div>
+<div class="pg land"><h1>Key to the numbered flows</h1>${cf}<table class="kt">${flowRows(E)}</table></div>
+<div class="pg land"><h1>Details by department</h1>${cf}<p class="cf">Flow numbers (#) match the map. The key on the previous pages gives the full wording, the channel, who reads it and the status.</p><div class="dets">${[...BUILD,"design","sales","coord","client","top"].map(detBlock).join("")}</div></div>
+<div class="pg land"><h1>Notes for Narendra only</h1><p>Take this page out before showing the map to anyone else.</p>${NOTES}</div>`,
+  whole:`<div class="pg land"><h1>Whole company: Agency, the PM as the bridge, and Build</h1><p class="subp">Ravashing Exhibitions &amp; Events · 6 Nov 2026 · Confidential. Build side from our talks. Agency side from Prateek's chart and notes (told, not confirmed) and our guesses. Marketing and HR are dimmed: not studied.</p><div class="legend">${LEG}</div><svg id="svgw" viewBox="0 56 1600 980"></svg></div>
+<div class="pg land"><h1>Key to the numbered flows, whole company</h1>${cf}<table class="kt">${flowRows(EV,nmw)}</table></div>`,
+  work:`<div class="pg land"><h1>Work flow: who does what, stage by stage</h1>${sub}${cf}<table class="wf" id="wf"></table><h3 class="sh">Site steps a PM tracks, walking from stand to stand</h3><div class="steps" id="steps"></div><p class="cf">Handoff, from Prateek's chart: after WON four tracks run before release. Technicals (Design: 2D drawings, finishes). Coordination (organisers, venues, approvals, passes; waits for the technicals). Graphics (sizes via the rep, mock-up, print proof). Purchasing (from the 3D render: stock or new to buy). The PM checks the handover pack, the rep gives the go-ahead, and the PM releases to Production.</p><p class="cf">Steps confirmed by a PM. The order and the full list are not confirmed. "Standing" is assumed to mean sanding. A blank cell means nothing is known yet. Build-area work runs in parallel.</p></div>`,
+  flows:`<div class="pg land"><h1>All data flows between departments</h1>${sub}${cf}<table class="kt">${flowRows(E)}</table></div>`,
+  questions:`<div class="pg port qdoc"><h1>Questions for each department</h1>${sub}<p class="cf">★ = ask first if you only have ten minutes. The tag says which part of the map the answer fills. Ask about the last real stand, not how things usually go.</p><div class="grid" id="qgrid"></div></div>`,
+  prateek:`<div class="pg port">${sheet("prateek")}</div>`
+ };
+ main.innerHTML=m==="all"?S.map+S.whole+S.work+S.flows+S.questions+S.prateek:S[m];
+ if(m==="all"||m==="map"){all=true;sel=null;drawMap()}
+ if(m==="all"||m==="whole"){allw=true;selw=null;drawWhole()}
+ if(m==="all"||m==="work")drawWork();
+ if(m==="all"||m==="questions")$("#qgrid").innerHTML=qHtml(Object.keys(Q).filter(k=>k!=="prateek"),false);
+}
+function drawQs(){
+ const s=$("#starred").checked,ks=qsel==="all"?Object.keys(Q):[qsel],n=ks.reduce((a,k)=>a+Q[k].filter(q=>!s||q[1]).length,0);
+ $("#qchips").innerHTML=chipBar([["all","All questions"],...Object.keys(Q).map(k=>[k,QS[k]])],qsel,"q");
+ $("#qgrid").innerHTML=qHtml(ks,s);$("#qcount").textContent=`${n} question${n===1?"":"s"}`;
+}
+const ans=n=>`<div class="ans"></div>`.repeat(n);
+const qList=k=>`<ol class="qs">${Q[k].map(q=>`<li><span class="tg">${q[0]}</span>${q[1]?'<b class="st">★</b> ':""}${q[2]}${ans(2)}</li>`).join("")}</ol>`;
+function sheet(id){
+ const idl=`<div class="id"><span>Name and role:</span><span>Date:</span></div>`;
+ if(id==="prateek")return `<article class="sheet"><h2>Prateek</h2><p class="meta">Structure, the edge with Agency, money and limits. ★ = ask first.</p>${idl}<h3>Questions</h3>${qList("prateek")}</article>`;
+ const d=D[id],p=P[id],rec=E.filter(e=>mem(e.t,id)||(e.bi&&mem(e.f,id))),snd=E.filter(e=>mem(e.f,id)||(e.bi&&mem(e.t,id)));
+ const fl=e=>`<li><span class="num">#${e.id+1}</span> ${bd(e.c)} <b>${nm(mem(e.f,id)?e.t:e.f)}</b>: ${e.n||clean(e.d)}${chips(e)}${rdr(e)}</li>`;
+ const org=`<ul class="org">${p.map(r=>r[0]==="o"?`<li class="o">${bd(r[2])} ${r[1]}</li>`:`<li style="--l:${r[0]*14}px">${bd(r[2])} ${r[1]}</li>`).join("")}</ul>`;
+ const pt=partnersOf(id),bp=[...pt].filter(x=>BUILD.includes(x)).length,ap=pt.size-bp;
+ return `<article class="sheet"><h2>${nm(id)}</h2><p>${clean(d.s)}</p>
+ <p class="meta">What we think we know. ${CF.c[1]} confirmed &nbsp; ${CF.t[1]} told to us &nbsp; ${CF.a[1]} our guess. A ? after a channel means we are guessing it. Please correct anything wrong or missing. Data flows with ${bp} Build departments and ${ap} Agency or outside contacts. Team sizes and data managers are our guesses.</p>
+ <div class="two"><div><h3>People and hierarchy</h3><p class="meta">Team size (our guess): ${SZ[id]}</p>${org}<h3>Data manager: who keeps the records</h3>${dmHtml(id)}<h3>Creates</h3>${list(d.cr.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}<h3>Keeps records in</h3>${list(d.kp.map(r=>`<li>${bd(r[1])} ${r[0]}</li>`))}</div>
+ <div><h3>Needs (receives)</h3>${list(rec.map(fl))}<h3>Passes on (sends)</h3>${list(snd.map(fl))}</div></div>
+ <h3 class="qh">Questions: ${nm(id)}</h3>${idl}${qList(id)}${id==="pm"?`<h3>Questions for Aman, head of PMs</h3>${qList("aman")}`:""}</article>`;
+}
+function drawSheets(){
+ $("#schips").innerHTML=chipBar([["all","All sheets"],...SH.map(k=>[k,k==="prateek"?"Prateek":nm(k)])],ssel,"s");
+ $("#sheets").innerHTML=(ssel==="all"?SH:[ssel]).map(sheet).join("");
+}
+function drawKey(){$("#key").innerHTML=`<h3 style="margin:10px 0 2px;font-size:13px">Key to the numbered flows (● confirmed, ◐ told, ○ our guess; a ? after a channel means we are guessing it)</h3><ol class="keylist">${E.map(e=>`<li><b>${e.id+1}</b> ${nm(e.f)} ${e.bi?"⇄":"→"} ${nm(e.t)}: ${e.n||clean(e.d)}. Read by: ${e.r}. ${e.ch.map(k=>CH[k][0]+(e.cq?"?":"")).join(", ")} ${CF[e.c][1]}</li>`).join("")}</ol>`}
+$("#starred").onchange=drawQs;
+function draw(){drawMap();drawDetail()}
+$("#svg").addEventListener("click",ev=>{const g=ev.target.closest("[data-id]");sel=g?(g.dataset.id===sel?null:g.dataset.id):null;draw()});
+$("#svg").addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){const g=ev.target.closest("[data-id]");if(g){ev.preventDefault();sel=g.dataset.id===sel?null:g.dataset.id;draw();$(`[data-id=${sel}]`)&&$(`[data-id=${sel}]`).focus()}}});
+$("#clr").onclick=()=>{sel=null;draw()};
+$("#svgw").addEventListener("click",ev=>{const g=ev.target.closest("[data-id]");selw=g?(g.dataset.id===selw?null:g.dataset.id):null;wholeAll()});
+$("#svgw").addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){const g=ev.target.closest("[data-id]");if(g){ev.preventDefault();selw=g.dataset.id===selw?null:g.dataset.id;wholeAll();const n=document.querySelector(`#svgw [data-id=${selw}]`);n&&n.focus()}}});
+$("#clrw").onclick=()=>{selw=null;wholeAll()};
+$("#allw").onchange=ev=>{allw=ev.target.checked;wholeAll()};
+$("#alllbl").onchange=ev=>{all=ev.target.checked;draw()};
+$("#fchips").addEventListener("click",ev=>{const b=ev.target.closest("[data-f]");if(b){fsel=b.dataset.f;drawFlows()}});
+const TABS=[["map","Build map"],["whole","Whole company map"],["work","Work flow"],["people","People"],["flows","All data flows"],["qs","All department questions"],["sheets","Department sheets (print)"]];
+$("#tabs").innerHTML=TABS.map((t,i)=>`<button role="tab" type="button" data-t="${t[0]}" aria-selected="${i===0}">${t[1]}</button>`).join("");
+$("#tabs").addEventListener("click",ev=>{const b=ev.target.closest("[data-t]");if(!b)return;TABS.forEach(t=>{$("#t-"+t[0]).hidden=t[0]!==b.dataset.t});document.body.dataset.tab=b.dataset.t;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b))});
+$("#legend").innerHTML=`<span><b>Line style</b></span><span><i class="sw" style="border-top-width:3.4px;border-color:var(--ink)"></i>${CF.c[1]} confirmed</span><span><i class="sw" style="border-color:var(--ink)"></i>${CF.t[1]} told, not confirmed</span><span><i class="sw" style="border-top-style:dashed;border-color:var(--ink)"></i>${CF.a[1]} assumed</span><span><b>Colour = channel</b></span>`+Object.values(CH).map(c=>`<span><i class="sw" style="border-color:${c[1]}"></i>${c[0]}</span>`).join("")+`<span><i class="sw" style="border-color:${RED}"></i>Talk that bypasses the PM</span>`;
+$("#qchips").addEventListener("click",ev=>{const b=ev.target.closest("[data-q]");if(b){qsel=b.dataset.q;drawQs()}});
+$("#schips").addEventListener("click",ev=>{const b=ev.target.closest("[data-s]");if(b){ssel=b.dataset.s;drawSheets()}});
+// printing: every flow shows its number and name, no selection; restore after
+let was=null;
+window.addEventListener("beforeprint",()=>{was=[all,sel];all=true;sel=null;drawMap();allw=true;selw=null;drawWhole()});
+window.addEventListener("afterprint",()=>{if(was){all=was[0];sel=was[1];was=null;draw()}});
+draw();wholeAll();drawWork();drawPeople();drawFlows();drawQs();drawSheets();drawKey();drawKeyW();
+if(PDF)pdfMode(PDF);
+</script>
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Stand Studio Database Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a fixed module rail on the left, a reading column that holds one module at a time; blueprint ink on paper. */
+:root{
+  --paper:#F6F7F9; --paper-2:#FFFFFF; --ink:#141A2A; --ink-2:#4A5368; --ink-3:#8A93A8;
+  --line:#D9DDE6; --line-2:#EDEFF4; --blue:#1F4FD8; --blue-soft:#E6ECFB; --amber:#B7791F; --amber-soft:#FBF1DC;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --display:"Archivo",var(--sans);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0F1420; --paper-2:#161C2B; --ink:#E8EBF2; --ink-2:#B4BBCC; --ink-3:#7E879C;
+  --line:#2A3246; --line-2:#1E2535; --blue:#7FA0FF; --blue-soft:#1B2745; --amber:#E0B35A; --amber-soft:#3A2E14; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0F1420; --paper-2:#161C2B; --ink:#E8EBF2; --ink-2:#B4BBCC; --ink-3:#7E879C;
+  --line:#2A3246; --line-2:#1E2535; --blue:#7FA0FF; --blue-soft:#1B2745; --amber:#E0B35A; --amber-soft:#3A2E14; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+a{color:var(--blue)}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;padding-block:28px 64px}
+header.top{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:20px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.2vw,36px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:4px 0 0;max-width:62ch}
+.stats{display:flex;gap:24px;font-variant-numeric:tabular-nums}
+.stats b{display:block;font-family:var(--display);font-size:26px;font-weight:600;line-height:1}
+.stats span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+nav.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;display:flex;flex-direction:column;gap:2px}
+nav.rail .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px 10px}
+nav.rail a{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14px}
+nav.rail a:hover{background:var(--line-2);color:var(--ink)}
+nav.rail a.on{background:var(--blue-soft);color:var(--blue);font-weight:500}
+nav.rail a small{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+nav.rail input{margin:14px 0 0;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper-2);color:var(--ink);font:inherit;font-size:14px}
+nav.rail input:focus{outline:2px solid var(--blue);outline-offset:1px}
+main{min-width:0}
+section.module{display:none}
+section.module.on{display:block}
+.mhead{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.mhead h2{font-family:var(--display);font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
+.mhead p{margin:0;color:var(--ink-2);max-width:70ch}
+.erd{background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;margin-bottom:28px}
+.erd pre.mermaid{margin:0;min-width:0}
+.erd .cap{font-size:12px;color:var(--ink-3);margin:8px 2px 0;font-family:var(--mono)}
+.tbl{margin-bottom:26px;scroll-margin-top:16px}
+.tbl h3{font-family:var(--mono);font-weight:500;font-size:16px;margin:0 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tbl h3 .n{color:var(--ink-3);font-size:12px;font-weight:400}
+.tbl .why{margin:0 0 10px;color:var(--ink-2);max-width:72ch}
+.tbl .src{margin:0 0 10px;color:var(--ink-3);font-size:13px;max-width:80ch}
+.fields{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--paper-2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.fwrap{overflow-x:auto;border-radius:8px}
+.fields th{text-align:left;font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:8px 10px;border-bottom:1px solid var(--line);background:var(--line-2)}
+.fields td{padding:7px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.fields tr:last-child td{border-bottom:0}
+.fields td.f{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+.fields td.t{white-space:nowrap;color:var(--ink-2)}
+.fields td.t.link{color:var(--blue)}
+.fields td.t.pick{color:var(--amber)}
+.fields td.r{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.fields td.c{color:var(--ink-2);min-width:220px}
+.badge{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:4px;background:var(--line-2);color:var(--ink-2);margin-left:6px;vertical-align:middle}
+.badge.id{background:var(--blue-soft);color:var(--blue)}
+.badge.uq{background:var(--amber-soft);color:var(--amber)}
+.enumgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.enum{background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.enum h4{font-family:var(--mono);font-weight:500;font-size:13px;margin:0 0 6px;color:var(--amber)}
+.enum ul{margin:0;padding:0;list-style:none;font-size:12.5px;color:var(--ink-2);font-family:var(--mono)}
+.enum li{padding:1px 0}
+.enum li small{font-family:var(--sans);color:var(--ink-3)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink-3);margin:0 0 22px}
+.legend i{font-style:normal;font-family:var(--mono);color:var(--ink-2)}
+.hit{outline:2px solid var(--blue);outline-offset:2px}
+.nores{color:var(--ink-3);padding:24px 0}
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:18px}
+  nav.rail{position:static;flex-direction:row;flex-wrap:wrap;gap:6px}
+  nav.rail .lbl{width:100%}
+  nav.rail a{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:13px}
+  nav.rail input{order:-1;margin:0 0 6px}
+  .stats{gap:16px}
+}
+@media (prefers-reduced-motion:no-preference){ nav.rail a{transition:background .12s} }
+</style>
+<div class="wrap">
+<header class="top">
+  <div><h1>Stand Studio Database Blueprint</h1>
+  <p class="sub">Every table in the Ravashing ERP, what it holds and how it links. Read from <span style="font-family:var(--mono)">prisma/schema.prisma</span> on 6 Nov 2026. Pick a module on the left; search any table or field.</p></div>
+  <div class="stats"><div><b>41</b><span>tables</span></div><div><b>484</b><span>fields</span></div><div><b>33</b><span>pick-lists</span></div><div><b>8</b><span>modules</span></div></div>
+</header>
+<nav class="rail" aria-label="Modules"><p class="lbl">Modules</p>
+<a href="#overview" data-mod="overview" class="on">Overview</a>
+<a href="#register" data-mod="register">Register<small>4</small></a>
+<a href="#sales-crm" data-mod="sales-crm">Sales (CRM)<small>8</small></a>
+<a href="#brief-design-dms" data-mod="brief-design-dms">Brief &amp; Design (DMS)<small>5</small></a>
+<a href="#estimating" data-mod="estimating">Estimating<small>7</small></a>
+<a href="#purchasing" data-mod="purchasing">Purchasing<small>6</small></a>
+<a href="#store-inventory" data-mod="store-inventory">Store (inventory)<small>4</small></a>
+<a href="#files-alerts-audit" data-mod="files-alerts-audit">Files, alerts &amp; audit<small>3</small></a>
+<a href="#users-settings" data-mod="users-settings">Users &amp; settings<small>4</small></a>
+<a href="#pick-lists" data-mod="pick-lists">Pick-lists<small>33</small></a>
+<input id="q" type="search" placeholder="Search tables and fields" aria-label="Search tables and fields">
+</nav>
+<main>
+<section class="module on" id="overview" data-mod="overview">
+<div class="mhead"><h2>How the tables connect</h2>
+<p>The spine runs left to right: a company at a show becomes a lead, the lead gets a brief, the brief becomes a project with an RV code, the project gets design versions and an estimate, and once won it drives purchasing and stock. Three links marked "by id" are kept as plain ids on purpose: Estimating, Purchasing and the Store write only their own tables and read the project by its id through the funnel.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  Company ||--o{ Lead : &quot;has&quot;
+  Exhibition ||--o{ Lead : &quot;at&quot;
+  User ||--o{ Lead : &quot;owns&quot;
+  Lead ||--o{ LeadInteraction : &quot;touches&quot;
+  Lead ||--o| Brief : &quot;brief&quot;
+  Brief ||--o| Project : &quot;project RV-code&quot;
+  Project ||--o{ DesignRevision : &quot;V1 V2 V3&quot;
+  Project ||--o| Estimate : &quot;estimate (by id)&quot;
+  Estimate ||--o{ EstimateRevision : &quot;revisions&quot;
+  EstimateRevision ||--o{ EstimateLine : &quot;lines&quot;
+  EstimateRevision ||--o{ LeadInteraction : &quot;quote sent&quot;
+  Project ||--o{ PurchaseOrderLine : &quot;bought for (by id)&quot;
+  Supplier ||--o{ PurchaseOrder : &quot;orders&quot;
+  PurchaseOrder ||--o{ PurchaseOrderLine : &quot;lines&quot;
+  PurchaseOrder ||--o{ GoodsReceipt : &quot;deliveries&quot;
+  StockItem ||--o{ StockUnit : &quot;coded units&quot;
+  StockItem ||--o{ StockMovement : &quot;moves&quot;
+  Project ||--o{ StockMovement : &quot;out / back (by id)&quot;
+</pre><p class="cap">crow's foot: one ——|| &nbsp; many ——o{ &nbsp; optional ——o|</p></div>
+<div class="legend"><span><i>link to X</i> a column holding another table's id</span><span><i>pick: X</i> a value from a fixed list (see Pick-lists)</span><span><i>key</i> the row's identifier</span><span><i>unique</i> no two rows share it</span></div>
+<div class="enumgrid">
+<div class="enum"><h4 style="color:var(--blue)"><a href="#register" style="text-decoration:none">Register</a></h4><ul><li>CompanyAlias</li><li>Exhibition</li><li>Company</li><li>ImportBatch</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#sales-crm" style="text-decoration:none">Sales (CRM)</a></h4><ul><li>Lead</li><li>LeadStageHistory</li><li>LeadTag</li><li>LeadInteraction</li><li>SalesDocument</li><li>SalesDocumentVersion</li><li>ActivityDocument</li><li>SalesTarget</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#brief-design-dms" style="text-decoration:none">Brief &amp; Design (DMS)</a></h4><ul><li>Brief</li><li>Project</li><li>ProjectCodeCounter</li><li>DesignRevision</li><li>DesignMessage</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#estimating" style="text-decoration:none">Estimating</a></h4><ul><li>EstimatingCode</li><li>EstimatingRate</li><li>EstimatingClause</li><li>Estimate</li><li>EstimateRevision</li><li>EstimateLine</li><li>EstimateQuoteDocument</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#purchasing" style="text-decoration:none">Purchasing</a></h4><ul><li>Supplier</li><li>PurchaseOrder</li><li>PurchaseOrderLine</li><li>OrderApproval</li><li>GoodsReceipt</li><li>GoodsReceiptLine</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#store-inventory" style="text-decoration:none">Store (inventory)</a></h4><ul><li>StockItem</li><li>StockUnit</li><li>StockCodeCounter</li><li>StockMovement</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#files-alerts-audit" style="text-decoration:none">Files, alerts &amp; audit</a></h4><ul><li>FileAsset</li><li>Notification</li><li>ActivityLog</li></ul></div>
+<div class="enum"><h4 style="color:var(--blue)"><a href="#users-settings" style="text-decoration:none">Users &amp; settings</a></h4><ul><li>User</li><li>ModuleRole</li><li>StatusOption</li><li>Setting</li></ul></div>
+</div></section>
+<section class="module" id="register" data-mod="register"><div class="mhead"><h2>Register</h2><p>The reference lists everything else points at: the shows, the client companies, and the spreadsheets that were imported.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  CompanyAlias }o--|| Company : &quot;company&quot;
+  ImportBatch }o--o| Exhibition : &quot;exhibition&quot;</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-CompanyAlias" data-name="companyalias">
+<h3>CompanyAlias<span class="n">9 fields</span></h3>
+<p class="why">A spelling of a company name that reps have typed, mapped to the real company.</p><p class="src">Wave R9.2 (D9-7): a typed spelling that maps to a company. One owner per key; never moved automatically (D9.2-3) — managers reassign on the company page.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">companyId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">company</td><td class="t link">link to Company</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">alias</td><td class="t">text</td><td class="r">required</td><td class="c">display spelling as typed</td></tr>
+<tr><td class="f">aliasKey<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c">companyNameKey(alias)</td></tr>
+<tr><td class="f">source</td><td class="t pick">pick: CompanyAliasSource</td><td class="r">default PICK</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Exhibition" data-name="exhibition">
+<h3>Exhibition<span class="n">19 fields</span></h3>
+<p class="why">One show, one edition. Leads and briefs point at it.</p><p class="src">One row per show per edition. Lead and Brief point at it. The free-text Lead.exhibitionName / exhibitionStart / exhibitionEnd and Brief.exhibitionName columns are kept (and still filled from the chosen row) until Wave R6 verifies the backfill, then dropped. Seed: docs/exhibitions-seed.csv.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">name<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">aliases</td><td class="t">text</td><td class="r">optional</td><td class="c">pipe-separated spellings seen in rep files; migration matches on them</td></tr>
+<tr><td class="f">eventFrom</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">eventTo</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">venue</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">hall</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">organiser</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">city</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">country</td><td class="t">text</td><td class="r">default AE</td><td class="c">ISO alpha-2; AE = UAE, anything else International (D9-5, D9.2-1)</td></tr>
+<tr><td class="f">edition</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">status</td><td class="t pick">pick: ExhibitionStatus</td><td class="r">default UPCOMING</td><td class="c">derived from dates by the alerts scan, never typed</td></tr>
+<tr><td class="f">website</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">exhibitorListUrl</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">migrationNote</td><td class="t">text</td><td class="r">optional</td><td class="c">provenance; an &quot;R1 backfill:&quot; prefix marks a row created from free text that needs review</td></tr>
+<tr><td class="f">leadCount</td><td class="t">whole number</td><td class="r">default 0</td><td class="c">maintained by the nightly job (SPEC §6.4), never typed</td></tr>
+<tr><td class="f">openLeadCount</td><td class="t">whole number</td><td class="r">default 0</td><td class="c">leads at an open stage</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Company" data-name="company">
+<h3>Company<span class="n">15 fields</span></h3>
+<p class="why">One client company. Uniqueness is on a cleaned-up name key so spellings don&#x27;t create duplicates.</p><p class="src">One row per client company. A Lead is one Company at one Exhibition. Uniqueness is case-insensitive through `nameKey` = companyNameKey(name) (src/lib/company-match.ts) — the same function in the seed, the backfill and the lead action, so app and database never disagree. &quot;Recurring client&quot; is derived from this table&#x27;s history, never stored.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">name</td><td class="t">text</td><td class="r">required</td><td class="c">display casing</td></tr>
+<tr><td class="f">nameKey<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c">trimmed, single-spaced, lower-cased, diacritics folded</td></tr>
+<tr><td class="f">website</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">country</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">region</td><td class="t pick">pick: Region</td><td class="r">optional</td><td class="c">derived from country</td></tr>
+<tr><td class="f">clientType</td><td class="t pick">pick: ClientType</td><td class="r">default PROSPECT</td><td class="c"></td></tr>
+<tr><td class="f">generalEmails</td><td class="t">list of text</td><td class="r">default []</td><td class="c">company-level contacts for scraped leads with no named person (D-4)</td></tr>
+<tr><td class="f">generalPhones</td><td class="t">list of text</td><td class="r">default []</td><td class="c"></td></tr>
+<tr><td class="f">domains</td><td class="t">list of text</td><td class="r">default []</td><td class="c">Wave R9.2 (item 13) match keys — maintained on write, backfilled once: lower-case hosts from website + generalEmails, generic domains excluded</td></tr>
+<tr><td class="f">phoneKeys</td><td class="t">list of text</td><td class="r">default []</td><td class="c">digits only, last 9 kept, from generalPhones + the leads&#x27; contactPhone</td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">migrationNote</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-ImportBatch" data-name="importbatch">
+<h3>ImportBatch<span class="n">19 fields</span></h3>
+<p class="why">One imported spreadsheet (the reps&#x27; workbooks, or a scraped exhibitor list) and what happened to it.</p><p class="src">Every scraped or migrated list is a batch; the leads created from it point at it. The importer (src/lib/import) writes leads only through setLeadStage / logActivity, so imported rows obey the same rules as the UI. `sha256` refuses a second APPLY of the same file; `report` keeps the dry-run counts, anomalies and D-5 decisions for the record.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: ImportKind</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">source</td><td class="t">text</td><td class="r">required</td><td class="c">file name</td></tr>
+<tr><td class="f">sha256</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">status</td><td class="t pick">pick: ImportStatus</td><td class="r">default DRY_RUN</td><td class="c"></td></tr>
+<tr><td class="f">exhibitionId</td><td class="t">text</td><td class="r">optional</td><td class="c">default show for a scraped list</td></tr>
+<tr><td class="f">exhibition</td><td class="t link">link to Exhibition</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">assignedToId</td><td class="t">text</td><td class="r">optional</td><td class="c">the rep the batch was assigned to</td></tr>
+<tr><td class="f">assignedTo</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">scrapedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">rowCount</td><td class="t">whole number</td><td class="r">required</td><td class="c">rows read from the file (after junk / template rows)</td></tr>
+<tr><td class="f">importedCount</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">skippedCount</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">report</td><td class="t">structured data</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">appliedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="sales-crm" data-mod="sales-crm"><div class="mhead"><h2>Sales (CRM)</h2><p>The reps&#x27; world. A lead is one company at one show. Every call, message and stage change is a row here.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  LeadStageHistory }o--|| Lead : &quot;lead&quot;
+  LeadTag }o--|| Lead : &quot;lead&quot;
+  LeadInteraction }o--|| Lead : &quot;lead&quot;
+  SalesDocument }o--o| SalesDocumentVersion : &quot;current&quot;
+  SalesDocumentVersion }o--|| SalesDocument : &quot;document&quot;
+  ActivityDocument }o--|| LeadInteraction : &quot;interaction&quot;
+  ActivityDocument }o--|| SalesDocumentVersion : &quot;version&quot;
+  SalesTarget {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-Lead" data-name="lead">
+<h3>Lead<span class="n">47 fields</span></h3>
+<p class="why">One company at one show, owned by one rep. Carries the stage, the chase dates and the quoted amount.</p><p class="src">Links out to: Company, Exhibition, ImportBatch, StatusOption, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">companyId</td><td class="t">text</td><td class="r">required</td><td class="c">Every lead has a company (Wave R2 migration B made this NOT NULL after the backfill).</td></tr>
+<tr><td class="f">company</td><td class="t link">link to Company</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">contactPerson</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">contactDesignation</td><td class="t">text</td><td class="r">optional</td><td class="c">the workbook&#x27;s Designation column (Wave R6)</td></tr>
+<tr><td class="f">contactPhone</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">contactEmail</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">linkedinUrl</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">instagramUrl</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">websiteUrl</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">outreachChannelId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">outreachChannel</td><td class="t link">link to StatusOption</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">nextFollowUpDue</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">--- Chase fields (Wave R4, SPEC §6.3) — derived by logActivity / the nightly roll-up --- last touch + cadence(stage), or a later hand-set date; null when closed</td></tr>
+<tr><td class="f">lastContactDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">max touchedAt of counted touches</td></tr>
+<tr><td class="f">lastContactChannel</td><td class="t pick">pick: ActivityChannel</td><td class="r">optional</td><td class="c">channel of that latest counted touch (Wave R3.1; the Reached Out card shows it)</td></tr>
+<tr><td class="f">firstContactDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">first counted touch, never typed</td></tr>
+<tr><td class="f">touchCount</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">statusId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">status</td><td class="t link">link to StatusOption</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">stage</td><td class="t pick">pick: LeadStage</td><td class="r">default LEAD_ASSIGNED</td><td class="c">--- Stage (Wave R3, SPEC §6.2) — written only by setLeadStage ---</td></tr>
+<tr><td class="f">urgent</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">boothNumber</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">clientBudget</td><td class="t">number</td><td class="r">optional</td><td class="c">the rep&#x27;s soft number; the money metric is quotedAmount</td></tr>
+<tr><td class="f">clientBudgetCurrency</td><td class="t pick">pick: Currency</td><td class="r">default AED</td><td class="c"></td></tr>
+<tr><td class="f">briefReceivedDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">stamped on first entry to the matching stage, never overwritten</td></tr>
+<tr><td class="f">designSentDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">quoteRequestedDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">rep action &quot;Request quote&quot; (Wave R3.1); Estimation later</td></tr>
+<tr><td class="f">quoteSentDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">rep action &quot;Quote sent&quot; (Wave R3.1); Finance / Estimation later</td></tr>
+<tr><td class="f">closeDate</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">quotedAmount</td><td class="t">number</td><td class="r">optional</td><td class="c">latest quote (rep action &quot;Quote sent&quot;); Estimation later</td></tr>
+<tr><td class="f">quotedCurrency</td><td class="t pick">pick: Currency</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designTurnaroundDays</td><td class="t">whole number</td><td class="r">optional</td><td class="c">days brief received → design sent</td></tr>
+<tr><td class="f">quoteTurnaroundDays</td><td class="t">whole number</td><td class="r">optional</td><td class="c">days quote requested → quote sent</td></tr>
+<tr><td class="f">lostReason</td><td class="t pick">pick: LostReason</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">lostReasonOther</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">standSize</td><td class="t">number</td><td class="r">optional</td><td class="c">always sqm (D9-6)</td></tr>
+<tr><td class="f">standSizeUnit</td><td class="t pick">pick: AreaUnit</td><td class="r">default SQM</td><td class="c">the unit the rep chose; display converts (Wave R9.2)</td></tr>
+<tr><td class="f">exhibitionId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">exhibition</td><td class="t link">link to Exhibition</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">optional</td><td class="c">lead-level notes: migrated free text (SPEC §6); per-touch notes are Activities</td></tr>
+<tr><td class="f">ownerId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">owner</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">importBatchId</td><td class="t">text</td><td class="r">optional</td><td class="c">Provenance (SPEC §6.6, Wave R6): the batch the lead was imported in and the source cell (&quot;Riza - CRM.xlsx:1234&quot;) — idempotent re-runs, audit trail.</td></tr>
+<tr><td class="f">importBatch</td><td class="t link">link to ImportBatch</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">importRowRef</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-LeadStageHistory" data-name="leadstagehistory">
+<h3>LeadStageHistory<span class="n">9 fields</span></h3>
+<p class="why">Every stage change a lead ever had. Insert-only.</p><p class="src">Insert-only log of every stage change (SPEC §6.2). No update or delete action exists for it; the backfill row has fromStage = null.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">leadId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">lead</td><td class="t link">link to Lead</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">fromStage</td><td class="t pick">pick: LeadStage</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">toStage</td><td class="t pick">pick: LeadStage</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">cause</td><td class="t">text</td><td class="r">required</td><td class="c">rep_ui | brief_submit | send_to_client | request_changes | request_quote | quote_sent | confirm_project | mark_lost | not_interested | override | backfill (version_for_review: retired R3.1, kept on old rows)</td></tr>
+<tr><td class="f">changedAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">changedById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">changedBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-LeadTag" data-name="leadtag">
+<h3>LeadTag<span class="n">6 fields</span></h3>
+<p class="why">A rep tagged on a lead that isn&#x27;t theirs.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">leadId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">lead</td><td class="t link">link to Lead</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-LeadInteraction" data-name="leadinteraction">
+<h3>LeadInteraction<span class="n">18 fields</span></h3>
+<p class="why">One touch (call, WhatsApp, meeting) or internal note on a lead. Milestone touches carry the design version sent or the quote amount.</p><p class="src">The Activity table (SPEC §6.3, Wave R4). One row per touch or internal note; written only by logActivity. (The pre-R4 `type` / `occurredAt` mirrors were dropped in Wave R6.5.)</p><p class="src">Links out to: DesignRevision, EstimateRevision, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">leadId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">channel</td><td class="t pick">pick: ActivityChannel</td><td class="r">default OTHER</td><td class="c"></td></tr>
+<tr><td class="f">outcome</td><td class="t pick">pick: ActivityOutcome</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">touchedAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c">when the contact happened, not when it was typed</td></tr>
+<tr><td class="f">isTouch</td><td class="t">yes / no</td><td class="r">default true</td><td class="c">false = internal note: on the timeline, never rolled up (decided 23 Sep 2026)</td></tr>
+<tr><td class="f">counted</td><td class="t">yes / no</td><td class="r">default false</td><td class="c">set once the touch has been rolled up onto the Lead; never twice</td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">milestone</td><td class="t pick">pick: LeadStage</td><td class="r">optional</td><td class="c">--- Milestone actions (Wave R3.1, SPEC §6.2): Send to client / Request quote / Quote sent --- DESIGN_SENT | QUOTE_REQUESTED | QUOTE_SENT; null for a plain touch or note</td></tr>
+<tr><td class="f">designRevisionId</td><td class="t">text</td><td class="r">optional</td><td class="c">the version sent (Send to client)</td></tr>
+<tr><td class="f">designRevision</td><td class="t link">link to DesignRevision</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">amount</td><td class="t">number</td><td class="r">optional</td><td class="c">quote snapshot (Quote sent) — the Lead keeps the latest, this row keeps the history</td></tr>
+<tr><td class="f">currency</td><td class="t pick">pick: Currency</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">estimateRevisionId</td><td class="t">text</td><td class="r">optional</td><td class="c">Wave E1: the issued Estimating revision a &quot;Quote sent&quot; picked (EST-E26)</td></tr>
+<tr><td class="f">estimateRevision</td><td class="t link">link to EstimateRevision</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">lead</td><td class="t link">link to Lead</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-SalesDocument" data-name="salesdocument">
+<h3>SalesDocument<span class="n">10 fields</span></h3>
+<p class="why">A brochure or sales document in the catalogue.</p><p class="src">The brochure catalogue. One row per document; one SalesDocumentVersion per upload (history is never rewritten); `currentId` is the version the picker sends. A touch that carried brochures links to the exact versions through ActivityDocument (decision D-8.1: one touch, many documents). Inactive = hidden from the picker, history kept. No delete anywhere.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">title<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">documentType</td><td class="t pick">pick: SalesDocumentType</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">description</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">currentId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">current</td><td class="t link">link to SalesDocumentVersion</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-SalesDocumentVersion" data-name="salesdocumentversion">
+<h3>SalesDocumentVersion<span class="n">11 fields</span></h3>
+<p class="why">One uploaded version of a sales document. History is never rewritten.</p><p class="src">Links out to: FileAsset, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">documentId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">document</td><td class="t link">link to SalesDocument</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">number</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">label</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">fileId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">file</td><td class="t link">link to FileAsset</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">uploadedById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">uploadedBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-ActivityDocument" data-name="activitydocument">
+<h3>ActivityDocument<span class="n">5 fields</span></h3>
+<p class="why">Which document versions a touch carried.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">interactionId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">interaction</td><td class="t link">link to LeadInteraction</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">versionId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">version</td><td class="t link">link to SalesDocumentVersion</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-SalesTarget" data-name="salestarget">
+<h3>SalesTarget<span class="n">7 fields</span></h3>
+<p class="why">A rep&#x27;s monthly target in AED.</p><p class="src">Wave R9.13: a sales seat&#x27;s target for one month, in AED. Set by Top Management on targets (rep × month). The team target is the sum of the reps&#x27; targets — computed, never stored. R9.14&#x27;s dashboard reads this table.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">month</td><td class="t">date</td><td class="r">required</td><td class="c">the first day of the month, on the Asia/Dubai calendar (&quot;2026-10-01&quot;)</td></tr>
+<tr><td class="f">amountAED</td><td class="t">number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="brief-design-dms" data-mod="brief-design-dms"><div class="mhead"><h2>Brief &amp; Design (DMS)</h2><p>What a lead turns into once a brief is received: the project with its RV code, the design versions, and the technical sign-off.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  Project }o--|| Brief : &quot;brief&quot;
+  DesignRevision }o--|| Project : &quot;project&quot;
+  DesignMessage }o--|| Project : &quot;project&quot;
+  ProjectCodeCounter {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-Brief" data-name="brief">
+<h3>Brief<span class="n">25 fields</span></h3>
+<p class="why">The client&#x27;s requirements for one lead. Creates the project when a designer is assigned.</p><p class="src">Links out to: Exhibition, Lead, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">leadId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">lead</td><td class="t link">link to Lead</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdBy</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">clientName</td><td class="t">text</td><td class="r">required</td><td class="c">Structured fields</td></tr>
+<tr><td class="f">exhibitionId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">exhibition</td><td class="t link">link to Exhibition</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">venue</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">city</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">country</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">standNumber</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">standSize</td><td class="t">number</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">standType</td><td class="t">text</td><td class="r">optional</td><td class="c">Stand type is an open text field (§7). The previous StatusOption relation is removed — top mgmt no longer maintains a stand-type list.</td></tr>
+<tr><td class="f">budget</td><td class="t">number</td><td class="r">optional</td><td class="c">NOTE: Float-for-money is a known pre-existing nit; revisit when confirmedSellingPrice / revenue rollups land (§5.4, §7 future).</td></tr>
+<tr><td class="f">budgetCurrency</td><td class="t pick">pick: Currency</td><td class="r">default AED</td><td class="c"></td></tr>
+<tr><td class="f">clientRequirements</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">additionalNotes</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">notesForDesigner</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">clientDeadline</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c">Deadlines</td></tr>
+<tr><td class="f">designerDeadline</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">auto-calculated when assigned, can be edited</td></tr>
+<tr><td class="f">submittedAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c">Workflow</td></tr>
+<tr><td class="f">assignedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Project" data-name="project">
+<h3>Project<span class="n">22 fields</span></h3>
+<p class="why">The design job behind a brief. Holds the RV code, the designer, the outcome (won/lost) and the technical status.</p><p class="src">Links out to: StatusOption, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">code<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c">Wave FN1: the RV- project code, RV-&lt;year&gt;-&lt;4-digit&gt;, set once in the transaction that creates the project (src/lib/project-code.ts); unique, never reused, never edited (the migration&#x27;s trigger).</td></tr>
+<tr><td class="f">briefId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">brief</td><td class="t link">link to Brief</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">designerId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designer</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designProgressId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designProgress</td><td class="t link">link to StatusOption</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designStartedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">outcome</td><td class="t pick">pick: ProjectOutcome</td><td class="r">default PENDING</td><td class="c">Project outcome — owned by the salesperson (§4.2, §8). PENDING while in flight. Single source of truth: Technical unlock, designer credit, and the WON/LOST status tag all read this column. &quot;Confirmed&quot; has one definition (§8).</td></tr>
+<tr><td class="f">lostReason</td><td class="t">text</td><td class="r">optional</td><td class="c">&quot;LOST_ON_PRICE&quot; | &quot;LOST_ON_DESIGN&quot; | &quot;LOST_TO_COMPETITOR&quot; | &quot;CLIENT_PULLED_OUT&quot; | &quot;OTHER&quot;</td></tr>
+<tr><td class="f">lostReasonOther</td><td class="t">text</td><td class="r">optional</td><td class="c">free-text when lostReason = &quot;OTHER&quot;</td></tr>
+<tr><td class="f">outcomeSetAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">outcomeSetById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">outcomeSetBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">confirmedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">Timestamp recorded when outcome transitions to CONFIRMED.</td></tr>
+<tr><td class="f">technicalStatus</td><td class="t pick">pick: TechnicalStatus</td><td class="r">default DRAFTING</td><td class="c">Technical workflow status (§9). Drafting → Checking → Approved. Reachable only when outcome = CONFIRMED; the gate lives in the /technical route. APPROVED is the completion marker (renamed from &quot;Technical Done&quot;).</td></tr>
+<tr><td class="f">technicalApprovedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">technicalId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">technical</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-ProjectCodeCounter" data-name="projectcodecounter">
+<h3>ProjectCodeCounter<span class="n">2 fields</span></h3>
+<p class="why">The last RV number given out each year. Only goes up.</p><p class="src">Wave FN1: one row per business year in Dubai: the last RV- number given. Only src/lib/project-code.ts reads or writes it; a row is only ever raised, so a number is never given twice.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">year<span class="badge id">key</span></td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">last</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-DesignRevision" data-name="designrevision">
+<h3>DesignRevision<span class="n">10 fields</span></h3>
+<p class="why">One design version (V1, V2…) uploaded by a designer.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">projectId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">project</td><td class="t link">link to Project</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">revisionNumber</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">uploadedById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">uploadedBy</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">requestedById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">requestedBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">notes</td><td class="t">text</td><td class="r">optional</td><td class="c">what changed</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-DesignMessage" data-name="designmessage">
+<h3>DesignMessage<span class="n">7 fields</span></h3>
+<p class="why">A message on the project between sales and design.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">projectId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">project</td><td class="t link">link to Project</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">body</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="estimating" data-mod="estimating"><div class="mhead"><h2>Estimating</h2><p>The estimator&#x27;s records. One estimate per project, numbered revisions that lock when issued, lines of quantities and unit costs, and the rate library.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  EstimateRevision }o--|| Estimate : &quot;estimate&quot;
+  EstimateLine }o--|| EstimateRevision : &quot;revision&quot;
+  EstimateQuoteDocument }o--|| EstimateRevision : &quot;revision&quot;
+  EstimatingCode {
+    string id
+  }
+  EstimatingRate {
+    string id
+  }
+  EstimatingClause {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-EstimatingCode" data-name="estimatingcode">
+<h3>EstimatingCode<span class="n">8 fields</span></h3>
+<p class="why">A stand element or cost type: stable code, renamable label.</p><p class="src">Stand elements and cost types: a stable code, never edited, and a renamable label (the note&#x27;s question 7).</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: EstimatingCodeKind</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">code</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">label</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-EstimatingRate" data-name="estimatingrate">
+<h3>EstimatingRate<span class="n">11 fields</span></h3>
+<p class="why">One rate for one item from one date. Copied into a line when picked, never linked.</p><p class="src">The dated rate library: one row per item and start date. A rate is copied into a line when picked, never linked.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">code</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">label</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">unit</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">costTypeCode</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">validFrom</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">rate</td><td class="t">decimal number</td><td class="r">required</td><td class="c">money</td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">isDemo</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-EstimatingClause" data-name="estimatingclause">
+<h3>EstimatingClause<span class="n">9 fields</span></h3>
+<p class="why">A standard inclusion, exclusion, term or payment text the estimator can drop into a quote.</p><p class="src">Wave E2 (docs/E2-PLAN.md §2.6; E-7): the clause library, standard texts the Estimating lead keeps. A picked clause is copied into a revision, never linked. No prices: a clause holds text only.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: EstimatingClauseKind</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">text</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">isDemo</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Estimate" data-name="estimate">
+<h3>Estimate<span class="n">12 fields</span></h3>
+<p class="why">The estimate for one project, or a reusable template or kit.</p><p class="src">An estimate (one per project), a template or a kit. A template&#x27;s or kit&#x27;s name carries the stand type (EST-E2).</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: EstimateKind</td><td class="r">default ESTIMATE</td><td class="c"></td></tr>
+<tr><td class="f">name</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">projectId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">optional</td><td class="c">Project.id, for an estimate; none for a template or kit</td></tr>
+<tr><td class="f">assigneeId</td><td class="t">text</td><td class="r">optional</td><td class="c">User.id: the seat that has it</td></tr>
+<tr><td class="f">dueOn</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">set by hand over the derived due date (E-11)</td></tr>
+<tr><td class="f">sourceRevisionId</td><td class="t">text</td><td class="r">optional</td><td class="c">the revision it started from: a template&#x27;s, a kit&#x27;s or a past estimate&#x27;s</td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">isDemo</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-EstimateRevision" data-name="estimaterevision">
+<h3>EstimateRevision<span class="n">21 fields</span></h3>
+<p class="why">A numbered revision. Draft until issued, then locked. Carries the price.</p><p class="src">A numbered revision: a draft until issued, then locked. Its price and currency are money.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">estimateId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">estimate</td><td class="t link">link to Estimate</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">number</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">state</td><td class="t pick">pick: EstimateRevisionState</td><td class="r">default DRAFT</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: EstimateRevisionKind</td><td class="r">default FIRST</td><td class="c"></td></tr>
+<tr><td class="f">note</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">designRevisionId</td><td class="t">text</td><td class="r">optional</td><td class="c">DesignRevision.id: the design version priced (E-5)</td></tr>
+<tr><td class="f">price</td><td class="t">decimal number</td><td class="r">optional</td><td class="c">money</td></tr>
+<tr><td class="f">currency</td><td class="t pick">pick: Currency</td><td class="r">optional</td><td class="c">money (a currency counts as money)</td></tr>
+<tr><td class="f">inclusions</td><td class="t">list of text</td><td class="r">default []</td><td class="c"></td></tr>
+<tr><td class="f">exclusions</td><td class="t">list of text</td><td class="r">default []</td><td class="c"></td></tr>
+<tr><td class="f">terms</td><td class="t">list of text</td><td class="r">default []</td><td class="c">Wave E2: the client&#x27;s quote&#x27;s terms</td></tr>
+<tr><td class="f">paymentTerms</td><td class="t">text</td><td class="r">optional</td><td class="c">Wave E2, EST-E15: money-class text, fetched only with the price</td></tr>
+<tr><td class="f">validUntil</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">Wave E2: the quote&#x27;s validity</td></tr>
+<tr><td class="f">showLines</td><td class="t">list of text</td><td class="r">default []</td><td class="c">Wave E2: the element codes whose lines the client&#x27;s PDF lists</td></tr>
+<tr><td class="f">issuedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">issuedById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-EstimateLine" data-name="estimateline">
+<h3>EstimateLine<span class="n">12 fields</span></h3>
+<p class="why">One line of quantities: element, cost type, quantity, unit cost.</p><p class="src">A line of the bill of quantities: a stand element, a cost type, the quantity as entered, and its unit cost.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">revisionId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">revision</td><td class="t link">link to EstimateRevision</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">elementCode</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">costTypeCode</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">description</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">unit</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">quantity</td><td class="t">decimal number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">rateCode</td><td class="t">text</td><td class="r">optional</td><td class="c">the rate library item picked</td></tr>
+<tr><td class="f">rateValidFrom</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c">the start date of the rate copied in</td></tr>
+<tr><td class="f">unitCost</td><td class="t">decimal number</td><td class="r">optional</td><td class="c">money</td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-EstimateQuoteDocument" data-name="estimatequotedocument">
+<h3>EstimateQuoteDocument<span class="n">8 fields</span></h3>
+<p class="why">The client&#x27;s quote PDF, frozen at the moment of issue.</p><p class="src">Wave E2 (docs/E2-PLAN.md §2.6; D-E2-10): the client&#x27;s PDF of an issued revision, made with the issue and stored frozen: written once, never changed or deleted, and the revision can&#x27;t go while it stands.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">revisionId<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">revision</td><td class="t link">link to EstimateRevision</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">fileName</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">pdf</td><td class="t">file bytes</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">sha256</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="purchasing" data-mod="purchasing"><div class="mhead"><h2>Purchasing</h2><p>Buying from suppliers: purchase orders with lines, approvals, and goods receipts. No prices are kept here.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  PurchaseOrder }o--|| Supplier : &quot;supplier&quot;
+  PurchaseOrderLine }o--|| PurchaseOrder : &quot;order&quot;
+  OrderApproval }o--|| PurchaseOrder : &quot;order&quot;
+  GoodsReceipt }o--|| PurchaseOrder : &quot;order&quot;
+  GoodsReceiptLine }o--|| GoodsReceipt : &quot;receipt&quot;
+  GoodsReceiptLine }o--|| PurchaseOrderLine : &quot;orderLine&quot;</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-Supplier" data-name="supplier">
+<h3>Supplier<span class="n">11 fields</span></h3>
+<p class="why">A vendor Ravashing buys from.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">name</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">category</td><td class="t">text</td><td class="r">required</td><td class="c">one of SUPPLIER_CATEGORIES (src/modules/purchasing/suppliers.ts)</td></tr>
+<tr><td class="f">contactName</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">email</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">phone</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">status</td><td class="t pick">pick: SupplierStatus</td><td class="r">default ACTIVE</td><td class="c"></td></tr>
+<tr><td class="f">blockedReason</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-PurchaseOrder" data-name="purchaseorder">
+<h3>PurchaseOrder<span class="n">14 fields</span></h3>
+<p class="why">One order to one supplier. Numbered automatically.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">number<span class="badge uq">unique</span></td><td class="t">whole number</td><td class="r">default auto number</td><td class="c"></td></tr>
+<tr><td class="f">supplierId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">supplier</td><td class="t link">link to Supplier</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">status</td><td class="t pick">pick: PurchaseOrderStatus</td><td class="r">default DRAFT</td><td class="c"></td></tr>
+<tr><td class="f">note</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">raisedById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">submittedAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">sentAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">supplierRef</td><td class="t">text</td><td class="r">optional</td><td class="c">the supplier&#x27;s own reference, typed once (PU-15)</td></tr>
+<tr><td class="f">promisedDate</td><td class="t">date</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">cancelledAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-PurchaseOrderLine" data-name="purchaseorderline">
+<h3>PurchaseOrderLine<span class="n">10 fields</span></h3>
+<p class="why">One line on a purchase order, optionally tied to a won project.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">orderId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t link">link to PurchaseOrder</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">lineNo</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">projectId</td><td class="t">text</td><td class="r">optional</td><td class="c">the job&#x27;s Project.id, picked from the won jobs; none for stock (PU-39)</td></tr>
+<tr><td class="f">description</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">unit</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">quantity</td><td class="t">decimal number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">neededBy</td><td class="t">date</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">deliverTo</td><td class="t pick">pick: DeliveryPlace</td><td class="r">default STORE</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-OrderApproval" data-name="orderapproval">
+<h3>OrderApproval<span class="n">7 fields</span></h3>
+<p class="why">An approve or reject decision on an order. Insert-only.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">orderId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t link">link to PurchaseOrder</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">decision</td><td class="t pick">pick: ApprovalDecision</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">reason</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">decidedById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-GoodsReceipt" data-name="goodsreceipt">
+<h3>GoodsReceipt<span class="n">6 fields</span></h3>
+<p class="why">One delivery received against an order.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">orderId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">order</td><td class="t link">link to PurchaseOrder</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">deliveryNote</td><td class="t">text</td><td class="r">optional</td><td class="c">the supplier&#x27;s delivery-note number: a search field, never a key (PU-43)</td></tr>
+<tr><td class="f">receivedById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">receivedAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-GoodsReceiptLine" data-name="goodsreceiptline">
+<h3>GoodsReceiptLine<span class="n">9 fields</span></h3>
+<p class="why">What was accepted and rejected per order line in a delivery.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">receiptId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">receipt</td><td class="t link">link to GoodsReceipt</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">orderLineId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">orderLine</td><td class="t link">link to PurchaseOrderLine</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">accepted</td><td class="t">decimal number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">rejected</td><td class="t">decimal number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">rejectReason</td><td class="t pick">pick: RejectReason</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">rejectNote</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="store-inventory" data-mod="store-inventory"><div class="mhead"><h2>Store (inventory)</h2><p>What is in the warehouse. Coded units (RA-0001) for reusable things, quantities for consumables, and a movement log that is never edited.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  StockUnit }o--|| StockItem : &quot;item&quot;
+  StockMovement }o--|| StockItem : &quot;item&quot;
+  StockMovement }o--o| StockUnit : &quot;unit&quot;
+  StockCodeCounter {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-StockItem" data-name="stockitem">
+<h3>StockItem<span class="n">9 fields</span></h3>
+<p class="why">A kind of thing in the store: single-use, limited-life or permanent.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">name</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">unit</td><td class="t">text</td><td class="r">required</td><td class="c">&quot;each&quot; for a coded item</td></tr>
+<tr><td class="f">stockClass</td><td class="t pick">pick: StockClass</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">minimum</td><td class="t">decimal number</td><td class="r">optional</td><td class="c">a single-use item&#x27;s only: below it, &quot;low&quot;</td></tr>
+<tr><td class="f">note</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-StockUnit" data-name="stockunit">
+<h3>StockUnit<span class="n">8 fields</span></h3>
+<p class="why">One coded physical unit (RA-0001) of a reusable item.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">code<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c">RA-&lt;4-digit&gt; (src/modules/purchasing/stock-code.ts): set once, never reused, never edited</td></tr>
+<tr><td class="f">itemId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">item</td><td class="t link">link to StockItem</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">expectedShows</td><td class="t">whole number</td><td class="r">optional</td><td class="c">a limited-life unit&#x27;s expected life in shows: a review prompt, never an automatic retirement</td></tr>
+<tr><td class="f">note</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdById</td><td class="t">text</td><td class="r">required</td><td class="c">a seat&#x27;s id, no relation</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-StockCodeCounter" data-name="stockcodecounter">
+<h3>StockCodeCounter<span class="n">2 fields</span></h3>
+<p class="why">The last RA number given out. Only goes up.</p><p class="src">One row: the last RA- number given. Only src/modules/purchasing/stock-code.ts writes it; it only goes up.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">prefix<span class="badge id">key</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">last</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-StockMovement" data-name="stockmovement">
+<h3>StockMovement<span class="n">15 fields</span></h3>
+<p class="why">One in, out, back, repair, flag or write-off. Never edited.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: StockMoveKind</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">itemId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">item</td><td class="t link">link to StockItem</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">unitId</td><td class="t">text</td><td class="r">optional</td><td class="c">a coded unit&#x27;s movement; none for a single-use item&#x27;s</td></tr>
+<tr><td class="f">unit</td><td class="t link">link to StockUnit</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">quantity</td><td class="t">decimal number</td><td class="r">required</td><td class="c">1 for a unit; 0 for a keep</td></tr>
+<tr><td class="f">projectId</td><td class="t">text</td><td class="r">optional</td><td class="c">OUT and BACK: the won job&#x27;s id, picked from the won jobs; no relation</td></tr>
+<tr><td class="f">receiptLineId</td><td class="t">text</td><td class="r">optional</td><td class="c">IN from a delivery: PU1&#x27;s receipt line&#x27;s id; no relation, PU1&#x27;s tables unchanged</td></tr>
+<tr><td class="f">condition</td><td class="t pick">pick: ReturnCondition</td><td class="r">optional</td><td class="c">a unit&#x27;s BACK</td></tr>
+<tr><td class="f">grade</td><td class="t pick">pick: ConditionGrade</td><td class="r">optional</td><td class="c">a unit&#x27;s BACK; required for a limited-life unit</td></tr>
+<tr><td class="f">reason</td><td class="t pick">pick: StockReason</td><td class="r">optional</td><td class="c">FLAG and WRITE_OFF</td></tr>
+<tr><td class="f">note</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">byId</td><td class="t">text</td><td class="r">required</td><td class="c">the seat that moved it, no relation</td></tr>
+<tr><td class="f">at</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="files-alerts-audit" data-mod="files-alerts-audit"><div class="mhead"><h2>Files, alerts &amp; audit</h2><p>Uploaded files and where they hang, in-app notifications, and the audit trail of who did what.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  FileAsset {
+    string id
+  }
+  Notification {
+    string id
+  }
+  ActivityLog {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-FileAsset" data-name="fileasset">
+<h3>FileAsset<span class="n">21 fields</span></h3>
+<p class="why">An uploaded file. Exactly one of the link columns says what it belongs to.</p><p class="src">Links out to: Brief, DesignRevision, Lead, LeadInteraction, Project, User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">filename</td><td class="t">text</td><td class="r">required</td><td class="c">stored filename (random uuid + ext)</td></tr>
+<tr><td class="f">originalName</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">mimeType</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">sizeBytes</td><td class="t">whole number</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">storagePath</td><td class="t">text</td><td class="r">required</td><td class="c">relative path under UPLOAD_DIR</td></tr>
+<tr><td class="f">uploadedById</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">uploadedBy</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">briefId</td><td class="t">text</td><td class="r">optional</td><td class="c">Polymorphic-ish attachment slots (only one populated)</td></tr>
+<tr><td class="f">brief</td><td class="t link">link to Brief</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">briefRole</td><td class="t">text</td><td class="r">optional</td><td class="c">&quot;FLOOR_PLAN&quot; | &quot;INSPIRATION&quot; | &quot;LAST_YEAR&quot; | &quot;OTHER&quot;</td></tr>
+<tr><td class="f">revisionId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">revision</td><td class="t link">link to DesignRevision</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">projectId</td><td class="t">text</td><td class="r">optional</td><td class="c">CAD / technical files for a project</td></tr>
+<tr><td class="f">project</td><td class="t link">link to Project</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">interactionId</td><td class="t">text</td><td class="r">optional</td><td class="c">quote attachment on a &quot;Quote sent&quot; activity (Wave R3.1)</td></tr>
+<tr><td class="f">interaction</td><td class="t link">link to LeadInteraction</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">leadId</td><td class="t">text</td><td class="r">optional</td><td class="c">documents received from the client on a lead (Wave R9.2, D9-4)</td></tr>
+<tr><td class="f">lead</td><td class="t link">link to Lead</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">leadRole</td><td class="t">text</td><td class="r">optional</td><td class="c">&quot;RECEIVED&quot;</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Notification" data-name="notification">
+<h3>Notification<span class="n">9 fields</span></h3>
+<p class="why">An in-app alert for one person.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t">text</td><td class="r">required</td><td class="c">BRIEF_UNASSIGNED | LEAD_STALE | DESIGN_NOT_STARTED | DESIGN_VERSION_UPLOADED | ...</td></tr>
+<tr><td class="f">title</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">body</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">link</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">readAt</td><td class="t">date &amp; time</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-ActivityLog" data-name="activitylog">
+<h3>ActivityLog<span class="n">8 fields</span></h3>
+<p class="why">The audit trail: who did what to which record, when.</p><p class="src">Links out to: User</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t">text</td><td class="r">required</td><td class="c">entity:action — e.g. &quot;lead:status_changed&quot;</td></tr>
+<tr><td class="f">entityType</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">entityId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">metadata</td><td class="t">structured data</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="users-settings" data-mod="users-settings"><div class="mhead"><h2>Users &amp; settings</h2><p>Who can log in, which module roles they hold, and the pick-lists and thresholds top management can change without code.</p></div>
+<div class="erd"><pre class="mermaid">erDiagram
+  ModuleRole }o--|| User : &quot;user&quot;
+  StatusOption {
+    string id
+  }
+  Setting {
+    string id
+  }</pre><p class="cap">links inside this module only; links to other modules are listed under each table</p></div>
+<article class="tbl" id="t-User" data-name="user">
+<h3>User<span class="n">12 fields</span></h3>
+<p class="why">A person who can sign in. Their role decides what they see.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">email<span class="badge uq">unique</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">passwordHash</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">name</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">role</td><td class="t pick">pick: UserRole</td><td class="r">optional</td><td class="c">Wave FN2: null for a seat whose only role is in a new module (its ModuleRole rows)</td></tr>
+<tr><td class="f">designSubRole</td><td class="t pick">pick: DesignSubRole</td><td class="r">optional</td><td class="c"></td></tr>
+<tr><td class="f">isSalesManager</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">isDemo</td><td class="t">yes / no</td><td class="r">default false</td><td class="c">Wave R9.12: a seeded demo seat — signs in only when DEMO_MODE=true</td></tr>
+<tr><td class="f">prefs</td><td class="t">structured data</td><td class="r">default {}</td><td class="c">per-user memory (Wave R9.2, D9-5): e.g. exhibitionScope</td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-ModuleRole" data-name="modulerole">
+<h3>ModuleRole<span class="n">5 fields</span></h3>
+<p class="why">A person&#x27;s role inside one module, for modules that don&#x27;t keep roles on the User row.</p><p class="src">Wave FN2: a seat&#x27;s role in a module whose roles aren&#x27;t kept on User (today&#x27;s CRM, DMS and BI keep theirs there: role, designSubRole, isSalesManager). One role per module per seat. Read in the session&#x27;s one lookup (src/lib/rbac.ts); written only by src/funnel/server.ts; the migration refuses the CRM, the DMS and BI.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">userId</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">user</td><td class="t link">link to User</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">module</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">role</td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-StatusOption" data-name="statusoption">
+<h3>StatusOption<span class="n">11 fields</span></h3>
+<p class="why">An editable pick-list entry: lead status, outreach channel, design progress, stage colours, lost reasons.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">id<span class="badge id">key</span></td><td class="t">text</td><td class="r">default auto id</td><td class="c"></td></tr>
+<tr><td class="f">kind</td><td class="t pick">pick: StatusKind</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">code</td><td class="t">text</td><td class="r">required</td><td class="c">stable, machine-referenced (e.g., INTERESTED)</td></tr>
+<tr><td class="f">label</td><td class="t">text</td><td class="r">required</td><td class="c">user-editable display label</td></tr>
+<tr><td class="f">color</td><td class="t">text</td><td class="r">required</td><td class="c">hex e.g. #16a34a</td></tr>
+<tr><td class="f">order</td><td class="t">whole number</td><td class="r">default 0</td><td class="c"></td></tr>
+<tr><td class="f">reasonRequired</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">isDefault</td><td class="t">yes / no</td><td class="r">default false</td><td class="c"></td></tr>
+<tr><td class="f">active</td><td class="t">yes / no</td><td class="r">default true</td><td class="c"></td></tr>
+<tr><td class="f">createdAt</td><td class="t">date &amp; time</td><td class="r">default now</td><td class="c"></td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+<article class="tbl" id="t-Setting" data-name="setting">
+<h3>Setting<span class="n">5 fields</span></h3>
+<p class="why">A named threshold or switch (SLA hours, follow-up days, office hours) stored as a value.</p>
+<div class="fwrap"><table class="fields"><thead><tr><th>Field</th><th>Holds</th><th>Rule</th><th>Meaning</th></tr></thead><tbody>
+<tr><td class="f">key<span class="badge id">key</span></td><td class="t">text</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">value</td><td class="t">structured data</td><td class="r">required</td><td class="c"></td></tr>
+<tr><td class="f">label</td><td class="t">text</td><td class="r">optional</td><td class="c">human-friendly label for the settings panel</td></tr>
+<tr><td class="f">group</td><td class="t">text</td><td class="r">optional</td><td class="c">e.g. &quot;alerts&quot;, &quot;office&quot;, &quot;design&quot;</td></tr>
+<tr><td class="f">updatedAt</td><td class="t">date &amp; time</td><td class="r">required</td><td class="c"></td></tr>
+</tbody></table></div></article>
+</section>
+<section class="module" id="pick-lists" data-mod="pick-lists"><div class="mhead"><h2>Pick-lists</h2><p>Fixed sets of values a field can take. Changing one of these is a code change; the editable lists (lead status, outreach channel, design progress) live in the StatusOption table instead.</p></div><div class="enumgrid">
+<div class="enum" data-name="userrole"><h4>UserRole</h4><ul><li>TOP_MANAGEMENT</li><li>SALESPERSON</li><li>DESIGN_TEAM</li></ul></div>
+<div class="enum" data-name="designsubrole"><h4>DesignSubRole</h4><ul><li>HEAD_OF_DESIGN</li><li>SENIOR_DESIGNER</li><li>DESIGNER_3D</li><li>TECHNICAL_DESIGNER</li></ul></div>
+<div class="enum" data-name="projectoutcome"><h4>ProjectOutcome</h4><ul><li>PENDING</li><li>CONFIRMED</li><li>LOST</li></ul></div>
+<div class="enum" data-name="technicalstatus"><h4>TechnicalStatus</h4><ul><li>DRAFTING</li><li>CHECKING</li><li>APPROVED</li><li>RE_APPROVAL_REQUIRED</li></ul></div>
+<div class="enum" data-name="currency"><h4>Currency</h4><ul><li>AED</li><li>USD</li><li>EUR</li><li>GBP</li><li>SAR</li></ul></div>
+<div class="enum" data-name="region"><h4>Region</h4><ul><li>MENA</li><li>EUROPE</li><li>NORTH_AMERICA</li><li>ASIA</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="clienttype"><h4>ClientType</h4><ul><li>PROSPECT</li><li>EXISTING_CLIENT</li></ul></div>
+<div class="enum" data-name="activitychannel"><h4>ActivityChannel</h4><ul><li>CALL</li><li>EMAIL</li><li>WHATSAPP</li><li>MEETING</li><li>STAND_VISIT</li><li>LINKEDIN</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="activityoutcome"><h4>ActivityOutcome</h4><ul><li>ANSWERED</li><li>NO_ANSWER</li><li>VOICEMAIL</li><li>REPLIED</li><li>NO_REPLY</li><li>MEETING_BOOKED</li></ul></div>
+<div class="enum" data-name="exhibitionstatus"><h4>ExhibitionStatus</h4><ul><li>UPCOMING</li><li>LIVE</li><li>PAST</li></ul></div>
+<div class="enum" data-name="importkind"><h4>ImportKind</h4><ul><li>MIGRATION</li><li>SCRAPE</li></ul></div>
+<div class="enum" data-name="importstatus"><h4>ImportStatus</h4><ul><li>DRY_RUN</li><li>APPLIED</li><li>FAILED</li></ul></div>
+<div class="enum" data-name="companyaliassource"><h4>CompanyAliasSource</h4><ul><li>PICK <small>a rep typed the alias and picked the company</small></li><li>MANUAL <small>added by a manager on the company page</small></li><li>MIGRATION <small>from an import</small></li></ul></div>
+<div class="enum" data-name="areaunit"><h4>AreaUnit</h4><ul><li>SQM</li><li>SQFT</li></ul></div>
+<div class="enum" data-name="salesdocumenttype"><h4>SalesDocumentType</h4><ul><li>GUIDE</li><li>ELEMENT</li><li>CHECKLIST</li><li>DECK</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="statuskind"><h4>StatusKind</h4><ul><li>LEAD_STATUS</li><li>OUTREACH_CHANNEL</li><li>DESIGN_PROGRESS</li><li>STAGE <small>labels/colours for the LeadStage enum (codes identical)</small></li><li>LOST_REASON <small>labels/colours for the LostReason enum (codes identical)</small></li></ul></div>
+<div class="enum" data-name="leadstage"><h4>LeadStage</h4><ul><li>LEAD_ASSIGNED</li><li>REACHED_OUT</li><li>MEETING_SCHEDULED</li><li>BRIEF_RECEIVED</li><li>DESIGN_SENT</li><li>CLIENT_REVIEW</li><li>QUOTE_REQUESTED</li><li>QUOTE_SENT</li><li>NEGOTIATION</li><li>WON</li><li>LOST</li><li>MISSED_OPPORTUNITY</li></ul></div>
+<div class="enum" data-name="lostreason"><h4>LostReason</h4><ul><li>PRICE</li><li>EXISTING_SUPPLIER</li><li>COMPETITOR</li><li>NO_RESPONSE</li><li>CLIENT_CANCELLED_PARTICIPATION</li><li>BUDGET_NOT_APPROVED</li><li>TIMING_TOO_LATE</li><li>DESIGN_NOT_ACCEPTED</li><li>GOVT_TENDER</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="estimatekind"><h4>EstimateKind</h4><ul><li>ESTIMATE</li><li>TEMPLATE</li><li>KIT</li></ul></div>
+<div class="enum" data-name="estimaterevisionstate"><h4>EstimateRevisionState</h4><ul><li>DRAFT</li><li>ISSUED</li></ul></div>
+<div class="enum" data-name="estimaterevisionkind"><h4>EstimateRevisionKind</h4><ul><li>FIRST</li><li>SCOPE_OUT</li><li>SPEC_DOWN</li><li>MARGIN_CUT</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="estimatingcodekind"><h4>EstimatingCodeKind</h4><ul><li>ELEMENT</li><li>COST_TYPE</li></ul></div>
+<div class="enum" data-name="estimatingclausekind"><h4>EstimatingClauseKind</h4><ul><li>INCLUSION</li><li>EXCLUSION</li><li>TERM</li><li>PAYMENT</li></ul></div>
+<div class="enum" data-name="supplierstatus"><h4>SupplierStatus</h4><ul><li>ACTIVE</li><li>BLOCKED</li></ul></div>
+<div class="enum" data-name="purchaseorderstatus"><h4>PurchaseOrderStatus</h4><ul><li>DRAFT</li><li>TO_APPROVE</li><li>APPROVED</li><li>SENT</li><li>CANCELLED</li></ul></div>
+<div class="enum" data-name="deliveryplace"><h4>DeliveryPlace</h4><ul><li>STORE</li><li>WORKSHOP</li></ul></div>
+<div class="enum" data-name="approvaldecision"><h4>ApprovalDecision</h4><ul><li>APPROVED</li><li>REJECTED</li></ul></div>
+<div class="enum" data-name="rejectreason"><h4>RejectReason</h4><ul><li>DAMAGED</li><li>WRONG_ITEM</li><li>WRONG_SPEC</li><li>OTHER</li></ul></div>
+<div class="enum" data-name="stockclass"><h4>StockClass</h4><ul><li>SINGLE_USE</li><li>LIMITED_LIFE</li><li>PERMANENT</li></ul></div>
+<div class="enum" data-name="stockmovekind"><h4>StockMoveKind</h4><ul><li>IN</li><li>OUT</li><li>BACK</li><li>TO_REPAIR</li><li>FROM_REPAIR</li><li>FLAG</li><li>KEEP</li><li>WRITE_OFF</li></ul></div>
+<div class="enum" data-name="returncondition"><h4>ReturnCondition</h4><ul><li>OK</li><li>DAMAGED</li></ul></div>
+<div class="enum" data-name="conditiongrade"><h4>ConditionGrade</h4><ul><li>GOOD</li><li>FAIR</li><li>POOR</li></ul></div>
+<div class="enum" data-name="stockreason"><h4>StockReason</h4><ul><li>WORN_OUT</li><li>BEYOND_REPAIR</li><li>LOST</li><li>SPOILT</li><li>OTHER</li></ul></div>
+</div></section>
+<p class="nores" id="nores" hidden>Nothing matches that search.</p>
+</main></div>
+
+<script>
+(function(){
+  var mods = Array.prototype.slice.call(document.querySelectorAll('section.module'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.rail a[data-mod]'));
+  var q = document.getElementById('q');
+  var nores = document.getElementById('nores');
+  function show(id){
+    var found = false;
+    mods.forEach(function(s){ var on = s.dataset.mod === id; s.classList.toggle('on', on); if(on) found = true; });
+    if(!found){ mods[0].classList.add('on'); id = 'overview'; }
+    links.forEach(function(a){ a.classList.toggle('on', a.dataset.mod === id); });
+    try{ localStorage.setItem('ssb-mod', id); }catch(e){}
+    window.scrollTo({top:0});
+  }
+  function route(){
+    var h = (location.hash||'').replace('#','');
+    if(h && h.indexOf('t-') === 0){
+      var el = document.getElementById(h);
+      if(el){ show(el.closest('section.module').dataset.mod); el.scrollIntoView(); el.classList.add('hit'); setTimeout(function(){el.classList.remove('hit');},1600); }
+      return;
+    }
+    if(!h){ try{ h = localStorage.getItem('ssb-mod') || 'overview'; }catch(e){ h = 'overview'; } }
+    show(h);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+  var all = Array.prototype.slice.call(document.querySelectorAll('article.tbl, .enum[data-name]'));
+  q.addEventListener('input', function(){
+    var v = q.value.trim().toLowerCase();
+    if(!v){ all.forEach(function(a){ a.hidden = false; }); mods.forEach(function(s){ s.style.display=''; var erd=s.querySelector('.erd'); if(erd) erd.style.display=''; var head=s.querySelector('.mhead'); if(head) head.style.display=''; }); nores.hidden = true; route(); return; }
+    var hits = 0;
+    mods.forEach(function(s){ s.style.display = 'block'; s.classList.remove('on'); var any=false;
+      s.querySelectorAll('article.tbl, .enum[data-name]').forEach(function(a){
+        var ok = a.textContent.toLowerCase().indexOf(v) !== -1; a.hidden = !ok; if(ok){ any = true; hits++; } });
+      var erd = s.querySelector('.erd'); if(erd) erd.style.display = 'none';
+      var head = s.querySelector('.mhead'); if(head) head.style.display = any ? '' : 'none';
+    });
+    document.getElementById('overview').style.display = 'none';
+    nores.hidden = hits > 0;
+  });
+  q.addEventListener('search', function(){ if(!q.value){ mods.forEach(function(s){ s.style.display=''; var erd=s.querySelector('.erd'); if(erd) erd.style.display=''; var head=s.querySelector('.mhead'); if(head) head.style.display=''; }); all.forEach(function(a){a.hidden=false;}); route(); } });
+})();
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+
+</body></html>
