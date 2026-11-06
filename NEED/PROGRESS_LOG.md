@@ -191,3 +191,7 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra asked to push the whole project to the private repo G-Narendra/Build. Created a local git repository in the project folder (branch main, 43 files, 86 MB), `.gitignore` for .DS_Store, one commit, remote origin set.
 - **Not pushed yet:** this computer has no GitHub sign-in (no gh, no SSH key, no saved credentials). Narendra must sign in once; see the command in chat. Nothing was sent to GitHub.
 - Content is confidential (real names, org chart, Prateek's schema, brochures). Narendra to confirm GitHub is on the NDA Annex A approved list before pushing.
+
+## 2026-11-06 17:53 (+04): GitHub push on hold
+
+- Narendra is not sure GitHub is on the NDA Annex A approved list. Push held; nothing has been sent to GitHub. The local commit stays ready. Next: Narendra checks Annex A (with Prateek or whoever holds the list), then runs the push.
