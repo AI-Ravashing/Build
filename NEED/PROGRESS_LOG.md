@@ -195,3 +195,7 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 ## 2026-11-06 17:53 (+04): GitHub push on hold
 
 - Narendra is not sure GitHub is on the NDA Annex A approved list. Push held; nothing has been sent to GitHub. The local commit stays ready. Next: Narendra checks Annex A (with Prateek or whoever holds the list), then runs the push.
+
+## 2026-11-06 18:01 (+04): GitHub target changed
+
+- Prateek told Narendra to create a new Ravashing Gmail account and push the repo to GitHub under it, not under G-Narendra. Narendra will create it and send the new repo address. Nothing pushed. Local commits stay ready; the remote will be switched when the address arrives. Prateek's instruction covers the Annex A worry (told, not confirmed on paper).
