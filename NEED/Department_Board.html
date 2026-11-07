@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Department Flow Board</title>
+<style>
+:root{--bg:#eef0f4;--ink:#1c2330;--mut:#64707f;--line:#d7dce3;--card:#fff;--A:#2f5fc4;--Ab:#e6edfb;--B:#b46a00;--Bb:#fff1d9;--C:#127a5a;--Cb:#dcf3ea;--ss:#4f46e5;--bs:#0f766e}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{position:fixed;left:0;right:0;top:0;height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 16px;z-index:20}
+header h1{font-size:16px;margin:0;white-space:nowrap}header .t{display:flex;gap:4px}
+header button{all:unset;cursor:pointer;padding:7px 13px;border-radius:9px;font-size:13.5px;color:#46515f}header button.on{background:#12343b;color:#fff}header button:hover:not(.on){background:#eef0f4}
+header .r{margin-left:auto;font-size:12px;color:var(--mut)}header a{color:var(--ss);text-decoration:none;font-weight:600}
+.view{position:fixed;inset:54px 0 0 0;display:none;overflow:auto}.view.on{display:block}
+#map{overflow:hidden;cursor:grab}#map.d{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;width:1900px;height:1020px}
+#edges{position:absolute;left:0;top:0;width:1900px;height:1020px;overflow:visible}
+.band{position:absolute;top:30px;height:880px;border-radius:22px}.band h2{margin:16px 22px 0;font-size:22px}.band p{margin:2px 22px;font-size:13px;color:var(--mut);max-width:330px}
+.card{position:absolute;width:300px;height:116px;background:var(--card);border-radius:14px;box-shadow:0 2px 10px #1c233018;padding:11px 14px;cursor:pointer;border:2px solid transparent;transition:opacity .15s,box-shadow .15s}
+.card:hover{box-shadow:0 5px 18px #1c233033}.card.sel{border-color:#12343b;box-shadow:0 6px 22px #1c233044}.card.dim{opacity:.35}
+.card b{font-size:16px;display:block}.card small{color:var(--mut);font-size:12px}.card .j{font-size:12.5px;margin-top:4px;line-height:1.3}
+.card .n{position:absolute;right:12px;top:12px;font-size:11.5px;padding:1px 8px;border-radius:9px;background:#eef0f4;color:#46515f}
+.card .c{position:absolute;left:14px;bottom:9px;font-size:11.5px;color:var(--mut)}.card .c i{font-style:normal;font-weight:700;color:var(--ink)}
+.cl{position:absolute;border:2px dashed #7fb9a4;border-radius:16px}.cl span{position:absolute;top:-11px;left:16px;background:#e3f3ec;color:var(--C);padding:0 8px;font-size:12px;font-weight:600;border-radius:8px}
+.pill{position:absolute;transform:translate(-50%,-50%);background:#fff;border-radius:11px;box-shadow:0 3px 12px #1c233050;font-size:17px;padding:5px 11px;max-width:330px;border:1px solid var(--line);pointer-events:none;line-height:1.25}
+.bd{position:absolute;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:50%;color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px #0004;pointer-events:none}.num{flex:none;width:22px;height:22px;border-radius:50%;background:#12343b;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}#drawer .fr{padding:4px 6px;border-radius:8px}#drawer .fr:hover{background:#eef3f6}.tg{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:5px;color:#fff;margin-right:3px}.tg.SS{background:var(--ss)}.tg.BS{background:var(--bs)}.tg.GAP{background:#b3261e}
+#drawer{position:fixed;top:66px;bottom:12px;width:400px;background:#fff;border-radius:16px;box-shadow:0 10px 40px #1c233050;overflow:auto;z-index:15;padding:18px 20px;font-size:13.5px;line-height:1.4}
+#drawer.L{left:12px}#drawer.R{right:12px}#drawer h3{margin:0 0 2px;font-size:21px}#drawer h5{margin:14px 0 4px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+#drawer ul{margin:0;padding-left:17px}#drawer li{margin:3px 0}#drawer .row{display:flex;gap:6px;margin:4px 0;align-items:baseline}
+.chip{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}.chip.A{background:var(--Ab);color:var(--A)}.chip.B{background:var(--Bb);color:var(--B)}.chip.C{background:var(--Cb);color:var(--C)}
+.ba{border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-top:6px}.ba div{padding:7px 10px}.ba .b{background:#fde7e5}.ba .n{background:#dff3e7}.ba b{display:block;font-size:10.5px;letter-spacing:.07em}
+#drawer .x{position:absolute;right:14px;top:12px;cursor:pointer;color:var(--mut);font-size:20px}
+.pg{max-width:1500px;margin:0 auto;padding:22px 28px 60px}.pg h2{font-size:24px;margin:6px 0}.pg>p{color:var(--mut);max-width:900px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}.k{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 10px #1c233014}.k h4{margin:0 0 4px;font-size:15px}.k ul{margin:4px 0 0;padding-left:17px}.k li{margin:2px 0;font-size:13px}
+table.fl{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;font-size:13px}table.fl th{background:#12343b;color:#fff;text-align:left;padding:8px 10px;font-size:12px}table.fl td{padding:7px 10px;border-bottom:1px solid #edf0f3;vertical-align:top}
+select{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+.mod{border-left:5px solid var(--ss)}.mod.bs{border-left-color:var(--bs)}.tbs span{display:inline-block;background:#eef0f4;border-radius:6px;padding:1px 7px;margin:2px 3px 2px 0;font-size:12px}
+#zb{position:fixed;left:12px;bottom:12px;z-index:12;display:flex;gap:6px}#zb button{all:unset;cursor:pointer;background:#12343b;color:#fff;padding:7px 14px;border-radius:9px;font-size:14px}
+#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;background:#12343bee;color:#fff;border-radius:10px;padding:7px 14px;font-size:12.5px;z-index:12;pointer-events:none}
+</style></head><body>
+<header><h1>Ravashing: department flow board</h1><div class="t" id="tabs"></div><div class="r">Concept · fictional data · ASSUMED · <a href="UI_Board.html">Screens board</a></div></header>
+<div id="map" class="view on"><div id="world"><svg id="edges"></svg></div><div id="zb"><button data-z="1.2">+</button><button data-z=".83">−</button><button id="fit">Fit</button></div><div id="hint">Click a department to light up what it makes, gets and sends</div><div id="drawer" class="R" style="display:none"></div></div>
+<div id="flows" class="view"></div><div id="schema" class="view"></div><div id="life" class="view"></div>
+<script>
+const $=s=>document.querySelector(s);
+const Z={A:'Agency (Prateek)',B:'Bridge',C:'Build'},ZC={A:'#2f5fc4',B:'#b46a00',C:'#127a5a'};
+/* tag: SS = in Prateek's schema (his file, 7th update); BS = in our proposed Build schema; GAP = in neither */
+const tg=t=>{const m=t.match(/^(SS|BS|GAP) /);return m?`<span class="tg ${m[1]}">${m[1]}</span>${t.slice(3)}`:t};
+const D=[
+{id:'mkt',n:'Marketing',z:'A',c:'1 person',x:60,y:140,j:'Brings in companies and show interest',
+ does:[['Marketer','Adds companies and shows; hands interest to Sales (ASSUMED role)']],
+ mk:['SS Register: Company, Exhibition (who adds them is ASSUMED)'],mg:[],scr:'Register and company lists (Prateek)',
+ b:'Interest lives in personal notes',nw:'Shared register; Sales sees it as a lead',open:'Prateek has no Marketing module. What Marketing needs from the system is unknown (Q106).'},
+{id:'sales',n:'Sales (the rep)',z:'A',c:'4 people',x:380,y:140,j:'Wins the job, talks to the client',
+ does:[['Rep','Moves a lead through stages; sends quotes; gives the go-ahead; records client changes and sign-off']],
+ mk:['SS Lead, LeadStageHistory, LeadInteraction','SS SalesDocument and versions','BS rep go-ahead, client change order, client sign-off (new fields)'],mg:['SS Lead stages, SalesTarget'],scr:'Pipeline, My stands, Go-ahead, Client changes, Sign-off',
+ b:'Client change and go-ahead told by message',nw:'Go-ahead button and change order on the stand file',open:'Where the rep records the go-ahead has no field in Prateek\'s schema (Q105).'},
+{id:'design',n:'Design',z:'A',c:'7 people',x:60,y:290,j:'Draws the stand; owns the latest design',
+ does:[['Designer','Uploads a version; answers doubts; publishes a change with a reason'],['Head of Design','Checks and approves the design set']],
+ mk:['SS Brief answers, Project, DesignRevision, DesignMessage','BS ChangeNotice (design changes)','BS colour and finish spec (we ask Prateek to add)'],mg:['SS Project.technicalStatus: drafting, checking, approved, re-approval'],scr:'Design sets, Doubts, Changes, Lessons',
+ b:'Files forwarded as zip; changes told to some',nw:'One stand file, versions, NEW + Seen',open:'Does the latest design live in Stand Studio or ours? (Decision A).'},
+{id:'est',n:'Procurement and Estimation',z:'A',c:'3 people',x:380,y:290,j:'Prices it, buys it, keeps the stock and furniture',
+ does:[['Estimator','Prices the item list; produces the quote'],['Procurement','Orders, receives, keeps stock and furniture; answers "is it in stock?"']],
+ mk:['SS Estimate, EstimateRevision, EstimateLine, QuoteDocument','SS PurchaseOrder, Supplier, GoodsReceipt','SS StockItem, StockUnit, StockMovement'],mg:['Stock and furniture levels','BS StockRequest: does the movement, Build never writes it'],scr:'Item lists, Stock, Furniture, Returns',
+ b:'PM sends the item list; stock answered by call',nw:'Stock status on the same item list',open:'EstimateLine carries money, so Build must never read it (Q103).'},
+{id:'fin',n:'Finance',z:'A',c:'3 people',x:60,y:440,j:'Approves spend and invoices',
+ does:[['Finance','Approves orders and quotes; later invoices site changes (ASSUMED)']],
+ mk:['GAP invoices and payments (not in Prateek\'s schema)'],mg:['SS OrderApproval (ASSUMED who approves)'],scr:'Approvals, billable changes',
+ b:'Site changes reach the invoice by memory',nw:'Billable change records feed the final invoice',open:'What Finance needs from the system is unknown (Q107).'},
+{id:'coord',n:'Project Coordination',z:'A',c:'2 people',x:380,y:440,j:'Show dates, passes, organiser approvals',
+ does:[['Coordinator','Enters build-up windows, bay slots, passes and approvals once']],
+ mk:['SS Exhibition (show dates)','GAP passes and approvals (not in either schema)'],mg:[],scr:'Shows, Passes, Approvals',
+ b:'Dates and passes arrive by WhatsApp',nw:'Entered once; PM passes the slot to Transport',open:'Coordination is absent from Prateek\'s schema (Q104).'},
+{id:'hr',n:'HR and Admin',z:'A',c:'2 people (+ IT)',x:60,y:590,j:'Roster, logins, roles',
+ does:[['HR','Keeps the list of people and their department'],['IT (Narendra)','Creates logins and roles']],
+ mk:['BS CrewMember (roster, proposed)'],mg:['SS User, ModuleRole, StatusOption, Setting (ASSUMED who)','BS UserDepartment'],scr:'People, Roles',
+ b:'No roster in one place',nw:'Roster feeds head count and who sees what',open:'Roster from HR still awaited; users without email (Q108).'},
+{id:'top',n:'Top managers',z:'B',c:'3 people',x:930,y:140,j:'Read only: how are all stands doing?',
+ does:[['Top manager','Opens the Top board; taps into a risky stand']],
+ mk:[],mg:[],scr:'Top board (read only)',b:'Updates by message to the boss',nw:'Board built from taps; nobody writes a report',open:'What each wants to see (Q43).'},
+{id:'pm',n:'Project Management',z:'B',c:'Head + 3 PMs',x:930,y:330,j:'The bridge: releases the stand, runs site, closes it',
+ does:[['Head of PM','Allocates stands to PMs; watches load, not-seen and late'],['PM','Checks the pack and releases; walks site steps; snags; sign-off; lessons']],
+ mk:['BS BuildStand (release), HandoverCheck, StandDepartment','BS Snag, Signoff, Lesson, site BuildTask'],mg:['BS who has not tapped Seen','BS TruckTrip requests (ready to load)','BS allocation (head)'],scr:'My stands, Release, Doubts, Site steps, Snags, Lessons',
+ b:'WhatsApp, Excel, retyping progress',nw:'Board builds itself from other people\'s taps',open:'Is it 3 PMs plus the head, or 4? (Q97)'},
+{id:'prod',n:'Production Coordination',z:'B',c:'2 people',x:930,y:520,j:'Between the PMs and the divisions (role unknown)',
+ does:[['Coordinator','Perhaps gives daily work and counts people per stand (ASSUMED)']],
+ mk:['BS HeadCount, Booking (if they allocate)'],mg:['BS CrewMember teams'],scr:'Head count, Who is where',
+ b:'People counted by hand',nw:'One count a day per stand',open:'What they actually do (Q96).'},
+{id:'carp',n:'Carpentry',z:'C',c:'Foreman + 24',x:1540,y:140,j:'Builds the structure and furniture parts',
+ does:[['Foreman','Reads My stands; taps Seen on changes; one head count a day'],['Carpenter','Taps Done, adds a photo, raises a doubt on the drawing, adds to the pack list']],
+ mk:['BS BuildTask, TaskEvent','BS Crate (pack list)','BS Doubt'],mg:['BS HeadCount (own)'],scr:'Today, Parts ready, Doubts, Packing',
+ b:'Progress typed by the PM; "latest drawing?" calls',nw:'Done tap + photo; latest drawing only',open:'Who does the metal work (Q100).'},
+{id:'water',n:'Water Paint',z:'C',c:'9 painters',x:1540,y:290,j:'Water-based painting, in the shop and on site',
+ does:[['Painter','Sees which parts are ready, taps Start and Done, adds a finish photo, taps the colour used']],
+ mk:['BS BuildTask, TaskEvent','BS Doubt'],mg:[],scr:'Paint list, Colour spec, Doubts',
+ b:'Colours asked by call; repaint after late change',nw:'Colour spec per element; changes with Seen',open:'No head named on the chart.'},
+{id:'spray',n:'Spray Paint',z:'C',c:'3 people',x:1540,y:440,j:'Spray finishes in the booth',
+ does:[['Sprayer','Books a booth slot, taps Start and Done, adds a finish photo']],
+ mk:['BS BuildTask','BS Booking (spray area)'],mg:['BS Resource: booth'],scr:'Spray area, Parts',
+ b:'Booth schedule on paper',nw:'Booking in the portal; load board sees it',open:'How often they go on site (Q99).'},
+{id:'elec',n:'Electric',z:'C',c:'Foreman + 6',x:1540,y:590,j:'Lighting, power, testing; AV and lighting outsourced',
+ does:[['Electrician','Taps Fit, Test, Power on with a test photo; lists equipment per stand'],['Foreman','Books the outside AV and lighting company']],
+ mk:['BS BuildTask','BS Resource (equipment)','BS OutsideCompany bookings'],mg:['BS equipment out and back'],scr:'Stands, Equipment, Outside AV',
+ b:'PM chases status; test notes on paper',nw:'Test tap + photo; power on seen from the office',open:'Who books outside AV and lighting (Q101).'},
+{id:'brand',n:'Branding (Print, Acrylic, CNC)',z:'C',c:'Head + 5',x:1540,y:740,j:'Printed panels, acrylic, CNC cutting, logo',
+ does:[['Operator','Reads artwork, size and proof; taps Printed, Packed, Fitted with a photo; checks size at printed'],['Head','Books the CNC router']],
+ mk:['BS BuildTask, Booking (CNC)','BS Doubt on measures'],mg:['BS print proof status'],scr:'Panels, Artwork, CNC, Acrylic',
+ b:'Zip by chat; measurement questions to Design; printed twice',nw:'Artwork on the panel card; size checked at printed',open:'Where Logo sits (Q98).'},
+{id:'trans',n:'Transport',z:'C',c:'Head + 6',x:1540,y:890,j:'Trucks, crates, loading and returns',
+ does:[['Loader','Scans each crate in and out'],['Driver','Taps Left, Reached, Offloaded'],['Head','Books the trucks']],
+ mk:['BS Vehicle, TruckTrip, TripStand','BS Crate scans (loaded, offloaded, returned)'],mg:['BS StockRequest returns'],scr:'Trip, Crates, Slot, Return',
+ b:'"Where is the truck?" calls; paper load list',nw:'Scans; trip status for all',open:'Who plans the trucks; owned or hired (Q102).'}
+];
+const BY=Object.fromEntries(D.map(d=>[d.id,d]));const isTr=d=>['carp','water','spray','elec','brand'].includes(d);
+/* edges: from>to | what | tables.  TR = every trade. */
+const E=`mkt>sales|New interest and companies|SS Register, Lead
+sales>design|The brief and what the client wants|SS Brief
+design>sales|Design versions and renders to show the client|SS DesignRevision, DesignMessage
+design>est|Item list and design set to price|SS Project, DesignRevision
+est>sales|The quote|SS Estimate, EstimateQuoteDocument
+sales>fin|Won jobs and quotes|SS Project.outcome, SalesDocument
+est>fin|Purchase orders to approve|SS PurchaseOrder, OrderApproval
+sales>pm|Go-ahead (the job is confirmed)|BS BuildStand.goAhead
+design>pm|Approved design set for the handover pack|SS Project.technicalStatus, BS HandoverCheck
+est>pm|Purchasing list and stock status|SS PurchaseOrder, StockUnit, BS HandoverCheck
+coord>pm|Show dates, passes, approvals|SS Exhibition, GAP passes
+hr>prod|Roster: who works where|BS CrewMember
+prod>pm|Head count and who is on which stand|BS HeadCount, Booking
+pm>prod|Which stands need people this week|BS BuildStand, StandDepartment
+pm>TR|Release: NEW, and only your part|BS StandDepartment, HandoverCheck
+design>TR|New design versions and changes|SS DesignRevision, BS ChangeNotice
+sales>TR|Client changes|BS ChangeNotice (client change)
+TR>design|Doubts with a mark and a photo|BS Doubt
+TR>pm|Done taps, blocked reasons, photos|BS BuildTask, TaskEvent, BuildAttachment
+TR>trans|Pack list: what is in which crate|BS Crate
+TR>est|Stock asks: out and back|BS StockRequest
+est>TR|Stock status, what has arrived|SS StockUnit, StockMovement
+carp>water|Part ready for paint|BS BuildTask
+carp>spray|Part ready for spray|BS BuildTask
+carp>elec|Part ready for wiring|BS BuildTask
+carp>brand|Panel sizes|BS BuildTask, DesignRevision
+brand>carp|CNC cut parts ready|BS BuildTask
+design>brand|Artwork zip, sizes and print proof|SS DesignRevision, FileAsset
+sales>brand|Client approval of the proof|BS HandoverCheck.PRINT_PROOF
+design>elec|Electrical and AV plan|SS DesignRevision
+pm>trans|Ready to load, slot and pass|BS TruckTrip, TripStand
+trans>pm|Truck left, reached, offloaded|BS TruckTrip
+est>trans|Furniture and stock to load|SS StockUnit, BS StockRequest
+trans>est|Returns: crates and stock back|BS StockRequest(BACK), SS StockMovement
+pm>sales|Site status, snags, sign-off request|BS Snag, Signoff
+sales>pm|Client changes on site|BS ChangeNotice
+pm>top|The board: colour, risk, load|BS derived from tasks, changes, doubts
+pm>design|Lessons at close, three taps|BS Lesson
+pm>fin|Billable site changes for the invoice|BS ChangeNotice.billable`.split('\n').map(l=>{const[a,w,t]=l.split('|');const[f,to]=a.split('>');return{f,t:to,w,tb:t}});
+const ids=(d)=>E.filter(e=>e.f==d||e.t==d||(isTr(d)&&(e.f=='TR'||e.t=='TR')));
+const cnt=d=>({o:E.filter(e=>e.f==d||(e.f=='TR'&&isTr(d))).length,i:E.filter(e=>e.t==d||(e.t=='TR'&&isTr(d))).length});
+
+/* ---------------- map ---------------- */
+const W=$('#world'),SV=$('#edges');let selD=null;
+[['A',30,'Agency','Prateek\'s side: sells, designs, prices, buys',700],['B',880,'Bridge','Where the two sides meet',360],['C',1500,'Build','Floor trades and Transport',380]].forEach(b=>{const e=document.createElement('div');e.className='band';e.style.cssText=`left:${b[1]}px;width:${b[4]}px;background:${ZC[b[0]]}14`;e.innerHTML=`<h2 style="color:${ZC[b[0]]}">${b[2]}</h2><p>${b[3]}</p>`;W.appendChild(e)});
+const cl=document.createElement('div');cl.className='cl';cl.id='TR';cl.style.cssText='left:1522px;top:120px;width:336px;height:610px';cl.innerHTML='<span>Floor trades: what they share</span>';W.appendChild(cl);
+D.forEach(d=>{const e=document.createElement('div');e.className='card';e.id='c-'+d.id;e.style.cssText=`left:${d.x}px;top:${d.y+20}px;border-top:5px solid ${ZC[d.z]}`;const k=cnt(d.id);
+ e.innerHTML=`<b>${d.n}</b><small>${d.c}</small><span class="n">${d.z=='A'?'Agency':d.z=='B'?'Bridge':'Build'}</span><div class="j">${d.j}</div><div class="c">makes <i>${d.mk.length}</i> · gets <i>${k.i}</i> · sends <i>${k.o}</i></div>`;
+ e.onclick=ev=>{ev.stopPropagation();pick(d.id)};W.appendChild(e)});
+const anchor=(id)=>{const e=id=='TR'?$('#TR'):$('#c-'+id);return{x:e.offsetLeft,y:e.offsetTop,w:e.offsetWidth,h:e.offsetHeight}};
+function layout(){const used={};const out=[];
+ E.forEach((e,i)=>{const a=anchor(e.f),b=anchor(e.t);const ra=a.x+a.w/2,rb=b.x+b.w/2;let sa,sb;
+  if(Math.abs(ra-rb)<80){sa=a.y<b.y?'b':'t';sb=a.y<b.y?'t':'b'}else if(ra<rb){sa='r';sb='l'}else{sa='l';sb='r'}
+  const ka=e.f+sa,kb=e.t+sb;used[ka]=(used[ka]||[]).concat(i);used[kb]=(used[kb]||[]).concat(i);out.push({e,a,b,sa,sb,ka,kb})});
+ out.forEach(o=>{const f=(k,i)=>(used[k].indexOf(i)+1)/(used[k].length+1);o.fa=f(o.ka,E.indexOf(o.e));o.fb=f(o.kb,E.indexOf(o.e))});return out}
+const pt=(r,s,k)=>s=='r'?[r.x+r.w,r.y+r.h*k,1,0]:s=='l'?[r.x,r.y+r.h*k,-1,0]:s=='t'?[r.x+r.w*k,r.y,0,-1]:[r.x+r.w*k,r.y+r.h,0,1];
+let L=[];
+function draw(){L=layout();SV.innerHTML=L.map((o,i)=>{const p0=pt(o.a,o.sa,o.fa),p1=pt(o.b,o.sb,o.fb),d=Math.max(70,Math.hypot(p1[0]-p0[0],p1[1]-p0[1])*.35);o.p=[p0[0],p0[1],p0[0]+p0[2]*d,p0[1]+p0[3]*d,p1[0]+p1[2]*d,p1[1]+p1[3]*d,p1[0],p1[1]];const c=ZC[BY[o.e.f=='TR'?'carp':o.e.f].z];o.c=c;
+ return `<path id="e${i}" d="M${o.p[0]} ${o.p[1]}C${o.p[2]} ${o.p[3]} ${o.p[4]} ${o.p[5]} ${o.p[6]} ${o.p[7]}" fill="none" stroke="${c}" stroke-width="2.2" opacity=".16"/><circle id="h${i}" cx="${o.p[6]}" cy="${o.p[7]}" r="4.5" fill="${c}" opacity=".16"/>`}).join('')}
+const inE=(id)=>E.map((e,i)=>[e,i]).filter(([e])=>e.t==id||(e.t=='TR'&&isTr(id))),outE=(id)=>E.map((e,i)=>[e,i]).filter(([e])=>e.f==id||(e.f=='TR'&&isTr(id)));
+const bez=(q,t)=>{const u=1-t;return[u*u*u*q[0]+3*u*u*t*q[2]+3*u*t*t*q[4]+t*t*t*q[6],u*u*u*q[1]+3*u*u*t*q[3]+3*u*t*t*q[5]+t*t*t*q[7]]};
+function pick(id){selD=id;document.querySelectorAll('.pill,.bd').forEach(p=>p.remove());const on=new Set();
+ const num={};if(id){inE(id).concat(outE(id)).forEach(([e,i],k)=>num[i]=k+1)}
+ L.forEach((o,i)=>{const hit=id&&num[i];const p=$('#e'+i),h=$('#h'+i);p.setAttribute('opacity',id?(hit?.95:.05):.16);p.setAttribute('stroke-width',hit?3.4:2.2);h.setAttribute('opacity',id?(hit?1:.05):.16);
+  if(hit){on.add(o.e.f);on.add(o.e.t);const isIn=o.e.t==id||(o.e.t=='TR'&&isTr(id));const [x,y]=bez(o.p,isIn?.8:.2);const l=document.createElement('div');l.className='bd';l.id='b'+i;l.style.cssText=`left:${x}px;top:${y}px;background:${o.c}`;l.textContent=num[i];W.appendChild(l)}});
+ D.forEach(d=>{const c=$('#c-'+d.id);c.classList.toggle('sel',d.id==id);c.classList.toggle('dim',!!id&&!(d.id==id||on.has(d.id)))});
+ $('#TR').style.opacity=id&&!isTr(id)&&!on.has('TR')?.35:1;
+ id?drawer(id,num):($('#drawer').style.display='none');fit()}
+function drawer(id,num){const d=BY[id],dr=$('#drawer');dr.className=d.z=='A'?'R':'L';dr.style.display='block';
+ const ch=x=>x=='TR'?'<span class="chip C" data-p="carp">All floor trades</span>':`<span class="chip ${BY[x].z}" data-p="${x}">${BY[x].n}</span>`;
+ const fl=(a,k)=>a.length?a.map(([e,i])=>`<div class="row fr" data-e="${i}"><span class="num">${num[i]}</span><div>${ch(e[k])}<div>${e.w}</div><div style="color:#64707f;font-size:12px">${tg(e.tb)}</div></div></div>`).join(''):'<div style="color:#64707f">Nothing (read only).</div>';
+ const gets=inE(id),sends=outE(id);
+ dr.innerHTML=`<span class="x" id="xx">×</span><h3>${d.n}</h3><div style="color:#64707f">${Z[d.z]} · ${d.c} · ${d.j}</div>
+<h5>What people do</h5>${d.does.map(p=>`<div class="row"><b>${p[0]}</b><span>${p[1]}</span></div>`).join('')}
+<h5>Makes (owns)</h5>${d.mk.length?`<ul>${d.mk.map(x=>`<li>${tg(x)}</li>`).join('')}</ul>`:'<div style="color:#64707f">Nothing; reads only.</div>'}
+<h5>Manages (keeps right)</h5>${d.mg.length?`<ul>${d.mg.map(x=>`<li>${tg(x)}</li>`).join('')}</ul>`:'<div style="color:#64707f">Nothing extra.</div>'}
+<h5>Gets from others (${gets.length}) <span style="text-transform:none;letter-spacing:0">· numbers match the map</span></h5>${fl(gets,'f')}<h5>Sends to others (${sends.length})</h5>${fl(sends,'t')}
+<h5>Screens</h5>${d.scr}<h5>Before → now</h5><div class="ba"><div class="b"><b>BEFORE</b>${d.b}</div><div class="n"><b>NOW</b>${d.nw}</div></div>
+<h5>Still open</h5>${d.open}<p style="color:#64707f;font-size:12px;margin-top:14px">${tg('SS x')} in Prateek's schema · ${tg('BS x')} in our proposed Build schema · ${tg('GAP x')} in neither. All proposal (ASSUMED).</p>`;
+ dr.querySelectorAll('[data-p]').forEach(c=>c.onclick=()=>pick(c.dataset.p));$('#xx').onclick=()=>pick(null);
+ dr.querySelectorAll('.fr').forEach(r=>{const i=+r.dataset.e;r.onmouseenter=()=>{const o=L[i],[x,y]=bez(o.p,.5);$('#e'+i).setAttribute('stroke-width',6);const l=document.createElement('div');l.className='pill';l.id='hp';l.style.cssText=`left:${x}px;top:${y}px;border-left:4px solid ${o.c}`;l.innerHTML=`${o.e.w}<br><span style="color:#64707f">${tg(o.e.tb.split(',')[0])}</span>`;W.appendChild(l)};r.onmouseleave=()=>{$('#e'+i).setAttribute('stroke-width',3.4);const h=$('#hp');h&&h.remove()}})}
+draw();
+
+/* pan and zoom */
+let sc=.7,tx=10,ty=10;const mp=$('#map'),ap=()=>W.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;
+const zoomAt=(f,cx,cy)=>{const n=Math.min(2,Math.max(.3,sc*f));tx=cx-(cx-tx)*n/sc;ty=cy-(cy-ty)*n/sc;sc=n;ap()};
+mp.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.1:.91,e.clientX,e.clientY-54)},{passive:false});
+let dr=null,mv=0;mp.addEventListener('pointerdown',e=>{if(e.target.closest('#drawer,#zb'))return;dr=[e.clientX-tx,e.clientY-ty];mv=0});
+mp.addEventListener('pointermove',e=>{if(dr){mv++;tx=e.clientX-dr[0];ty=e.clientY-dr[1];ap();mp.classList.add('d')}});
+mp.addEventListener('pointerup',e=>{if(dr&&mv<4&&!e.target.closest('.card,#drawer,#zb'))pick(null);dr=null;mp.classList.remove('d')});
+const fit=()=>{const dw=selD?424:0,aw=innerWidth-dw;sc=Math.min(aw/1930,(innerHeight-54)/1000);const left=selD&&BY[selD].z!='A'?dw:0;tx=left+(aw-1900*sc)/2;ty=8;ap()};
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>zoomAt(+b.dataset.z,innerWidth/2,innerHeight/2));$('#fit').onclick=fit;fit();
+
+/* ---------------- flow list ---------------- */
+function flows(){const opt=['<option value="">All departments</option>'].concat(D.map(d=>`<option value="${d.id}">${d.n}</option>`)).join('');
+ $('#flows').innerHTML=`<div class="pg"><h2>Every flow, one line each</h2><p>Who sends what to whom, and which table it lives in. ${tg('SS x')} Prateek's schema · ${tg('BS x')} our Build schema · ${tg('GAP x')} in neither. Pick a department to see only its lines.</p><p><select id="fs">${opt}</select> <span id="fc" style="color:#64707f"></span></p><div id="ft"></div></div>`;
+ const nm=x=>x=='TR'?'All floor trades':BY[x].n;
+ const r=()=>{const f=$('#fs').value;const a=E.filter(e=>!f||e.f==f||e.t==f||(isTr(f)&&(e.f=='TR'||e.t=='TR')));$('#fc').textContent=a.length+' flows';
+  $('#ft').innerHTML=`<table class="fl"><tr><th>From</th><th>What is sent</th><th>To</th><th>Where it lives</th></tr>${a.map(e=>`<tr><td><b>${nm(e.f)}</b></td><td>${e.w}</td><td><b>${nm(e.t)}</b></td><td>${e.tb.split(',').map(tg).join(' · ')}</td></tr>`).join('')}</table>`};
+ $('#fs').onchange=r;r()}
+/* ---------------- schema ---------------- */
+function schema(){const SS=[['Register','Company, CompanyAlias, Exhibition, ImportBatch','Marketing, Sales'],['Sales (CRM)','Lead, LeadStageHistory, LeadTag, LeadInteraction, SalesDocument(+Version), ActivityDocument, SalesTarget','Sales'],['Brief and Design (DMS)','Brief, Project, ProjectCodeCounter, DesignRevision, DesignMessage','Design (Sales for the brief)'],['Estimating','EstimatingCode, EstimatingRate, EstimatingClause, Estimate, EstimateRevision, EstimateLine, EstimateQuoteDocument','Procurement and Estimation'],['Purchasing','Supplier, PurchaseOrder, PurchaseOrderLine, OrderApproval, GoodsReceipt(+Line)','Procurement; Finance approves (ASSUMED)'],['Store','StockItem, StockUnit, StockCodeCounter, StockMovement','Procurement'],['Files, alerts, audit','FileAsset, Notification, ActivityLog','Everyone (shared)'],['Users and settings','User, ModuleRole, StatusOption, Setting','IT / HR (ASSUMED)']];
+ const BS=[['A · Join','BuildStand, HandoverCheck, StandDepartment, ElementTrade','PM, Head PM'],['B · Changes and doubts','ChangeNotice, ChangeSeen, Doubt','Design, Sales, trades, PM'],['C · Tasks and site','TaskTemplate, BuildTask, TaskEvent, BuildAttachment, Snag, Signoff, Lesson','Trades, PM, Sales'],['D · Logistics','Vehicle, TruckTrip, TripStand, Crate, StockRequest','Transport, trades, Procurement'],['E · People','CrewMember, UserDepartment, OutsideCompany, HeadCount, Resource, Booking','HR, Production Coordination, Head PM, foremen'],['F · Alerts','EventRoute, Watch','Management, each person']];
+ const g=(a,c)=>a.map(m=>`<div class="k mod ${c}"><h4>${m[0]}</h4><div class="tbs">${m[1].split(', ').map(t=>`<span>${t}</span>`).join('')}</div><div style="font-size:12px;color:#64707f;margin-top:4px">Written by: ${m[2]}</div></div>`).join('');
+ $('#schema').innerHTML=`<div class="pg"><h2>Two schemas, one stand</h2><p>Prateek's Stand Studio (41 tables, 8 modules) covers selling, designing, pricing, buying and stock. Our Build schema (27 tables, 6 groups) covers everything on the floor. They meet at one key: the Project (RV code) is the stand. Modules link only by id; each module writes only its own tables.</p>
+ <h2 style="color:var(--ss)">Stand Studio: ${SS.length} modules</h2><div class="grid">${g(SS,'')}</div><h2 style="color:var(--bs);margin-top:22px">Build: ${BS.length} groups</h2><div class="grid">${g(BS,'bs')}</div>
+ <h2 style="margin-top:22px">What neither schema holds yet</h2><div class="grid"><div class="k"><h4>${tg('GAP x')}Coordination</h4>Show passes, bay slots and organiser approvals (Q104).</div><div class="k"><h4>${tg('GAP x')}Marketing and Finance</h4>No module for either; invoices and payments are not in Prateek's schema (Q106, Q107).</div><div class="k"><h4>${tg('GAP x')}Rep's go-ahead</h4>Proposed as a field on BuildStand; no field in Stand Studio (Q105).</div><div class="k"><h4>${tg('GAP x')}Colour and finish spec</h4>Prateek's Build Spec idea; no table yet. We ask him to add it.</div></div></div>`}
+/* ---------------- day in the life ---------------- */
+function life(){const R=[['Head of PM','Load board, Not seen, Late alarms','Taps an allocation per new stand; books outside labour in one short form','A stand is late, or a department has not tapped Seen','Gather lists from PMs or count people by hand'],
+['Project manager','My stands','Checks the pack and taps Release; taps site steps; snags, sign-off, three-tap lessons','A trade is blocked, a doubt is open, a change is unseen','Retype progress into messages or Excel'],
+['Foreman (any trade)','My stands','Looks once; taps Seen on a change; one head count a day; pack list','A NEW change for their part, a doubt answer','Report status by message'],
+['Carpenter / painter / electrician / operator','Phone: My jobs today','Done or Blocked, a photo, a doubt with a mark on the drawing','Part ready for them, change on their part','Ask "latest drawing?" or "what colour?"'],
+['Loader / driver','Phone: Trip','Scans each crate; Left, Reached, Offloaded','Slot or truck change','Fill the paper load list; answer "where is the truck?"'],
+['Designer','Design sets, Doubts','Uploads a version with a reason; answers doubts on the card','A doubt is raised on their drawing','Forward files; tell each department a change'],
+['Sales rep','My stands','Go-ahead button; client change order; records sign-off','Snags closed; a step is late','Ask the PM for updates before talking to the client'],
+['Estimator / Procurement','Item lists, Stock','Prices; orders; updates stock status; does returns','A trade or Transport asks for stock','Answer "is it in stock?" by call'],
+['Project coordinator','Shows, Passes','Enters dates, slots, passes, approvals once','A pass is missing before a show','Send dates by WhatsApp'],
+['Finance','Approvals, billable changes','Approves orders; invoices from change records','A purchase order waits','Chase site changes by memory'],
+['HR / IT','People, Roles','Keeps roster and logins','A new joiner or leaver','Answer "who is in which department?"'],
+['Top manager','Top board (read only)','Opens it; taps into a risky stand','Daily digest only','Wait for reports']];
+ $('#life').innerHTML=`<div class="pg"><h2>What people actually do</h2><p>The target is under 5 minutes a day for a foreman and one tap per step for everyone else (ASSUMED, to verify). Nobody types a status; boards and reports are built from taps.</p><div class="grid">${R.map(r=>`<div class="k"><h4>${r[0]}</h4><div style="font-size:12px;color:#64707f">Opens: ${r[1]}</div><ul><li><b>Does:</b> ${r[2]}</li><li><b>Alerted when:</b> ${r[3]}</li><li><b>Never has to:</b> ${r[4]}</li></ul></div>`).join('')}</div></div>`}
+flows();schema();life();
+[['map','Map'],['flows','Flows'],['schema','Schemas'],['life','What people do']].forEach((t,i)=>{const b=document.createElement('button');b.textContent=t[1];b.className=i?'':'on';b.onclick=()=>{document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==t[0]));document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x==b));if(t[0]=='map')fit()};$('#tabs').appendChild(b)});
+</script></body></html>

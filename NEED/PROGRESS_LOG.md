@@ -219,3 +219,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Built NEED/UI_Board.html: pan/zoom board, 36 frames: access matrix, who does not need access, 4 Agency touchpoint screens, Top managers, Head PM, PM (desktop and phone), head (desktop) + staff (phone) for the 6 trades, and flow boards (stages, photos, tables, uses, changes). 14 lines carry BEFORE / NOW tags.
 - No Miro tool is connected and Miro is not on the Annex A list (ASSUMED not checked), so this is an HTML board; can be rebuilt in Miro later by hand.
 - All screens are mock-ups, fictional data, ASSUMED. Open: Q89 (doubt route), Q90 (phones, signal), Q96 (Production Coordination).
+
+##  — Department flow board (all departments, both schemas)
+- Narendra asked for a clearer board covering Agency and Build: what each department makes, manages, gets, sends, and what people do, tied to both schemas.
+- Built NEED/Department_Board.html: 16 departments, 39 flows each tagged SS (Prateek table), BS (our table) or GAP (in neither). Click a department: its lines light up, numbered badges match a side panel. Tabs: Map, Flows (filterable list), Schemas (41 + 27 tables side by side, plus gaps), What people do (12 roles).
+- Content is ASSUMED except the table names, which come from Prateek 7th-update file and BUILD_SCHEMA.md. Marketing, Finance, Coordination, Production Coordination are thin because we know little (Q96, Q104, Q106, Q107).
+- Earlier screens board kept as NEED/UI_Board.html.
