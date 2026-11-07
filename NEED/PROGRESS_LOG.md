@@ -241,3 +241,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra CONFIRMED the split: 7 stands at the Web Show, 5 at GITEX (12 stands). Added RV-26-111 and 112 (GITEX).
 - Added a tab "Screens by person" to NEED/Stands_Simulation.html: pick a department, then a person (HR chart names for heads and leads; generic entries for ordinary staff), then see that person's portal tabs, filtered stands, and the tables they read and write. 390 person-and-tab screens render without errors.
 - Floor staff names are not in our files; Furniture division and Adhiraj (International) have no role yet.
+
+##  — Simulation rebuilt: dated events, scenarios, alerts, top managers
+- Narendra: remove invented names; show people and hierarchy per phase; cover missing departments and outside parties; one scenario per stand; show how alerts look; involve Tariq, Prateek and Raveena at every needed phase; top managers add the markup; use Stand A and Company A.
+- Rebuilt NEED/Stands_Simulation.html: 12 stands (Stand A to L, Company A to L), 13 phases, 23 actors incl. outside parties (client, venue and organiser, supplier, outsourced AV and lighting, outside labour, outside PM, hired transport), dated events with people and escalation chain, a date bar (7 Nov to 31 Dec), 20 scenarios across the 12 stands, Alerts tab (desktop list, phone alert, 18:00 summary, routing table), Top managers tab (decisions, cost to markup to price, risks), Hierarchy tab, allocation with outside labour, data rows by table (SS, BS, GAP). Unknown staff names removed.
+- ASSUMED and unconfirmed: who adds the markup and in what order, the deal size that needs Raveena, Tariq approving outside labour, hired trucks and overtime, Finance advance invoice. New schema gaps: markup, discount approval, invoices and payments, passes (GAP).
+- Checked: all dates render, 427 person screens render without errors. Not every tab read at full size.
