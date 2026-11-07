@@ -263,3 +263,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra asked that clicking a table in the Flow map shows that table.
 - Stands_Simulation.html: the Data (tables) arm now lists real tables (79: Prateek 41 with all 484 fields read from his 7th-update file, ours 29 from BUILD_SCHEMA.md, and 9 GAP tables proposed where neither schema has one: markup rule, price approval, discount approval, invoices, payments, passes, organiser approvals, transport cost, spec table). Click one to see its rows from the 12 stands up to the date bar, plus the full field list. 107 department-table views open without errors; 44 of 79 tables have rows.
 - Honest limit: the simulation only fills fields it can derive (stand, person, date, text, status, cost, markup, price); other columns show a dot. The 9 GAP column lists are our proposals, not Prateek schema.
+
+##  — Session checkpoint before /compact
+- Everything above is logged. State: research and design phase, no production code. Latest work: NEED/Stands_Simulation.html (12 stands, date bar, Flow map with department snowflake, person view, screen thumbnails, clickable tables), NEED/screens/ (90 images, not committed), full roster in NEED/ORG_CHART.md.
+- Git: first push to AI-Ravashing/Build done 7 Nov by Narendra from his Terminal; commits since then are local only (run git push in his Terminal with a new token). Old token pasted in chat should be revoked (not confirmed).
+- Open: markup order and Raveena threshold (ASSUMED), Q95-Q113, Annex A check for GitHub, play back to Aman and a trade head and Prateek (phase 3 not started).
+- Next session: read this log tail and OPEN_QUESTIONS.md first.
