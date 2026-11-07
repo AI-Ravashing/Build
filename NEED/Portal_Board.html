@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal Board</title>
+<style>
+:root{--bg:#1b1f25;--dot:#2b3139;--card:#f5f6f8;--ink:#1d2430;--mut:#5b6573;--line:#d5d9df;--ok:#1a7f4b;--okb:#dff3e7;--wk:#8a5a00;--wkb:#fff0cc;--bl:#b3261e;--blb:#fde2e0;--ns:#4d5560;--nsb:#e6e8eb;--nw:#1d4ed8;--nwb:#dbe7ff;--acc:#0f766e}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+#vp{position:fixed;inset:0;cursor:grab;background-image:radial-gradient(var(--dot) 1.5px,transparent 1.5px);background-size:40px 40px}
+#vp.d{cursor:grabbing}#world{position:absolute;left:0;top:0;transform-origin:0 0;width:4300px;height:12800px}
+#lines{position:absolute;left:0;top:0;width:4300px;height:12800px;pointer-events:none;overflow:visible}
+.fr{position:absolute;background:var(--card);border-radius:14px;box-shadow:0 6px 24px #0007;overflow:hidden;font-size:13px}
+.fr>header{padding:10px 14px;background:#e3e7ec;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
+.fr>header b{font-size:16px}.fr>header span{color:var(--mut);font-size:12px}
+.pad{padding:14px}.fr h3{margin:0 0 6px;font-size:15px}.fr p{margin:4px 0}
+.sm{font-size:12px;color:var(--mut)}
+.p{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:600;white-space:nowrap}
+.p.ok{background:var(--okb);color:var(--ok)}.p.wk{background:var(--wkb);color:var(--wk)}.p.bl{background:var(--blb);color:var(--bl)}.p.ns{background:var(--nsb);color:var(--ns)}.p.nw{background:var(--nwb);color:var(--nw)}
+.desk{background:#fff;font-size:11.5px}.desk .top{display:flex;gap:10px;align-items:center;padding:7px 12px;background:#12343b;color:#fff}
+.desk .top .rl{background:#2a6b74;border-radius:8px;padding:1px 8px;font-size:11px}.grow{flex:1}.bell{background:#b3261e;border-radius:9px;padding:0 7px;font-size:11px}
+.desk .mid{display:flex;min-height:340px}.nav{width:118px;background:#eef1f4;padding:8px 0;border-right:1px solid var(--line)}
+.nav div{padding:7px 12px;color:#39424e}.nav div.on{background:#fff;border-left:3px solid var(--acc);font-weight:700;color:#000}
+.main{flex:1;padding:10px 12px;min-width:0}.main h4{margin:0 0 8px;font-size:14px}
+.kp{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}.kp div{border:1px solid var(--line);border-radius:8px;padding:4px 9px;min-width:80px}
+.kp b{display:block;font-size:17px}.kp small{color:var(--mut)}
+table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line);padding:3px 5px;font-size:11px}
+td{border-bottom:1px solid #edf0f3;padding:4px 5px;vertical-align:top}
+.two{display:flex;gap:10px}.two>*{flex:1;min-width:0}.box{border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fafbfc}
+.box b{font-size:11.5px}.btn{display:inline-block;background:var(--acc);color:#fff;border-radius:7px;padding:4px 10px;font-weight:600;font-size:11.5px}
+.btn.g{background:#e6e8eb;color:#222}.btn.r{background:var(--bl)}.btn.w{background:#c27800}
+.phone{width:250px;margin:12px auto;border:6px solid #20262e;border-radius:26px;background:#fff;overflow:hidden;font-size:12px}
+.phone .st{background:#12343b;color:#fff;padding:7px 12px;font-size:11px;display:flex;justify-content:space-between}
+.phone .hd{padding:8px 12px;border-bottom:1px solid var(--line)}.phone .hd b{font-size:14px;display:block}
+.card{margin:8px;border:1px solid var(--line);border-radius:10px;padding:8px}.card .t{font-weight:700}.card .bt{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.card .btn{padding:7px 10px;font-size:12px}.tabs{display:flex;border-top:1px solid var(--line);background:#f2f4f6}.tabs div{flex:1;text-align:center;padding:7px 0;font-size:10.5px;color:#444}.tabs .on{color:var(--acc);font-weight:700}
+.info{padding:12px 14px;font-size:12.5px}.info h5{margin:8px 0 2px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}.info ul{margin:0;padding-left:16px}.info li{margin:2px 0}
+.ba{margin-top:10px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}.ba div{padding:6px 9px}.ba .b{background:var(--blb)}.ba .n{background:var(--okb)}
+.ba b{display:block;font-size:10.5px;letter-spacing:.06em}.b b{color:var(--bl)}.n b{color:var(--ok)}
+.lab{position:absolute;width:250px;background:#fffffff2;border-radius:10px;box-shadow:0 3px 12px #0009;font-size:12px;overflow:hidden;transform:translate(-50%,-50%);border:1px solid #fff}
+.lab div{padding:4px 8px}.lab .b{background:var(--blb);color:#5c1a15}.lab .n{background:var(--okb);color:#0c3d24}.lab b{font-size:10px;letter-spacing:.07em;display:block}.lab .b b{color:var(--bl)}.lab .n b{color:var(--ok)}
+.mx td,.mx th{text-align:center;padding:5px 4px;font-size:12px}.mx td:first-child,.mx th:first-child{text-align:left;white-space:nowrap}
+.W{background:#c7ecd6;color:#0b5a31;font-weight:700}.Rr{background:#e0ecff;color:#1a3f99}.r1{background:#fff0cc;color:#7a5200}.Z{color:#b8bec7}
+.chips span{display:inline-block;margin:2px 3px 2px 0;padding:2px 8px;border-radius:10px;background:#e8eef5;font-size:11.5px}
+.chips .g{background:#dff3e7}.chips .u{background:#e0ecff}
+.grid{display:grid;gap:10px}.stage{border:1px solid var(--line);border-radius:10px;background:#fff;padding:9px;font-size:12px}.stage h4{margin:0 0 4px;font-size:13px;background:var(--acc);color:#fff;margin:-9px -9px 7px;padding:6px 9px;border-radius:10px 10px 0 0}
+.arrow{font-size:28px;color:var(--acc);text-align:center;align-self:center}
+#bar{position:fixed;left:12px;top:12px;z-index:9;background:#12161bee;color:#fff;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:3px;max-height:calc(100vh - 24px);overflow:auto;width:178px;font-size:12.5px}
+#bar button{all:unset;cursor:pointer;padding:5px 8px;border-radius:7px;color:#cfd6df}#bar button:hover{background:#2a323c;color:#fff}
+#bar .z{display:flex;gap:4px}#bar .z button{flex:1;text-align:center;background:#2a323c}#bar hr{border:0;border-top:1px solid #333c47;width:100%}
+#hint{position:fixed;right:12px;bottom:10px;color:#8b95a3;font-size:12px;z-index:9}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tile{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fafbfc}.tile small{color:var(--mut);display:block}.tile b{font-size:11.5px}
+.dt{width:100%;border-collapse:collapse}.dt td{padding:3px 4px;border-bottom:1px solid #edf0f3;font-size:11.5px;vertical-align:top}.dt .fl{color:var(--mut);font-size:11px}.wr{background:#c7ecd6;color:#0b5a31;padding:0 5px;border-radius:5px}.rd{background:#e0ecff;color:#1a3f99;padding:0 5px;border-radius:5px}
+.hid{display:flex;flex-wrap:wrap;gap:4px}.hid span{font-size:11px;color:#8b95a3;text-decoration:line-through;background:#eef0f3;border-radius:6px;padding:0 6px}
+.tg{display:inline-block;font-size:9.5px;font-weight:700;padding:0 5px;border-radius:5px;color:#fff;margin-right:3px}.tg.SS{background:#4f46e5}.tg.BS{background:#0f766e}.tg.GAP{background:#b3261e}
+.oc{display:grid;grid-template-columns:1fr 1.7fr 1fr;gap:16px}.ot{background:#12343b;color:#fff;padding:7px 10px;border-radius:8px;font-weight:700;margin-bottom:6px}.ot2{font-weight:700;margin:10px 0 4px;color:#b46a00}.oc1 .ob{margin-bottom:6px}
+.ob{border:1px solid var(--line);border-left:5px solid #2f5fc4;background:#fff;border-radius:8px;padding:5px 9px;font-size:12px}.ob.b{border-left-color:#127a5a}.ob.n{border-left-color:#aaa;opacity:.7}.ob b{font-size:13px}.lz{display:inline-block;margin-top:2px;font-size:10.5px;background:#e8eef5;border-radius:6px;padding:0 6px;color:#2a3b50}
+.oc2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.lt{border-collapse:collapse;width:100%}.lt th{height:90px;vertical-align:bottom;font-size:11.5px}.lt th div{writing-mode:vertical-rl;transform:rotate(180deg);margin:auto;white-space:nowrap}.lt td{padding:3px 5px;font-size:11.5px;border-bottom:1px solid #edf0f3;text-align:center}.lt td:first-child{text-align:left;white-space:nowrap}
+</style></head><body>
+<div id="vp"><div id="world"><svg id="lines"></svg></div></div>
+<div id="bar"><div class="z"><button data-z="1.25">+</button><button data-z="0.8">−</button><button id="fit">Fit</button></div><hr><div id="jumps"></div></div>
+<div id="hint">Drag = move · wheel = zoom · left list = jump</div>
+<script>
+const $=s=>document.querySelector(s),W=$('#world');
+const st=(k,t)=>`<span class="p ${k}">${t}</span>`,ok=t=>st('ok',t),wk=t=>st('wk',t),bl=t=>st('bl',t),ns=t=>st('ns',t),nw=t=>st('nw',t);
+const tbl=(c,r)=>`<table><tr>${c.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table>`;
+const kp=a=>`<div class="kp">${a.map(x=>`<div><b>${x[1]}</b><small>${x[0]}</small></div>`).join('')}</div>`;
+const desk=o=>`<div class="desk" style="width:${o.w||640}px"><div class="top"><b>Ravashing Build</b><span class="rl">${o.role}</span><span class="grow"></span><span class="bell">${o.bell||0} new</span><span>User (fictional)</span></div><div class="mid"><div class="nav">${o.nav.map(n=>`<div class="${n==o.act?'on':''}">${n}</div>`).join('')}</div><div class="main"><h4>${o.title}</h4>${o.kpis?kp(o.kpis):''}${o.body}</div></div></div>`;
+const phone=o=>`<div class="phone"><div class="st"><span>9:41</span><span>Site mode · online</span></div><div class="hd"><b>${o.title}</b><span class="sm">${o.sub}</span></div>${o.cards.map(c=>`<div class="card"><div class="t">${c.t}</div><div class="sm">${c.s}</div><div>${c.p||''}</div><div class="bt">${c.b.map(b=>`<span class="btn ${b[1]||''}">${b[0]}</span>`).join('')}</div></div>`).join('')}<div class="tabs">${o.tabs.map((t,i)=>`<div class="${i?'':'on'}">${t}</div>`).join('')}</div></div>`;
+const info=o=>`<div class="info"><h5>Sees</h5><ul>${o.sees.map(x=>`<li>${x}</li>`).join('')}</ul><h5>Updates</h5><ul>${o.upd.map(x=>`<li>${x}</li>`).join('')}</ul><h5>Does not see</h5><ul>${o.no.map(x=>`<li>${x}</li>`).join('')}</ul>${o.b?`<div class="ba"><div class="b"><b>BEFORE</b>${o.b}</div><div class="n"><b>NOW</b>${o.n}</div></div>`:''}</div>`;
+const FR=[];const frame=(id,x,y,w,t,s,inner)=>FR.push({id,x,y,w,html:`<header><b>${t}</b><span>${s||''}</span></header>${inner}`});
+const JUMPS=[];const jump=(l,x,y,w,h)=>JUMPS.push({l,x,y,w,h});
+
+/* ---------- header band ---------- */
+frame('title',0,0,900,'Ravashing Build portal: screens board','concept, research phase',`<div class="pad"><h3 style="font-size:22px">What each person sees and taps</h3>
+<p>Every screen below is a <b>mock-up</b>. Stands, names, counts and dates are <b>fictional</b>. Nothing is built. Everything here is <b>ASSUMED</b> (our proposal) until the people who do the work confirm it.</p>
+<p><b>One rule:</b> work information (status, photos, doubts, changes, files, dates) travels only through the portal. WhatsApp is no longer a work channel. <span class="sm">(ASSUMED decision, for Narendra to confirm with the COO. Needs a plan for phone-less or offline moments; see the Photos board.)</span></p>
+<p><b>How to read the board:</b> left to right follows a stand: Agency (Design, rep, Procurement, Coordination) → PM bridge → trade departments. Each line between two screens carries a tag: <span class="p bl">BEFORE</span> how it happened, <span class="p ok">NOW</span> how it is digitised. Screens for heads are desktop or tablet; screens for staff are phones with large buttons.</p>
+<p class="sm">Prices never appear on any Build screen (ASSUMED). Access is enforced by the server, not only by hiding buttons.</p></div>`);
+frame('legend',960,0,640,'Legend','',`<div class="pad"><p>${ok('Done')} ${wk('Working')} ${bl('Blocked / late')} ${ns('Not started')} ${nw('NEW: tap Seen')}</p>
+<p><span class="btn">Done</span> <span class="btn w">Blocked</span> <span class="btn g">📷 Photo</span> <span class="btn r">? Doubt</span> <span class="sm">staff buttons: one tap, time and name added automatically</span></p>
+<p><b>Desktop screen</b> = head of department, PM, top managers, Agency touchpoints. <b>Phone screen</b> = staff on the floor or on site.</p>
+<p><b>Bell</b> = alerts. A NEW item stays red on the PM board until each department taps Seen.</p>
+<p class="sm">Fictional codes: stands RV-26-014, -017, -021, -022. Shows A to D. Real names are kept out on purpose.</p></div>`);
+frame('wa',1660,0,2040,'WhatsApp, calls and paper → portal','what moves where (ASSUMED)',`<div class="pad">${tbl(['Today (told or observed)','Becomes in the portal','Who gains'],[
+['PMs track site steps in WhatsApp (confirmed)','One tap per step with time and name; the board builds itself','PM, Top managers, rep'],
+['Photos sent to WhatsApp','Photo button on the task; tied to stand and step','PM, Design, rep'],
+['Doubts by phone call; one went straight to Design and caused a mistake','Doubt card with a mark on the drawing and a photo; answer on the same card, visible to all on the stand','Trades, Design'],
+['Design files forwarded as a zip by chat','One stand file; new version replaces old; NEW tap Seen','Every trade'],
+['Changes reach some departments only','Change record names every department that must see it; red until seen','PM, Design'],
+['"Where is the truck?" calls; paper load list','Crate and truck scans; status on the board','PM, Transport'],
+['PM to boss and Sales updates by message or Excel','Top board and Sales status page built from taps','Top managers, rep'],
+['Handover sheet and lessons on paper or not done','Walk checklist, snags, three-tap lessons at close','PM, Design']])}</div>`);
+jump('Overview',0,0,3700,520);
+
+/* ---------- access ---------- */
+const M=[['Top managers','R - - - - - R R - - -'],['Head of PM','W R R R R R R R R R R'],['Project manager','R R R R R R W W R R R'],['Production Coord. (role unknown)','R R - R - R W W R R W'],['Dept head (trade)','R r r r W r W W W - W'],['Dept staff','r r r r W r W W W - -'],['Transport','r - - r - r W W W r W'],['Design','R W W W W W R R - - -'],['Sales rep','W R R - - W R R - - -'],['Procurement','R R - W - R - - R - -'],['Coordination','R - - - - - - - - W -'],['Outside AV / lighting','- - - - - - r r - - -']];
+const cell=c=>c=='W'?'<td class="W">edit</td>':c=='R'?'<td class="Rr">see</td>':c=='r'?'<td class="r1">own part</td>':'<td class="Z">·</td>';
+frame('access',0,620,2300,'Who has access to what','every cell ASSUMED; one owner per fact',`<div class="pad"><table class="mx"><tr><th>Role</th>${['Stand file','Design set','Colour spec','Item list','Doubts','Changes','Task status','Photos','Load list','Dates, passes','Head count'].map(x=>`<th>${x}</th>`).join('')}</tr>${M.map(r=>`<tr><td><b>${r[0]}</b></td>${r[1].split(' ').map(cell).join('')}</tr>`).join('')}</table>
+<p class="sm"><span class="p ok">edit</span> creates or changes it · <span class="p nw">see</span> reads it · <span class="p wk">own part</span> sees only the part for their department or stand · dot = no access. Trades do not edit the Design set: they raise a doubt. Seeing a change means tapping Seen.</p></div>`);
+frame('noaccess',2360,620,1340,'Who does not need access','keep it small, keep it safe',`<div class="info"><h5>Never on a Build screen</h5><ul><li>Prices, quotes, invoices, margins (Agency and Finance only)</li><li>Other departments' staff pay or HR records</li><li>Client contact details (the PM and rep keep them)</li></ul>
+<h5>Only their own part</h5><ul><li>Staff see only stands and parts assigned to their department</li><li>Outside AV or lighting companies see only their own stand and their own electric tasks</li><li>Drivers and loaders see load lists and truck jobs only</li></ul>
+<h5>No access at all</h5><ul><li>Marketing, HR, Mess (not Build work)</li><li>Finance on the floor screens (Finance reads its own Agency side)</li></ul>
+<h5>Can read but never edit</h5><ul><li>Top managers: everything on the board, nothing editable</li><li>Trades: the Design set, only through doubts</li></ul></div>`);
+jump('Access',0,620,3700,560);
+
+/* ---------- Agency ---------- */
+const aN=['Today','Design sets','Doubts','Changes','Lessons'];
+frame('a-design',0,1300,560,'Agency · Design','Prateek side (touchpoint only)',desk({w:560,role:'Design',nav:aN,act:'Design sets',bell:3,title:'RV-26-014 · upload design set',body:`<div class="box"><b>Version 4</b> uploaded 14:20 → replaces v3<br>Includes 3D, 2D, item list, colour spec, artwork zip</div><br><b>Will be told (NEW):</b><br>${nw('Carpentry')} ${nw('Water Paint')} ${nw('Spray')} ${nw('Electric')} ${nw('Branding')}<br><br><span class="btn">Publish changes</span> <span class="btn g">Reason for change</span><br><br><b>Doubts waiting:</b> ${bl('1')} Ceiling frame, photo attached`}));
+frame('a-rep',0,1840,560,'Agency · Sales rep','touchpoint only',desk({w:560,role:'Sales rep',nav:['Today','My stands','Client changes','Sign-off'],act:'My stands',title:'RV-26-017 · go-ahead',body:`<div class="box">Client confirmed show C 10:05. Pack checks: technicals ${ok('✓')} colours ${ok('✓')} proofs ${wk('1 open')}</div><br><span class="btn">Give go-ahead</span> <span class="btn g">Client change order</span><br><br><b>What the client asked for</b><br>Raise the counter 10 cm → creates a change record, sent to every department that must see it.`}));
+frame('a-proc',0,2380,560,'Agency · Procurement and Estimation','touchpoint only',desk({w:560,role:'Procurement',nav:['Today','Item lists','Stock','Furniture','Returns'],act:'Item lists',title:'RV-26-014 · item list',body:tbl(['Item','Qty','Stock','Status'],[['LED strip','12 m','in stock',ok('ok')],['Plywood 18mm','18','to buy',wk('ordered')],['Chairs','6','reuse',ok('ok')],['Acrylic sign','1','to make',ns('Branding')]])+`<p class="sm">Procurement edits only the Stock and Status columns. Design owns the rest.</p>`}));
+frame('a-coord',0,2920,560,'Agency · Project Coordination','touchpoint only',desk({w:560,role:'Coordination',nav:['Today','Shows','Passes','Approvals'],act:'Passes',title:'Show C · dates and passes',body:tbl(['Item','Date','Status'],[['Build-up window','Sun 06:00',ok('given')],['Loading bay slot','Sun 07:30',wk('asked')],['Vehicle pass','Sat',ok('issued')],['Organiser approval','Fri',bl('missing')]])+`<p class="sm">Entered once here. The PM passes the slot to Transport with one tap.</p>`}));
+jump('Agency screens',0,1300,560,2100);
+
+/* ---------- PM bridge ---------- */
+frame('top',1000,1300,640,'Top managers','read only · built from taps',desk({role:'Top managers',nav:['Board','Shows','Risky stands','Load'],act:'Board',bell:2,title:'All stands this week',kpis:[['Stands live','14'],['On track','10'],['At risk','3'],['Blocked','1']],body:`<div class="two"><div class="box"><b>By colour</b><br>${ok('RV-26-014')} ${wk('RV-26-017')} ${bl('RV-26-021')} ${ok('RV-26-022')}</div><div class="box"><b>Next shows</b><br>Show C Sun · Show D 12 Dec<br><b>Risky</b>: 3 changes + 2 doubts</div></div><p class="sm">Nobody writes a report. Read only; no edit buttons.</p>`}));
+frame('headpm',1000,2060,640,'Head of PM (Aman role)','all stands and all PMs',desk({role:'Head PM',nav:['Load','All stands','Allocate','Not seen','Alarms'],act:'Load',bell:4,title:'Load by PM this week',kpis:[['PMs','4'],['Stands','14'],['Late alarms','2']],body:tbl(['PM','Stands','Load','Not seen','Late'],[['PM 1','4','████░',bl('2'),'—'],['PM 2','3','███░░','—','—'],['PM 3','4','█████',wk('1'),bl('1')],['PM 4','3','██░░░','—','—']])+`<p class="sm">Allocate a stand = pick a PM. Load, not-seen and late are built from taps.</p>`}));
+frame('pmboard',1000,2820,640,'Project manager: my stands','release · board',desk({role:'PM',nav:['My stands','Release','Doubts','Site steps','Snags','Lessons'],act:'My stands',bell:5,title:'RV-26-014 · handover pack and release',body:`<div class="two"><div class="box"><b>Pack check</b><br>Design set v4 ${ok('✓')}<br>Colours ${ok('✓')}<br>Proofs ${wk('1')}<br>Purchase list ${ok('✓')}<br>Rep go-ahead ${ok('✓')}<br><br><span class="btn">Release to Build</span></div><div class="box"><b>Who has Seen</b><br>Carpentry ${ok('✓')}<br>Water Paint ${ok('✓')}<br>Spray ${bl('not yet')}<br>Electric ${ok('✓')}<br>Branding ${wk('read')}<br>Transport ${ns('later')}</div></div><p class="sm">Last photo, open doubts and late alarm show on the stand card.</p>`}));
+frame('pmphone',1000,3560,640,'Project manager: on site (phone)','also used by the other PMs',`<div class="two">${phone({title:'RV-26-014 · site steps',sub:'Show C · build-up',cards:[{t:'Truck',s:'reached 06:40, offloaded 07:20',b:[['✓ Done']]},{t:'Platform · Electric · Structure',s:'platform done 09:10',b:[['Done'],['📷 Photo','g'],['Blocked','w']]},{t:'Putty · Paint · Fitting · Logo',s:'next',b:[['Start']]}],tabs:['Steps','Snags','Doubts','Photos']})}<div class="info"><h5>Sees</h5><ul><li>Steps and photos from trades</li><li>Drawing (latest only)</li><li>Doubts on this stand</li></ul><h5>Updates</h5><ul><li>Site steps, snags, sign-off, lessons</li></ul><h5>Does not see</h5><ul><li>Prices; other PMs' stands (unless head PM)</li></ul></div></div>`);
+jump('PM and top managers',1000,1300,640,3300);
+
+/* ---------- trades ---------- */
+const D=[
+['carp','Carpentry','Foreman and 24 (HR chart)',['Today','My stands','Parts ready','Doubts','Packing','Team'],'Parts ready',[['Stands','4'],['Parts ready','2'],['Doubts open','1'],['To see','1']],tbl(['Stand','Part','Who','Status'],[['014','Counter front','Senior 1',wk('working')],['014','Back wall','Team B',ok('done')],['017','Ceiling frame','Team A',bl('blocked')],['021','Platform','Team C',ns('not started')]]),'NEW change: 017 height 2.4 → 2.7 m. Seen by 3 of 6.',{title:'My jobs · today',sub:'Carpenter (fictional)',cards:[{t:'RV-26-014 · Counter front',s:'drawing v4',b:[['Done'],['📷 Photo','g'],['? Doubt','r']]},{t:'RV-26-017 · Ceiling frame',s:'change: height',p:nw('NEW'),b:[['Seen'],['? Doubt','r']]}],tabs:['Jobs','Drawing','Pack','Doubts']},['Design set and changes (own parts)','Item list: what has arrived','Sizes from Branding'],['Task done / blocked','Photos of mock-up and packed stand','Doubts with a mark on the drawing','Pack list for loading'],['Prices','Other trades\' staff tasks','Client details'],'PM writes Carpentry progress in WhatsApp; "is this the latest drawing?" calls','Done tap + photo; latest drawing only; PM board updates itself'],
+['water','Water Paint','9 painters (HR chart); head not named',['Today','Paint list','Colour spec','Changes','Doubts'],'Paint list',[['Stands','3'],['Ready to paint','2'],['Colour changes','1']],tbl(['Stand','Part','Colour','Status'],[['014','Counter front','match render',wk('ready')],['017','Back wall','Pantone 2728 (fict.)',ns('waiting')],['021','Pillars','white',ok('done')]]),'NEW colour change on 017 back wall.',{title:'Paint list',sub:'Painter (fictional)',cards:[{t:'014 · Counter front',s:'colour: match render',p:wk('part ready'),b:[['Start'],['Done'],['📷 Photo','g']]},{t:'017 · Back wall',s:'colour changed',p:nw('NEW'),b:[['Seen']]}],tabs:['List','Spec','Doubts','Photos']},['Colour and finish per element','"Part ready for paint" from Carpentry','Colour changes'],['Task status','Finish photo','Colour used (tap on spec line)','Site painting on same card'],['Prices','Carpentry task detail beyond ready'],'Asking for colours; repainting after a late colour change','Spec line per element; colour change record with Seen'],
+['spray','Spray Paint','3 including head (HR chart)',['Today','Spray area','Parts','Changes'],'Spray area',[['Stands','2'],['Booth slots','5'],['Ready','1']],tbl(['Slot','Stand','Part','Status'],[['Mon AM','014','Panels',ok('done')],['Mon PM','017','Doors',wk('booked')],['Tue AM','—','free',ns('free')]]),'Booth fills Thursday: warn Head PM.',{title:'Spray booth',sub:'Sprayer (fictional)',cards:[{t:'Mon PM · RV-26-017 Doors',s:'finish: gloss',p:wk('booked'),b:[['Start'],['Done'],['📷 Photo','g']]},{t:'Tue AM',s:'free slot',b:[['Book']]}],tabs:['Slots','Parts','Doubts','Photos']},['Colour and finish spec','Part ready from Carpentry'],['Booth slot','Task status','Finish photo'],['Prices','Painters\' tasks beyond order'],'Booth schedule on paper; PM asks what is sprayed','Booking in the portal; load board sees the booth filling'],
+['elec','Electric','Foreman and 6; AV and lighting outsourced (told)',['Today','Stands','Equipment','Outside AV','Doubts'],'Stands',[['Stands','3'],['Tests due','2'],['Equipment out','12']],tbl(['Stand','Task','Equip.','Status'],[['014','Fit lights','LED x12',ok('done')],['017','Test','Driver x2',wk('testing')],['021','Power on (site)','—',ns('Sun')]]),'Outside AV for show C: company X, Sun 09:00 (fict.)',{title:'Electric jobs',sub:'Electrician (fictional)',cards:[{t:'017 · Test',s:'LED, drivers',b:[['Test OK'],['📷 Photo','g'],['? Doubt','r']]},{t:'021 · Power on',s:'Show C · Sun',b:[['Start']]}],tabs:['Jobs','Plan','Equip.','Doubts']},['Electrical and AV plan','Venue power details (via PM)','Changes'],['Fit, test, power on','Test photos','Equipment list per stand','Outside AV booked'],['Prices','Painters and carpenters\' tasks'],'PM chases electric status; test notes on paper','Test tap + photo; PM sees power-on from the office'],
+['brand','Branding (Printing, Acrylic, CNC)','Head and 5 (HR chart)',['Today','Panels','Proofs','Acrylic','CNC'],'Panels',[['Panels','18'],['Printed','11'],['Awaiting proof','3']],tbl(['Panel','Size','Proof','Status'],[['014-A','2400x900',ok('ok'),wk('printing')],['014-B','1200x900',ok('ok'),ok('packed')],['017-A','2400x1200',bl('client?'),ns('wait')]]),'Size check at "printed": must match Carpentry.',{title:'Panels today',sub:'Operator (fictional)',cards:[{t:'014-A · 2400x900',s:'proof approved',b:[['Printed'],['Packed'],['📷 Photo','g']]},{t:'017-A',s:'waiting client proof',p:bl('hold'),b:[['? Doubt','r']]}],tabs:['Panels','Artwork','CNC','Doubts']},['Artwork, sizes and print proof (Design)','Client approval (rep)','Panel sizes from Carpentry','Lightbox needs'],['Printed, packed, fitted per panel','CNC and acrylic done','Photos','Doubts on measures'],['Prices','Other trades\' detail'],'Zip by chat; measurement questions to Design; printing twice','Artwork on the panel card; size checked at "printed"'],
+['trans','Transport (Logistics)','Head and 6 (HR chart)',['Today','Trips','Load lists','Scans','Returns'],'Trips',[['Trips today','4'],['On road','1'],['Late','0']],tbl(['Trip','Stands','Truck','Status'],[['T-31','014, 017','booked',ok('left')],['T-32','021','booked',wk('loading')],['T-33','return','—',ns('Mon')]]),'Slot Sun 07:30 passed on by the PM.',{title:'Trip T-31',sub:'Loader (fictional)',cards:[{t:'Load list · 014',s:'12 crates · 11 scanned',b:[['Scan crate'],['Left'],['Reached']]},{t:'Missing',s:'crate C-07',p:bl('not scanned'),b:[['Ask carpenter','g']]}],tabs:['Trip','Crates','Slot','Return']},['Pack lists from trades','Slots and passes (via PM)','Furniture and stock to load'],['Truck booked, left, reached, offloaded','Crate scans in and out','Return load'],['Prices','Design files','Trade progress'],'"Where is the truck?" calls; paper load list','Scans and trip status; PM and trades see missing crates']];
+D.forEach((d,i)=>{const y=1300+i*1000;
+ frame(d[0]+'-p',2300,y,290,d[1]+' · staff','phone',phone(d[8]));
+ frame(d[0]+'-h',2640,y,640,d[1]+' · head','desktop / tablet',desk({role:d[1].split(' (')[0]+' head',nav:d[3],act:d[4],bell:2,title:d[1].split(' (')[0]+' · '+d[4],kpis:d[5],body:d[6]+`<p class="sm">${d[7]}</p>`}));
+ frame(d[0]+'-i',3320,y,380,d[1],d[2],info({sees:d[9],upd:d[10],no:d[11],b:d[12],n:d[13]}));
+ jump(d[1].split(' (')[0],2300,y,1900,900)});
+
+/* ---------- flows ---------- */
+const FY=8900;
+frame('f-life',0,FY,3700,'How the information flows, stage by stage','one stand from sale to close',`<div class="pad"><div class="grid" style="grid-template-columns:repeat(9,1fr)">${[
+['0 Sell','Agency','Job record · design set · colour spec · artwork · item list','Nothing reaches Build yet'],
+['1 Release','PM','Pack checked; rep go-ahead; release','Every dept: NEW, tap Seen'],
+['2 Start','Carpentry, Branding','Tasks, photos, stock status, doubts','Next trade when a part is ready'],
+['3 Mock-up','All trades','Done taps, proofs, changes','Red until Seen'],
+['4 Pack and move','Trades, Transport','Load list, crate scans, truck booked','Transport when ready to load'],
+['5 On site','PM, trades','Site steps, photos, head count, doubts','Alert when a step is late'],
+['6 Show','PM, rep','Snags, sign-off, daily checks','Rep when snags close'],
+['7 Dismantle','Transport, Procurement','Crates back, stock updated','Procurement sees returns'],
+['8 Close','PM','Closing sheet, lessons (3 taps)','Design reads lessons']].map(s=>`<div class="stage"><h4>${s[0]}</h4><b>${s[1]}</b><p><b>Made:</b> ${s[2]}</p><p><b>Told:</b> ${s[3]}</p></div>`).join('')}</div><p class="sm">Built from taps, nobody types: PM board, Load board, Top board, Sales status page, Late alarm, Lessons list.</p></div>`);
+frame('f-photo',0,FY+320,1800,'Photos and files: upload and download','ASSUMED design',`<div class="pad"><div class="grid" style="grid-template-columns:repeat(6,1fr)">${[
+['1 Tap 📷','Photo button sits on the task. No gallery, no chat.'],
+['2 Auto-tag','Stand, step, person and time added. Picture shrunk to a small size.'],
+['3 Queue','No signal on site? It waits on the phone and sends when back online.'],
+['4 Saved once','One copy on the portal server. Shown as a thumbnail on the task.'],
+['5 Seen by','PM board, Design (on doubts), rep status page (if marked client-ready).'],
+['6 Download','Tap thumbnail → view or save. Drawings open in the app; latest version only.']].map(s=>`<div class="stage"><h4>${s[0]}</h4>${s[1]}</div>`).join('')}</div>
+<p><b>Before:</b> a photo in WhatsApp is lost in the thread and has no stand or step. <b>Now:</b> it belongs to a task, can be found by stand, and is read by only the roles in the access board.</p>
+<p class="sm">Open: signal on site, phone type, language, how many photos per stand (Questions 90, 92). Whether drawings must work offline is ASSUMED yes.</p></div>`);
+frame('f-table',1860,FY+320,1840,'How table information transfers','the item list: enter once, others add their own column',`<div class="pad">${tbl(['Item','Qty','Spec','Stock status','Made by','Packed','Loaded'],[['LED strip','12 m','warm',ok('in stock'),'Electric','✓','✓'],['Plywood 18mm','18','—',wk('ordered'),'Carpentry','—','—'],['Acrylic sign','1','logo',ns('to make'),'Branding','—','—']])}
+<div class="chips"><span class="u">Design: Item, Qty, Spec</span><span class="g">Procurement: Stock status</span><span class="u">Trade: Made by, Packed</span><span class="g">Transport: Loaded</span></div>
+<p><b>Rule:</b> one owner per column. Nobody retypes the table. Each department sees a filtered view: Carpentry sees its rows, Transport sees Packed and Loaded, Procurement sees Stock.</p><p class="sm">Item names may follow Adhiraj's brochures (Design Elements, Materials, Machines). ASSUMED until Design confirms (Question 101).</p></div>`);
+frame('f-uses',0,FY+640,2400,'How one department uses another','gives → / uses ←',`<div class="pad"><div class="grid" style="grid-template-columns:repeat(4,1fr)">${[
+['Design','→ spec, drawings, changes, answers','← doubts, lessons'],['Procurement','→ stock status, furniture','← item list'],['PM','→ release, dates to Transport','← all taps, doubts'],['Carpentry','→ part ready, sizes, pack list','← drawings, spec, stock'],
+['Water Paint','→ finish, order','← part ready, colours'],['Spray Paint','→ booth load','← part ready, colours'],['Electric','→ power, equipment needs','← plan, parts ready'],['Branding','→ panels, CNC output','← artwork, sizes, proof'],
+['Transport','→ truck status, scans','← pack lists, slots, stock'],['Coordination','→ dates, passes','← nothing from Build'],['Top managers','→ nothing (read only)','← board'],['Head PM','→ allocation','← load, not seen']].map(s=>`<div class="stage"><h4>${s[0]}</h4><p style="color:#0b5a31">${s[1]}</p><p style="color:#1a3f99">${s[2]}</p></div>`).join('')}</div></div>`);
+frame('f-change',2460,FY+640,1240,'Changes and doubts','who must see, who has seen',`<div class="pad"><div class="two"><div class="box"><b>Change</b><br>Design or rep creates a record → names every department that relies on it → each taps Seen.<br><br>Carpentry ${ok('✓')} Water ${ok('✓')} Electric ${ok('✓')} Branding ${wk('read')} Spray ${bl('not yet')}<br><span class="sm">PM board stays red until all tap.</span></div><div class="box"><b>Doubt</b><br>Trade marks the drawing, adds photo or voice → Design answers on the same card → everyone on the stand sees the answer.<br><br><span class="sm">Does the PM see it first, or go direct to Design? Open: Question 89.</span></div></div></div>`);
+jump('Flows',0,FY,3700,950);
+
+/* ===== v2: people, role lens, data structures ===== */
+const tg=t=>{const m=t.match(/^(SS|BS|GAP) /);return m?`<span class="tg ${m[1]}">${m[1]}</span>${t.slice(3)}`:t};
+const MODS=[
+['board','Board','10 on track · 3 at risk · 1 blocked','BS derived','built from taps; nobody types it'],
+['load','Load by PM','PM 3: 4 stands, 1 late','BS derived','BuildStand.pmUserId, StandDepartment'],
+['alloc','Allocate stands','Pick a PM for RV-26-021','BS BuildStand','pmUserId'],
+['stands','Stands','RV-26-014 · Show C · Sun','SS Project + BS BuildStand','code, show, dates, buildStatus'],
+['pack','Pack and release','5 of 6 ready → Release','BS HandoverCheck','kind, state, releasedAt'],
+['goahead','Go-ahead, client changes','Client said go, 10:05','BS BuildStand, ChangeNotice','goAheadAt, kind=CLIENT_CHANGE'],
+['dset','Design set','Version 4 (replaces 3)','SS DesignRevision, FileAsset','no, summary, fileAssetId'],
+['spec','Colour and finish spec','Back wall: match render','GAP spec table (ask Prateek)','element, colour, finish'],
+['items','Item list (no prices)','LED strip 12 m · in stock','SS item list, price-free view','item, qty, spec'],
+['stock','Stock and furniture','Plywood 18 mm: ordered','SS StockUnit, StockMovement','status, place'],
+['doubts','Doubts','1 open: ceiling frame','BS Doubt','markX, markY, photo, status, answer'],
+['changes','Changes: NEW, Seen','Height 2.4 → 2.7 m · 3 of 6 seen','BS ChangeNotice, ChangeSeen','summary, severity, seenAt'],
+['tasks','Tasks and photos','Counter front: working','BS BuildTask, TaskEvent, BuildAttachment','status, blockReason, doneAt, photo'],
+['crates','Crates and trips','12 crates · 11 scanned','BS Crate, TruckTrip, TripStand','code, loadedAt, reachedAt'],
+['dates','Show dates and passes','Bay slot Sun 07:30','SS Exhibition + GAP passes','buildUpFrom, slot, passState'],
+['heads','Head count and crews','Carpentry: 8 own, 2 outside','BS HeadCount, CrewMember, Booking','onDate, ownCount, outsideCount'],
+['snags','Snags and sign-off','2 snags open','BS Snag, Signoff','kind, status, signedAt'],
+['lessons','Lessons','Three taps at close','BS Lesson','cause, note'],
+['quote','Quotes and estimating','Estimate revision 2','SS Estimate, EstimateLine (money)','money fields: Build never sees'],
+['po','Purchase orders','1 waiting approval','SS PurchaseOrder, GoodsReceipt','supplier, lines, state'],
+['approvals','Approvals, billable changes','2 changes to invoice','SS OrderApproval + BS ChangeNotice.billable','state, billable'],
+['leads','Leads and pipeline','Show D: quote sent','SS Lead, LeadInteraction','stage, nextStep'],
+['register','Companies and shows','Show C · Show D','SS Company, Exhibition','name, dates'],
+['people','People and roles','Roster, logins','SS User, ModuleRole + BS CrewMember','name, department, isHead'],
+['routing','Alert rules','Who sees which event','BS EventRoute, Watch','eventKind, consumer, delivery']];
+const ROLES={
+top:['Top managers','Raveena, Tariq, Prateek','desk','board:R load:R stands:R snags:R lessons:R','Top'],
+headpm:['Head of PM','Aman','desk','board:R load:R alloc:W stands:R pack:R dset:R doubts:R changes:R tasks:R crates:R dates:R heads:R snags:R lessons:R','Head PM'],
+pm:['Project manager','Ali Asgar, Shahanawaz, Hamraz','desk','stands:W pack:W goahead:R dset:R spec:R items:R stock:R doubts:R changes:R tasks:W crates:R dates:R heads:R snags:W lessons:W','PM'],
+prodco:['Production Coordination','Tabrej, Tayyab','desk','stands:R dset:R items:R changes:R tasks:R crates:R dates:R heads:W','Prod. Coord.'],
+foreman:['Head of a trade','Jayson, Happy, Kayum Ali, Jasvir, Zain (Water Paint head not named)','desk','stands:R dset:R spec:R items:R stock:R doubts:W changes:W tasks:W crates:W heads:W','Trade head'],
+trade:['Floor staff','Seniors Manoj, Talib, Ahmad, Sunny; carpenters, electricians, painters, sprayers, branding operators','phone','stands:R dset:R spec:R items:R doubts:W changes:W tasks:W crates:W','Staff'],
+loader:['Driver or loader','Zain\'s team of 6','phone','crates:W dates:R tasks:W','Driver'],
+designhead:['Head of Design','Kalim (Mustafa below him)','desk','board:R stands:R dset:W spec:W items:W doubts:W changes:W tasks:R dates:R lessons:R','Design head'],
+designer:['Designer','3 x 3D and 2 x 2D designers','desk','stands:R dset:W spec:W items:W doubts:W changes:W lessons:R','Designer'],
+rep:['Sales (the rep)','Nisah, Riza, Supriya, April','desk','stands:W goahead:W dset:R spec:R items:R changes:W tasks:R snags:W leads:W register:R','Sales'],
+mkt:['Marketing','Priyanka','desk','register:W leads:R','Marketing'],
+estproc:['Procurement and Estimation','Akil, Amal, Mukesh','desk','stands:R dset:R items:R stock:W quote:W po:W changes:R crates:R register:R','Proc. & Est.'],
+fin:['Finance','Zeeshan, Adil, Rahul','desk','quote:R po:R approvals:W register:R','Finance'],
+coord:['Project Coordination','Gloria, Lakshmi','desk','stands:R dates:W changes:R register:R','Coord.'],
+hr:['HR','Pooja, Bashini','desk','people:W heads:R','HR'],
+admin:['AI and Digitalization (admin)','Narendra','desk','board:R people:W routing:W register:R','Admin']};
+const view=r=>Object.fromEntries(ROLES[r][3].split(' ').map(s=>s.split(':')));
+const dataBlock=(r,h)=>{const v=view(r);return `<div class="info"><h5>${h||ROLES[r][0]}: data it reads (R) and writes (W)</h5><table class="dt">${MODS.filter(m=>v[m[0]]).map(m=>`<tr><td><b class="${v[m[0]]=='W'?'wr':'rd'}">${v[m[0]]}</b></td><td><b>${m[1]}</b> ${tg(m[3])}<br><span class="fl">${m[4]}</span></td></tr>`).join('')}</table><h5>Hidden from this role (not on its screens)</h5><div class="hid">${MODS.filter(m=>!v[m[0]]).map(m=>`<span>${m[1]}</span>`).join('')}</div></div>`};
+const roleScreen=(r,title,w)=>{const v=view(r),vis=MODS.filter(m=>v[m[0]]),dv=ROLES[r][2];
+ if(dv=='phone')return phone({title:title,sub:ROLES[r][1].slice(0,40),cards:vis.slice(0,4).map(m=>({t:m[1],s:m[2],b:v[m[0]]=='W'?[['Update']]:[['Open','g']]})),tabs:vis.slice(0,4).map(m=>m[1].split(' ')[0])});
+ return desk({w:w||560,role:ROLES[r][0],nav:vis.map(m=>m[1]),act:vis[0][1],bell:2,title:title,body:`<div class="tiles">${vis.map(m=>`<div class="tile"><small>${m[1]}${v[m[0]]=='W'?' ✎':''}</small><b>${m[2]}</b></div>`).join('')}</div>`})};
+const NAMES={'a-design':'Kalim, Mustafa + 5 designers','a-rep':'Nisah, Riza, Supriya, April','a-proc':'Akil, Amal, Mukesh','a-coord':'Gloria, Lakshmi','top':'Raveena, Tariq, Prateek','headpm':'Aman','pmboard':'Ali Asgar, Shahanawaz, Hamraz','pmphone':'the 3 PMs and Aman','carp-h':'Jayson','carp-p':'Manoj, Talib, Ahmad + 21','water-h':'head not named','water-p':'9 painters','spray-h':'Kayum Ali','spray-p':'2 sprayers','elec-h':'Happy','elec-p':'Sunny + 5','brand-h':'Jasvir','brand-p':'printing 3, acrylic 1, CNC 1','trans-h':'Zain','trans-p':'6 drivers and loaders'};
+const RF={'a-design':'designer','a-rep':'rep','a-proc':'estproc','a-coord':'coord','top':'top','headpm':'headpm','pmboard':'pm'};
+/* move and extend existing frames */
+const MV={'a-design':[0,1300],'a-rep':[0,3150],'a-proc':[0,4100],'a-coord':[0,5000],'headpm':[1000,2200],'pmboard':[1000,3300],'pmphone':[1000,4500]};
+FR.forEach(f=>{if(MV[f.id]){f.x=MV[f.id][0];f.y=MV[f.id][1]}if(NAMES[f.id])f.html=f.html.replace(/<span>[^<]*<\/span>/,`<span>${NAMES[f.id]}</span>`);if(RF[f.id])f.html+=dataBlock(RF[f.id])});
+/* new frames for departments that had none */
+const nf=(id,x,y,r,t,title)=>frame(id,x,y,560,t,ROLES[r][1],roleScreen(r,title)+dataBlock(r));
+nf('designhead',0,2200,'designhead','Design head','Design: head view');
+nf('mkt',0,5800,'mkt','Marketing','Register and leads');
+nf('fin',0,6700,'fin','Finance','Approvals and billable changes');
+nf('hr',0,7600,'hr','HR','People and roster');
+frame('prodco',1000,5400,640,'Production Coordination','Tabrej, Tayyab (role unknown, ASSUMED)',roleScreen('prodco','Head count and who is where',640)+dataBlock('prodco'));
+frame('admin',1000,6400,640,'AI and Digitalization (admin)','Narendra',roleScreen('admin','People, roles, alert rules',640)+dataBlock('admin'));
+D.forEach((d,i)=>{const hr=d[0]=='trans'?'loader':'trade';frame(d[0]+'-d',3720,1300+i*1000,440,d[1]+' · data','what each role reads and writes',dataBlock('foreman','Head')+dataBlock(hr,d[0]=='trans'?'Driver or loader':'Floor staff'))});
+/* offset the main area to make room for hierarchy and lens rows */
+const OFF=1550;FR.forEach(f=>{if(f.y>=1300)f.y+=OFF});JUMPS.forEach(j=>{if(j.y>=1300)j.y+=OFF});
+JUMPS.forEach(j=>{if(j.l=='Agency screens'){j.h=8500}if(j.l=='PM and top managers'){j.h=6000}if(j.w==1400){j.w=1900;j.h=900}});
+/* hierarchy */
+const lens=r=>{const v=view(r),a=Object.values(v);return `<span class="lz">sees ${a.length} · edits ${a.filter(x=>x=='W').length}</span>`};
+const bx=(t,who,r,k)=>`<div class="ob ${k||''}"><b>${t}</b><div>${who}</div>${r?lens(r):''}</div>`;
+frame('hier',0,1240,3700,'Who is who: hierarchy and what each level sees','HR chart, 6 Nov 2026 (heads and leads; reporting lines as drawn, not yet confirmed by Build)',`<div class="pad"><div class="oc">
+<div class="oc1"><div class="ot">CEO · Raveena</div>${bx('HR','Pooja (manager), Bashini (executive)','hr')}${bx('Sales','Nisah (senior BDE), Riza, Supriya, April','rep')}${bx('Finance','Zeeshan (senior), Adil, Rahul','fin')}</div>
+<div class="oc1 g"><div class="ot">General Manager · Tariq</div>${bx('Project Coordination','Gloria, Lakshmi (admin)','coord')}${bx('Design','Kalim (head), Mustafa; 3 x 3D, 2 x 2D','designhead')}${bx('Procurement and Estimation','Akil (procurement mgr), Amal, Mukesh (estimation)','estproc')}${bx('Printing, Acrylic, CNC (Branding)','Jasvir (head); printing 3, acrylic 1, CNC 1','foreman','b')}
+ <div class="ot2">Production</div>${bx('Project Management','Aman (head) + Ali Asgar, Shahanawaz, Hamraz','headpm','b')}${bx('Production Coordination','Tabrej, Tayyab (between PMs and the divisions)','prodco','b')}
+ <div class="oc2">${bx('Carpenter','Jayson; seniors Manoj, Talib, Ahmad; 21','foreman','b')}${bx('Electrician','Happy; Sunny (senior) + 5','foreman','b')}${bx('Water Painter','9, head not named','trade','b')}${bx('Spray Painter','Kayum Ali + 2','foreman','b')}${bx('Transport','Zain + 6','foreman','b')}${bx('Furniture','Davinder, Govind (Agency per Prateek, Q95)','','b')}${bx('Mess','Karan + 3 (not Build)','','n')}</div></div>
+<div class="oc1"><div class="ot">International Division · Prateek</div>${bx('Marketing','Priyanka','mkt')}${bx('International','Adhiraj','')}${bx('AI and Digitalization','Narendra','admin')}<div class="ot2" style="margin-top:14px">Three top managers see</div>${bx('Raveena, Tariq, Prateek','read-only board, load, risky stands','top')}</div></div>
+<p class="sm">Counts: HR (CONFIRMED, Bashini, 6 Nov). Aman plus 3 PMs (the chart says 4 Pax): Q97. Names of ordinary staff are in HR's PDF and are not copied. Each box shows how many of the 24 portal modules that role sees and edits.</p></div>`);
+/* role lens */
+const RK=Object.keys(ROLES);
+frame('lens',0,2050,2300,'Role lens: what each person sees on screen','a module a role does not need is not on its screen (server-enforced, ASSUMED)',`<div class="pad"><table class="lt"><tr><th></th>${RK.map(r=>`<th><div>${ROLES[r][4]}</div></th>`).join('')}</tr>${MODS.map(m=>`<tr><td><b>${m[1]}</b> ${tg(m[3].split(' ')[0]+' x').replace('x','')}</td>${RK.map(r=>{const c=view(r)[m[0]];return c=='W'?'<td class="W">edit</td>':c=='R'?'<td class="Rr">see</td>':'<td class="Z">·</td>'}).join('')}</tr>`).join('')}</table></div>`);
+frame('onTrack',2360,2050,1340,'Are we on track?','honest check against the plan, 7 Nov 2026',`<div class="pad">${tbl(['Phase','State'],[['0 Plan','Done'],['1 People and ownership','Counts CONFIRMED by HR; reporting lines and who leads on site not confirmed'],['2 Ground truth',wk('Partly')+' flows from Ali, Prateek and Akhil; no talk yet with Aman, the Branding head, Transport or the Water Paint head'],['3 Play it back',bl('Not started')+' no real person has seen any of this'],['4 Stand Studio boundary',wk('Drafted')+' 8 requests and 5 conflicts, not agreed with Prateek'],['5 Ideas and scope',wk('Mostly')+' GitHub and Miro not cleared on Annex A'],['6 Data model','Paper draft (27 tables), unvalidated'],['7 Capture design','Boards drawn, '+bl('none tried with users')]])}
+<p><b>Verdict:</b> on track for drafting, ahead of validation. We are drawing phases 5 to 7 while phases 3 and 4 are open, so everything on this board is still ASSUMED. The plan itself says WhatsApp is the real system today and a tool that asks people to stop using it can fail, so removing it needs a tested plan, not only a screen.</p><p><b>Best next step:</b> play this back to three people: Aman, one trade head, Prateek.</p></div>`);
+jump('Hierarchy',0,1240,3700,780);jump('Role lens',0,2050,3700,700);
+
+/* ---------- connectors ---------- */
+const C=[
+['a-design','r','pmboard','l',.2,.1,'Design files forwarded as a zip; "is this the latest?" calls','One stand file with versions; new replaces old; PM sees the pack complete',0.35],
+['a-rep','r','pmboard','l',.5,.3,'Rep tells the PM by message that the client said go','Go-ahead button on the stand file unlocks Release',0.35],
+['a-proc','r','pmboard','l',.5,.6,'PM sends item list to Procurement; stock answered by call','Stock status on the same item list; nobody forwards it',0.35],
+['a-coord','r','pmboard','l',.5,.9,'Dates and passes arrive by WhatsApp','Entered once by Coordination; PM passes the slot to Transport',0.35],
+['pmboard','t','headpm','b',.5,.5,'Per-PM Excel; counts sent by chat','Load board built from the PMs\' stands'],
+['headpm','t','top','b',.5,.5,'Updates to the boss by message','Top board built from the same taps; read only'],
+['pmboard','r','carp-p','l',.3,.1,'PM forwards drawings to each foreman; changes reach some only','Release gives each dept NEW and only its part; red until Seen',0.55],
+['carp-p','b','water-p','t',.5,.5,'Shout or call "part ready for paint"','Done tap sends "part ready" to Water and Spray'],
+['water-p','l','pmboard','r',.5,.25,'Colours asked by call; repaint after late change','Colour spec per element; change record with Seen',0.25],
+['spray-p','l','pmboard','r',.5,.4,'Booth schedule on paper','Booth booked in the portal; load board sees it',0.25],
+['elec-p','l','pmboard','r',.5,.55,'PM chases electric status; test notes on paper','Test tap + photo; PM sees power-on from the office',0.25],
+['brand-p','l','pmboard','r',.5,.7,'Zip by chat; printed twice; size questions to Design','Printed/packed/fitted taps with photo; size checked at printed',0.25],
+['trans-p','l','pmboard','r',.5,.9,'"Where is the truck?" calls; paper load list','Scans and trip status on the board',0.25],
+['carp-p','l','pmboard','r',.5,.02,'Foreman messages "done" with a photo; PM retypes it','One tap + photo; the PM board updates itself',0.2]];
+function draw(){const L=$('#lines');let s='';document.querySelectorAll('.lab').forEach(e=>e.remove());
+ const R=id=>{const e=document.getElementById(id);return{x:e.offsetLeft,y:e.offsetTop,w:e.offsetWidth,h:e.offsetHeight}};
+ const A=(r,sd,k)=>sd=='r'?[r.x+r.w,r.y+r.h*k,1,0]:sd=='l'?[r.x,r.y+r.h*k,-1,0]:sd=='t'?[r.x+r.w*k,r.y,0,-1]:[r.x+r.w*k,r.y+r.h,0,1];
+ C.forEach((c,i)=>{const a=A(R(c[0]),c[1],c[4]),b=A(R(c[2]),c[3],c[5]),d=Math.max(80,Math.hypot(b[0]-a[0],b[1]-a[1])*.4);
+  const p=[a[0],a[1],a[0]+a[2]*d,a[1]+a[3]*d,b[0]+b[2]*d,b[1]+b[3]*d,b[0],b[1]];
+  s+=`<path d="M${p[0]} ${p[1]}C${p[2]} ${p[3]} ${p[4]} ${p[5]} ${p[6]} ${p[7]}" fill="none" stroke="#2dd4bf" stroke-width="4" opacity=".85"/><circle cx="${b[0]}" cy="${b[1]}" r="7" fill="#2dd4bf"/>`;
+  const m=t=>{const u=1-t;return[u*u*u*p[0]+3*u*u*t*p[2]+3*u*t*t*p[4]+t*t*t*p[6],u*u*u*p[1]+3*u*u*t*p[3]+3*u*t*t*p[5]+t*t*t*p[7]]},q=m(c[8]||.5);
+  const l=document.createElement('div');l.className='lab';l.style.left=q[0]+'px';l.style.top=q[1]+'px';l.innerHTML=`<div class="b"><b>BEFORE</b>${c[6]}</div><div class="n"><b>NOW</b>${c[7]}</div>`;W.appendChild(l)});
+ L.innerHTML=s}
+FR.forEach(f=>{const e=document.createElement('section');e.className='fr';e.id=f.id;e.style.cssText=`left:${f.x}px;top:${f.y}px;width:${f.w}px`;e.innerHTML=f.html;W.appendChild(e)});
+draw();
+
+/* ---------- pan, zoom, jump ---------- */
+let sc=.3,tx=250,ty=40;const vp=$('#vp'),ap=()=>W.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`;
+const zoomAt=(f,cx,cy)=>{const n=Math.min(2.5,Math.max(.08,sc*f));tx=cx-(cx-tx)*n/sc;ty=cy-(cy-ty)*n/sc;sc=n;ap()};
+vp.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.12:.89,e.clientX,e.clientY)},{passive:false});
+let dr=null;vp.addEventListener('pointerdown',e=>{dr=[e.clientX-tx,e.clientY-ty];vp.classList.add('d');vp.setPointerCapture(e.pointerId)});
+vp.addEventListener('pointermove',e=>{if(dr){tx=e.clientX-dr[0];ty=e.clientY-dr[1];ap()}});vp.addEventListener('pointerup',()=>{dr=null;vp.classList.remove('d')});
+const go=(x,y,w,h)=>{const vw=innerWidth-210,vh=innerHeight;sc=Math.min(2,Math.min(vw/(w+80),vh/(h+80)));tx=200+(vw-w*sc)/2-x*sc;ty=(vh-h*sc)/2-y*sc;ap()};
+JUMPS.forEach(j=>{const b=document.createElement('button');b.textContent=j.l;b.onclick=()=>go(j.x,j.y,j.w,j.h);$('#jumps').appendChild(b)});
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>zoomAt(+b.dataset.z,innerWidth/2,innerHeight/2));
+$('#fit').onclick=()=>go(0,0,4200,12700);go(0,0,3700,520);
+</script></body></html>

@@ -225,3 +225,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Built NEED/Department_Board.html: 16 departments, 39 flows each tagged SS (Prateek table), BS (our table) or GAP (in neither). Click a department: its lines light up, numbered badges match a side panel. Tabs: Map, Flows (filterable list), Schemas (41 + 27 tables side by side, plus gaps), What people do (12 roles).
 - Content is ASSUMED except the table names, which come from Prateek 7th-update file and BUILD_SCHEMA.md. Marketing, Finance, Coordination, Production Coordination are thin because we know little (Q96, Q104, Q106, Q107).
 - Earlier screens board kept as NEED/UI_Board.html.
+
+##  — Portal Board (screens + people + role lens + data structures)
+- Narendra: the Department board looked worse than the screens board; wanted per-person screens, real people and hierarchy, role-filtered screens, data structures, everything in one place; asked if we are on track.
+- Built NEED/Portal_Board.html from the screens board: HR hierarchy with names, role lens (24 modules x 16 roles), 14 role screens (new: Head of Design, Marketing, Finance, HR, Production Coordination, Admin), each with the data it reads/writes (tables and fields, tagged SS/BS/GAP) and what is hidden from that role. Names in frame headers come from ORG_CHART.md (heads and leads only; ordinary staff names are not in our files).
+- On-track verdict (honest): drafting is on track, validation is not. Phases 5 to 7 drawn while 3 (play back) and 4 (Stand Studio boundary) are open; no real person has seen any of it. WhatsApp removal conflicts with the plan risk that WhatsApp is the real system today: needs a tested plan.
+- Contains real first names: private repo only; do not share outside the NDA circle.
