@@ -231,3 +231,8 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Built NEED/Portal_Board.html from the screens board: HR hierarchy with names, role lens (24 modules x 16 roles), 14 role screens (new: Head of Design, Marketing, Finance, HR, Production Coordination, Admin), each with the data it reads/writes (tables and fields, tagged SS/BS/GAP) and what is hidden from that role. Names in frame headers come from ORG_CHART.md (heads and leads only; ordinary staff names are not in our files).
 - On-track verdict (honest): drafting is on track, validation is not. Phases 5 to 7 drawn while 3 (play back) and 4 (Stand Studio boundary) are open; no real person has seen any of it. WhatsApp removal conflicts with the plan risk that WhatsApp is the real system today: needs a tested plan.
 - Contains real first names: private repo only; do not share outside the NDA circle.
+
+##  — Ten-stand simulation
+- Narendra asked for 10 fictional stand projects (Web Show 12 Nov 2026, GITEX 15 Dec 2026) to show how information, allocation and the flow between departments would work, in a normal page (the pan/zoom boards felt wrong).
+- Built NEED/Stands_Simulation.html: 7 stands at Web Show, 3 at GITEX (ASSUMED split, message was unclear: "7 ... and fire"). Tabs: overview, one stand step by step (RECEIVES, MANAGES, CREATES, SENDS per department with SS/BS tables), each department as of 7 Nov, allocation (PMs, crew vs capacity, machines, trucks), data rows. All data fictional; real names only for staff roles from the HR chart.
+- Shows that RV-26-106 is released 5 days before opening and RV-26-105 is blocked by a missing colour spec.

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ten Stands Simulation</title>
+<style>
+:root{--bg:#f3f5f8;--ink:#1c2330;--mut:#667180;--line:#dbe0e7;--card:#fff;--A:#2f5fc4;--B:#b46a00;--C:#127a5a;--ss:#4f46e5;--bs:#0f766e;--bad:#b3261e;--ok:#1a7f4b;--wk:#8a5a00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#12343b;color:#fff;padding:10px 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0}header nav{display:flex;gap:4px;flex-wrap:wrap}header button{all:unset;cursor:pointer;padding:7px 14px;border-radius:9px;font-size:14px;color:#cfe0e3}header button.on{background:#fff;color:#12343b;font-weight:700}header button:hover:not(.on){background:#24505a}
+.ban{background:#fff3cd;color:#664d03;padding:8px 24px;font-size:13.5px;border-bottom:1px solid #f0dc9b}
+main{max-width:1380px;margin:0 auto;padding:22px 24px 70px}.view{display:none}.view.on{display:block}
+h2{font-size:22px;margin:4px 0 6px}h3{font-size:17px;margin:20px 0 8px}.sub{color:var(--mut);margin:0 0 14px;max-width:880px}
+.row{display:flex;gap:16px;flex-wrap:wrap}.card{background:var(--card);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px #1c23301a}
+.show{flex:1;min-width:300px}.show b{font-size:18px}.big{font-size:34px;font-weight:800;line-height:1}
+table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;font-size:14px;box-shadow:0 2px 10px #1c23301a}
+th{background:#eef1f5;text-align:left;padding:9px 11px;font-size:12.5px;color:#46515f;white-space:nowrap}td{padding:9px 11px;border-top:1px solid #edf0f3;vertical-align:top}
+tr.pick{cursor:pointer}tr.pick:hover td{background:#f4f8fb}tr.sel td{background:#e8f3f5}
+.p{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;font-weight:700;white-space:nowrap}.p.ok{background:#dff3e7;color:var(--ok)}.p.wk{background:#fff0cc;color:var(--wk)}.p.bl{background:#fde2e0;color:var(--bad)}.p.ns{background:#e8eaee;color:#4d5560}.p.nw{background:#dbe7ff;color:#1d4ed8}
+.tg{display:inline-block;font-size:10px;font-weight:700;padding:0 5px;border-radius:5px;color:#fff;margin-right:3px;vertical-align:1px}.tg.SS{background:var(--ss)}.tg.BS{background:var(--bs)}.tg.GAP{background:var(--bad)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 16px}.chip{cursor:pointer;padding:5px 12px;border-radius:18px;background:#fff;border:1px solid var(--line);font-size:13.5px}.chip.on{background:#12343b;color:#fff;border-color:#12343b}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.sum div{background:#f6f8fa;border-radius:10px;padding:8px 11px}.sum small{display:block;color:var(--mut);font-size:12px}
+.st{margin:14px 0 4px;display:flex;align-items:baseline;gap:10px}.st b{font-size:16px}.st span{color:var(--mut);font-size:13px}
+.ev{display:grid;grid-template-columns:100px 150px 90px 1fr;gap:10px;padding:7px 10px;border-radius:9px;background:#fff;margin:3px 0;align-items:start;font-size:14px;box-shadow:0 1px 4px #1c23300d}
+.ev.todo{opacity:.45;background:transparent;box-shadow:none}.ev.open{border-left:5px solid #c27800}.ev.blocked{border-left:5px solid var(--bad);background:#fff5f4}.ev.done{border-left:5px solid #7fc8a0}.ev.todo{border-left:5px dashed #bbb}
+.d{display:inline-block;padding:0 8px;border-radius:9px;font-weight:700;font-size:12.5px}.d.A{background:#e6edfb;color:var(--A)}.d.B{background:#fff1d9;color:var(--B)}.d.C{background:#dcf3ea;color:var(--C)}
+.v{font-size:12px;font-weight:700;letter-spacing:.02em}.v.made{color:#0b6b43}.v.got{color:#1d4ed8}.v.managed{color:#8a5a00}.v.sent{color:#8a1fa0}
+.cp{color:var(--mut);font-size:12.5px}.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px}
+.dc h4{margin:0;font-size:17px}.dc .c4{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:10px}.dc .c4 h5{margin:0 0 3px;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.dc ul{list-style:none;margin:0;padding:0}.dc li{font-size:13.5px;padding:3px 0;border-bottom:1px dashed #e8ebef}.dc li i{font-style:normal;font-weight:700;font-size:12px;color:#12343b}
+.bar{height:16px;background:#e8eaee;border-radius:8px;overflow:hidden;min-width:90px;position:relative}.bar i{display:block;height:100%;background:#4aa383}.bar.over i{background:var(--bad)}
+.note{background:#fff;border-left:5px solid var(--bad);padding:10px 14px;border-radius:8px;margin:10px 0}
+.dt table{font-size:12.5px}.dt td,.dt th{padding:5px 8px}
+</style></head><body>
+<header><h1>Ten stands: how the work moves</h1><nav id="nav"></nav></header>
+<div class="ban">Mock data. The ten stands, exhibitors, dates and numbers are <b>fictional</b>, built to show how information would move. People and departments are from the HR chart. Everything is <b>ASSUMED</b> until confirmed. "Today" in this page is <b>7 Nov 2026</b>.</div>
+<main>
+<div id="v-over" class="view on"></div><div id="v-journey" class="view"></div><div id="v-dept" class="view"></div><div id="v-alloc" class="view"></div><div id="v-data" class="view"></div><div id="v-notes" class="view"></div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const TODAY=new Date(2026,10,7);const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};const fm=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const SHOW={W:{n:'Web Show 2026',d:new Date(2026,10,12),v:'Hall 2 (fictional)'},G:{n:'GITEX 2026',d:new Date(2026,11,15),v:'Trade centre (fictional)'}};
+const ST=['Lead','Brief','Design','Quote','Won','Release','Build area','Pack and move','On site','Show','Dismantle','Close'],OFFS=[-80,-72,-58,-45,-38,-14,-12,-5,-3,0,4,14];
+const DM={mkt:['Marketing','A',1],sales:['Sales','A',4],design:['Design','A',7],est:['Procurement and Estimation','A',3],fin:['Finance','A',3],coord:['Project Coordination','A',2],pm:['Project Management','B',4],prodco:['Production Coordination','B',2],top:['Top managers','B',3],carp:['Carpentry','C',25],water:['Water Paint','C',9],spray:['Spray Paint','C',3],elec:['Electric','C',7],brand:['Branding','C',6],trans:['Transport','C',7]};
+const WHO={mkt:'Priyanka',sales:'Nisah, Riza, Supriya, April',design:'Kalim, Mustafa + 5',est:'Akil, Amal, Mukesh',fin:'Zeeshan, Adil, Rahul',coord:'Gloria, Lakshmi',pm:'Aman + Ali Asgar, Shahanawaz, Hamraz',prodco:'Tabrej, Tayyab',top:'Raveena, Tariq, Prateek',carp:'Jayson + 24',water:'9 painters',spray:'Kayum Ali + 2',elec:'Happy + 6',brand:'Jasvir + 5',trans:'Zain + 6'};
+const S=[
+{code:'RV-26-101',co:'Cloudline Vape',sh:'W',size:24,kind:'branded counter on a shell scheme',pm:'Ali Asgar',rep:'Nisah',des:'Designer 1',cur:7,fl:'car,acr,ele,pri',v:3,loops:2},
+{code:'RV-26-102',co:'Northwind Software',sh:'W',size:54,kind:'two-storey custom stand with LED wall',pm:'Shahanawaz',rep:'Riza',des:'Mustafa',cur:6,fl:'car,wat,spr,ele,pri,fur',v:5,loops:3,doubt:1,av:1},
+{code:'RV-26-103',co:'Bluepeak Cloud',sh:'W',size:36,kind:'open custom stand with CNC signage',pm:'Hamraz',rep:'April',des:'Designer 2',cur:6,fl:'car,wat,ele,cnc,pri',v:4,loops:2,change:1},
+{code:'RV-26-104',co:'Orbit Payments',sh:'W',size:16,kind:'printed graphics on a shell scheme',pm:'Ali Asgar',rep:'Nisah',des:'Designer 1',cur:7,fl:'pri',v:2,loops:1},
+{code:'RV-26-105',co:'Kestrel AI',sh:'W',size:40,kind:'custom stand with an acrylic wall',pm:'Shahanawaz',rep:'Riza',des:'Kalim',cur:6,fl:'car,wat,ele,acr,pri',v:4,loops:2,blocked:['water','Colour spec missing for the back wall']},
+{code:'RV-26-106',co:'Lumen Games',sh:'W',size:72,kind:'custom stand with a raised stage',pm:'Hamraz',rep:'April',des:'Kalim',cur:5,fl:'car,wat,spr,ele,pri,fur',v:6,loops:4,fresh:1,late:1,av:1},
+{code:'RV-26-107',co:'Tidal Data',sh:'W',size:20,kind:'compact counter stand',pm:'Ali Asgar',rep:'Nisah',des:'Designer 3',cur:7,fl:'car,ele,pri',v:2,loops:1},
+{code:'RV-26-108',co:'Sandmark Energy',sh:'G',size:108,kind:'two-level hospitality stand',pm:'',rep:'Supriya',des:'Kalim',cur:2,fl:'car,wat,spr,ele,pri,acr,fur',v:3,loops:3},
+{code:'RV-26-109',co:'Aurum Logistics',sh:'G',size:54,kind:'custom stand with a branded wall',pm:'',rep:'April',des:'Mustafa',cur:3,fl:'car,wat,ele,pri',v:2,loops:2},
+{code:'RV-26-110',co:'Falcon Medical Devices',sh:'G',size:36,kind:'clean white custom stand',pm:'Shahanawaz (planned)',rep:'Nisah',des:'Designer 2',cur:4,fl:'car,wat,ele,pri,acr',v:2,loops:2}];
+const has=(s,k)=>s.fl.includes(k);
+const trades=s=>[['carp',has(s,'car')],['water',has(s,'wat')],['spray',has(s,'spr')],['elec',has(s,'ele')],['brand',has(s,'pri')||has(s,'acr')||has(s,'cnc')]].filter(x=>x[1]).map(x=>x[0]);
+const tg=t=>{const m=t.match(/^(SS|BS|GAP) /);return m?`<span class="tg ${m[1]}">${m[1]}</span>${t.slice(3)}`:t};
+const dn=d=>`<span class="d ${DM[d][1]}">${DM[d][0]}</span>`;
+function evs(s){const tr=trades(s),E=[],a=(st,d,t,x,tb,o)=>E.push({st,d,t,x,tb,o});
+ a(0,'mkt','made',`Adds ${s.co} and the show to the register`,'SS Company, Exhibition','sales');a(0,'sales','got','New interest from Marketing','SS Lead','mkt');
+ a(1,'sales','made',`Brief: ${s.size} m², ${s.kind}`,'SS Brief','design');a(1,'design','got',`Brief arrives; project ${s.code} is created`,'SS Project','sales');
+ a(2,'design','made',`3D and 2D, version ${s.v}`,'SS DesignRevision','sales');a(2,'sales','managed',`Client feedback: ${s.loops} rounds`,'SS LeadInteraction');
+ a(3,'est','got','Item list from Design','SS Project','design');a(3,'est','made','Estimate and quote','SS Estimate','sales');a(3,'sales','sent','Quote to the client','SS SalesDocument');a(3,'fin','got','Quote, for the record','SS SalesDocument','sales');
+ a(4,'sales','managed','Outcome set to CONFIRMED','SS Project.outcome');a(4,'design','managed','Technical status set to APPROVED','SS Project.technicalStatus');a(4,'est','made','Purchase orders for items to buy','SS PurchaseOrder');a(4,'fin','managed','Approves the purchase orders','SS OrderApproval');
+ a(5,'coord','sent','Show dates, bay slot and passes','SS Exhibition + GAP passes','pm');a(5,'design','sent','Final design set and colour spec','SS DesignRevision','pm');a(5,'est','sent','Purchasing list and stock status','SS PurchaseOrder, StockUnit','pm');a(5,'sales','sent','Go-ahead','BS BuildStand.goAhead','pm');
+ a(5,'pm','got','Handover pack: design, spec, proofs, purchase list','BS HandoverCheck','design');a(5,'pm','made',`Release: ${tr.length} trades must see it`,'BS BuildStand, StandDepartment');a(5,'pm','managed',`Allocated to ${s.pm||'a PM'} by the Head of PM`,'BS BuildStand.pmUserId');
+ tr.forEach(d=>a(5,d,'got','NEW: your part of the stand; tap Seen','BS StandDepartment, ChangeSeen','pm'));a(5,'top','got','Stand appears on the Top board','BS derived','pm');
+ const wk={carp:'Structure parts, photos',water:'Paint, finish photo',spray:'Spray finish in the booth',elec:'Fit and test the lights, test photo',brand:'Panels printed, acrylic and CNC done, photos'};
+ tr.forEach(d=>a(6,d,'made',wk[d],'BS BuildTask, BuildAttachment','pm'));
+ if(s.doubt){a(6,'carp','sent','Doubt on the ceiling frame: mark and photo','BS Doubt','design');a(6,'design','made','Answer on the same card','BS Doubt.answer','carp')}
+ if(s.change){a(6,'design','sent','Change: counter height 2.4 to 2.7 m','BS ChangeNotice','pm');tr.forEach(d=>a(6,d,'got','Change: tap Seen','BS ChangeSeen','design'))}
+ a(6,'prodco','managed','Head count per trade per day','BS HeadCount');a(6,'est','sent','Stock status: arrived','SS StockUnit','pm');a(6,'pm','managed','Watches the board; chases only the red items','BS derived');
+ tr.forEach(d=>a(7,d,'made','Pack list, crates labelled','BS Crate','trans'));a(7,'trans','made','Trip booked, crates scanned','BS TruckTrip, Crate','pm');a(7,'pm','sent','Ready to load; slot passed on','BS TruckTrip','trans');if(has(s,'fur'))a(7,'est','sent','Furniture and stock out','SS StockUnit + BS StockRequest','trans');
+ a(8,'trans','made','Truck reached, offloaded','BS TruckTrip','pm');if(has(s,'ele'))a(8,'elec','made','Power on, test photo','BS BuildTask','pm');a(8,'pm','managed','Site steps: platform, structure, putty, paint, fitting, logo','BS BuildTask');
+ a(9,'pm','made','Walk-through and snag list','BS Snag');a(9,'sales','made','Client sign-off','BS Signoff');a(9,'top','got','Board shows the stand done','BS derived','pm');
+ a(10,'trans','made','Crates scanned back','BS Crate');a(10,'est','managed','Stock and furniture back in the store','SS StockMovement');
+ a(11,'pm','made','Lessons in three taps','BS Lesson','design');a(11,'design','got','Lessons from the PM','BS Lesson','pm');a(11,'fin','got','Billable changes for the final invoice','BS ChangeNotice.billable','pm');
+ const cnt={};E.forEach(e=>cnt[e.st]=(cnt[e.st]||0)+1);const seen={};
+ E.forEach(e=>{if(e.st<s.cur)e.s='done';else if(e.st>s.cur)e.s='todo';else{seen[e.st]=(seen[e.st]||0)+1;e.s=seen[e.st]<=Math.ceil(cnt[e.st]/2)?'done':'open';if(s.fresh&&e.t=='got'&&trades(s).includes(e.d))e.s='open';if(s.blocked&&e.d==s.blocked[0]&&e.t=='made'&&e.st==6)e.s='blocked'}});
+ E.forEach(e=>{const o=addD(SHOW[s.sh].d,OFFS[e.st]);e.dt=e.s=='done'?(o<TODAY?o:addD(TODAY,-(s.cur-e.st))):e.s=='todo'?(o>addD(TODAY,(e.st-s.cur)*2)?o:addD(TODAY,(e.st-s.cur)*2)):TODAY});
+ return E}
+S.forEach(s=>s.E=evs(s));
+const status=s=>s.blocked?['bl','Blocked']:(s.late?['bl','Late']:(s.change||s.doubt?['wk','Needs attention']:['ok','On track']));
+const next=s=>{const e=s.E.find(x=>x.s=='blocked'||x.s=='open');return e?`${DM[e.d][0]}: ${e.x}`:'—'};
+let sel=S[1].code;const cs=()=>S.find(s=>s.code==sel);
+const TABS=[['over','Overview'],['journey','One stand, step by step'],['dept','Each department'],['alloc','Allocation'],['data','Data rows'],['notes','Notes and gaps']];
+TABS.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t[1];b.className=i?'':'on';b.onclick=()=>show(t[0]);b.id='t-'+t[0];$('#nav').appendChild(b)});
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+id));TABS.forEach(t=>$('#t-'+t[0]).classList.toggle('on',t[0]==id));scrollTo(0,0)}
+const chips=()=>`<div class="chips">${S.map(s=>`<span class="chip ${s.code==sel?'on':''}" data-c="${s.code}">${s.code.slice(-3)} ${s.co}</span>`).join('')}</div>`;
+const bindChips=()=>document.querySelectorAll('[data-c]').forEach(c=>c.onclick=()=>{sel=c.dataset.c;render()});
+/* ---------- overview ---------- */
+function vOver(){const dl=k=>Math.round((SHOW[k].d-TODAY)/864e5),n=k=>S.filter(s=>s.sh==k);
+ $('#v-over').innerHTML=`<h2>Ten stands, two shows</h2><p class="sub">This is how Ravashing would hold ten live stands in one place. Click a row to follow that stand through every department.</p>
+<div class="row">${['W','G'].map(k=>`<div class="card show"><b>${SHOW[k].n}</b><div class="cp">${SHOW[k].v}</div><div style="margin:10px 0"><span class="big">${dl(k)}</span> days to opening, ${fm(SHOW[k].d)} 2026</div><div>${n(k).length} stands · ${n(k).filter(s=>status(s)[0]=='bl').length} blocked or late · ${n(k).filter(s=>status(s)[0]=='wk').length} need attention</div></div>`).join('')}
+<div class="card show"><b>Where the ten stands are today</b><div style="margin-top:8px">${ST.map((x,i)=>{const c=S.filter(s=>s.cur==i).length;return c?`<div><span class="p ns">${x}</span> ${c} stand${c>1?'s':''}</div>`:''}).join('')}</div></div></div>
+<h3>All ten stands</h3><table><tr><th>Code</th><th>Exhibitor</th><th>Show</th><th>m²</th><th>What it is</th><th>Rep</th><th>PM</th><th>Stage today</th><th>Status</th><th>Next open item</th></tr>${S.map(s=>`<tr class="pick ${s.code==sel?'sel':''}" data-r="${s.code}"><td><b>${s.code}</b></td><td>${s.co}</td><td>${SHOW[s.sh].n.split(' ')[0]}</td><td>${s.size}</td><td>${s.kind}</td><td>${s.rep}</td><td>${s.pm||'<span class="p ns">not yet</span>'}</td><td><span class="p nw">${ST[s.cur]}</span></td><td><span class="p ${status(s)[0]}">${status(s)[1]}</span></td><td>${next(s)}</td></tr>`).join('')}</table>
+<h3>What this shows</h3><div class="row"><div class="card show"><b>Nobody typed a status</b><p class="cp">Stage, colour and next item come from taps and records in each department's own table.</p></div><div class="card show"><b>Risk is visible early</b><p class="cp">RV-26-106 was released five days before opening, and RV-26-105 is blocked by a missing colour spec. A PM would see both without asking.</p></div><div class="card show"><b>Agency and Build meet at one code</b><p class="cp">The stand code (RV-year-number) is the Project in Prateek's schema. Build adds its own rows beside it.</p></div></div>`;
+ document.querySelectorAll('[data-r]').forEach(r=>r.onclick=()=>{sel=r.dataset.r;render();show('journey')})}
+/* ---------- journey ---------- */
+function vJourney(){const s=cs(),tr=trades(s),op=s.E.filter(e=>e.s=='open'||e.s=='blocked').length;
+ $('#v-journey').innerHTML=`<h2>${s.code} · ${s.co}</h2><p class="sub">Each line is one thing a department receives, manages, creates or sends. Coloured bar: green done, amber open now, red blocked, dashed not yet.</p>${chips()}
+<div class="card"><div class="sum"><div><small>Show</small>${SHOW[s.sh].n}, ${fm(SHOW[s.sh].d)}</div><div><small>Stand</small>${s.size} m², ${s.kind}</div><div><small>Rep (Sales)</small>${s.rep}</div><div><small>Designer</small>${s.des}</div><div><small>Project manager</small>${s.pm||'not allocated yet'}</div><div><small>Stage today</small>${ST[s.cur]}</div><div><small>Trades assigned (by element)</small>${tr.map(d=>DM[d][0]).join(', ')||'none'}</div><div><small>Open items now</small>${op}</div></div></div>
+${ST.map((x,i)=>{const e=s.E.filter(y=>y.st==i);return `<div class="st"><b>${i} · ${x}</b><span>${i<s.cur?'done':i==s.cur?'in progress today':'planned'} · ${fm(addD(SHOW[s.sh].d,OFFS[i]))}</span></div>`+e.map(y=>`<div class="ev ${y.s}"><div>${fm(y.dt)}</div><div>${dn(y.d)}</div><div class="v ${y.t}">${{made:'CREATES',got:'RECEIVES',managed:'MANAGES',sent:'SENDS'}[y.t]}</div><div>${y.x} ${y.o?`<span class="cp">${y.t=='got'?'from':'to'} ${DM[y.o][0]}</span>`:''}<br><span class="cp">${tg(y.tb)}</span>${y.s=='blocked'?` <span class="p bl">Blocked: ${s.blocked[1]}</span>`:''}</div></div>`).join('')}).join('')}`;bindChips()}
+/* ---------- departments ---------- */
+let df='';
+function vDept(){const ids=Object.keys(DM);const rec=d=>S.flatMap(s=>s.E.filter(e=>e.d==d&&(e.st==s.cur||e.st==s.cur-1)&&e.s!='todo').map(e=>({s,e})));
+ $('#v-dept').innerHTML=`<h2>Each department, as of 7 Nov 2026</h2><p class="sub">For the ten stands: what each department receives, manages, creates and sends right now (this stage and the one before it). Amber means open today.</p><div class="chips"><span class="chip ${df==''?'on':''}" data-f="">All</span>${ids.map(d=>`<span class="chip ${df==d?'on':''}" data-f="${d}">${DM[d][0]}</span>`).join('')}</div><div class="dg">${ids.filter(d=>!df||df==d).map(d=>{const r=rec(d),g=t=>r.filter(x=>x.e.t==t),col=(t,l)=>`<div><h5 class="v ${t}">${l} (${g(t).length})</h5><ul>${g(t).map(x=>`<li><i>${x.s.code.slice(-3)}</i> ${x.e.x}${x.e.o?` <span class="cp">${x.e.t=='got'?'← ':'→ '}${DM[x.e.o][0]}</span>`:''}${x.e.s=='open'||x.e.s=='blocked'?` <span class="p ${x.e.s=='blocked'?'bl':'wk'}">${x.e.s}</span>`:''}</li>`).join('')||'<li class="cp">nothing now</li>'}</ul></div>`;
+ return `<div class="card dc"><h4>${DM[d][0]} <span class="d ${DM[d][1]}">${DM[d][1]=='A'?'Agency':DM[d][1]=='B'?'Bridge':'Build'}</span></h4><div class="cp">${WHO[d]} · ${DM[d][2]} people</div><div class="c4">${col('got','Receives')}${col('managed','Manages')}${col('made','Creates')}${col('sent','Sends')}</div></div>`}).join('')}</div>`;
+ document.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{df=c.dataset.f;vDept()})}
+/* ---------- allocation ---------- */
+function vAlloc(){const W=S.filter(s=>s.sh=='W'),days=[7,8,9,10,11],CAP={carp:25,water:9,spray:3,elec:7,brand:6,trans:7};
+ const need=(s,d,k)=>{const b=has(s,'pri')||has(s,'acr')||has(s,'cnc'),h=x=>has(s,x),c=Math.ceil;
+  if(d<=8){if(s.cur==7)return k=='carp'&&h('car')&&d==7?2:k=='trans'?(d==7?2:d==8?2:0):0;
+   return k=='carp'?(h('car')?c(s.size/12)+1:0):k=='water'?(h('wat')?c(s.size/30):0):k=='spray'?(h('spr')&&(s.code!='RV-26-106'||d==8)?2:0):k=='elec'?(h('ele')?(s.cur==5?1:2):0):k=='brand'?(b?1:0):0}
+  return k=='carp'?(h('car')?c(s.size/12):0):k=='elec'?(h('ele')?(c((s.size>=50?2:1)/(d==9?1:2))):0):k=='water'?(h('wat')?(d==9?2:1):0):k=='brand'?(b&&d==9?1:0):k=='trans'?(d==9?(h('fur')?2:1):0):0};
+ const tot=(d,k)=>W.reduce((a,s)=>a+need(s,d,k),0);
+ const pms=['Ali Asgar','Shahanawaz','Hamraz'];
+ $('#v-alloc').innerHTML=`<h2>Allocation: who is doing what, when</h2><p class="sub">Built from the stand records, nobody counts it by hand. The numbers are an illustration of the rules (fictional), not real labour data.</p>
+<h3>1. Project managers (set by the Head of PM)</h3><table><tr><th>PM</th><th>Stands</th><th>Stages</th><th>Needs attention</th></tr>${pms.map(p=>{const m=S.filter(s=>s.pm.startsWith(p));return `<tr><td><b>${p}</b></td><td>${m.map(s=>s.code.slice(-3)+' '+s.co).join(', ')}</td><td>${m.map(s=>ST[s.cur]).join(' · ')}</td><td>${m.filter(s=>status(s)[0]!='ok').map(s=>`<span class="p ${status(s)[0]}">${s.code.slice(-3)} ${status(s)[1]}</span>`).join(' ')||'—'}</td></tr>`}).join('')}<tr><td><b>Not allocated yet</b></td><td>${S.filter(s=>!s.pm).map(s=>s.code.slice(-3)+' '+s.co).join(', ')}</td><td>Design and Quote</td><td><span class="p ns">Head of PM sees these coming</span></td></tr></table>
+<h3>2. Crew needed against crew available (Web Show stands)</h3><table><tr><th>Department</th><th>People</th>${days.map(d=>`<th>${d} Nov<br><span class="cp" style="font-weight:400">${d<9?'Build area':d==9?'Site: offload':'Site'}</span></th>`).join('')}</tr>${Object.keys(CAP).map(k=>`<tr><td><b>${DM[k][0]}</b></td><td>${CAP[k]}</td>${days.map(d=>{const t=tot(d,k),o=t>CAP[k];return `<td><div class="bar ${o?'over':''}"><i style="width:${Math.min(100,t/CAP[k]*100)}%"></i></div>${t} of ${CAP[k]} ${o?'<span class="p bl">over</span>':''}</td>`}).join('')}</tr>`).join('')}</table><div class="note">The sheet shows days where more people are needed than the department has. Today this is found by phone calls. The fix is a decision for the Head of PM: move a stand, bring in outside labour, or add hours. Outside labour is not counted here.</div>
+<h3>3. Machines and areas (Resource and Booking)</h3><table><tr><th>Machine or area</th><th>Booked</th><th>Stand</th><th>Note</th></tr><tr><td>CNC router</td><td>7 Nov, 09:00 to 13:00</td><td>103 Bluepeak Cloud</td><td>Signage</td></tr><tr><td>Acrylic bench</td><td>7 to 8 Nov</td><td>101 and 105</td><td>Logo and acrylic wall</td></tr><tr><td>Spray booth (3 people)</td><td>7 Nov</td><td>102 Northwind Software</td><td>—</td></tr><tr><td>Spray booth</td><td>8 Nov</td><td>106 Lumen Games</td><td><span class="p bl">106 was released late, booth is tight</span></td></tr></table>
+<h3>4. Trucks (TruckTrip, TripStand)</h3><table><tr><th>Trip</th><th>Date</th><th>Stands</th><th>Check</th></tr><tr><td>T-41</td><td>8 Nov</td><td>101, 104, 107</td><td><span class="p ok">all packed or packing</span></td></tr><tr><td>T-42</td><td>9 Nov, early</td><td>102, 105</td><td><span class="p bl">105 blocked: colour spec</span></td></tr><tr><td>T-43</td><td>9 Nov</td><td>103, 106</td><td><span class="p bl">106 still in Release; a change on 103 is not fully seen</span></td></tr><tr><td>T-51</td><td>12 Dec</td><td>108, 109, 110</td><td><span class="p ns">too early to book</span></td></tr></table>`}
+/* ---------- data rows ---------- */
+function vData(){const s=cs(),tr=trades(s),rel=s.cur>=5,T=(t,h,r)=>`<h3>${tg(t)}</h3><div class="dt"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table></div>`;
+ const pk=['TECHNICALS','COLOUR_SPEC','PRINT_PROOF','FINISH_SPEC','APPROVALS','PURCHASING_LIST'];
+ $('#v-data').innerHTML=`<h2>The rows behind one stand: ${s.code}</h2><p class="sub">What the tables would hold for this stand today. SS tables belong to Prateek's schema; BS tables are ours (proposed). Fictional.</p>${chips()}`+
+ T('SS Project',['code','outcome','technicalStatus','designerId'],[[s.code,s.cur>=4?'CONFIRMED':'PENDING',s.cur>=4?'APPROVED':s.cur>=3?'CHECKING':'DRAFTING',s.des]])+
+ (rel?T('BS BuildStand',['projectId','source','buildStatus','pm','goAheadAt','releasedAt'],[[s.code,'MANUAL (first slice)',ST[s.cur].toUpperCase(),s.pm,fm(addD(SHOW[s.sh].d,-15)),fm(s.E.find(e=>e.st==5&&e.d=='pm'&&e.t=='made').dt)]])
+ +T('BS StandDepartment',['standId','department','reason','neededFrom','seen'],tr.map(d=>[s.code.slice(-3),DM[d][0],'ELEMENT_RULE',fm(addD(SHOW[s.sh].d,-12)),s.fresh?'<span class="p wk">not yet</span>':'<span class="p ok">yes</span>']))
+ +T('BS HandoverCheck',['standId','kind','state'],pk.map(k=>[s.code.slice(-3),k,(s.blocked&&k=='COLOUR_SPEC')?'<span class="p bl">MISSING</span>':'<span class="p ok">PRESENT</span>'])):'<div class="note">Not released yet, so Build has no rows for this stand. Only Prateek\'s side holds it.</div>')+
+ (s.change?T('BS ChangeNotice and ChangeSeen',['kind','summary','must see','seen'],[['DESIGN_REVISION','Counter height 2.4 to 2.7 m',tr.length+' departments',`<span class="p wk">${Math.ceil(tr.length/2)} of ${tr.length}</span>`]]):'')+
+ (s.doubt?T('BS Doubt',['standId','department','mark','photo','status'],[[s.code.slice(-3),'Carpentry','x 0.62, y 0.31','1 photo','<span class="p wk">OPEN</span>']]):'')+
+ (s.cur>=6?T('BS BuildTask',['standId','department','part','status'],tr.map((d,i)=>[s.code.slice(-3),DM[d][0],['Structure','Paint','Spray finish','Lighting','Panels'][['carp','water','spray','elec','brand'].indexOf(d)],s.cur>6?'<span class="p ok">DONE</span>':(s.blocked&&s.blocked[0]==d)?'<span class="p bl">BLOCKED</span>':i%2?'<span class="p wk">WORKING</span>':'<span class="p ok">DONE</span>'])):'')+
+ (s.cur>=7?T('BS Crate and TruckTrip',['crate','contents','packedBy','trip'],[['CR-26-0'+s.code.slice(-2)+'1','Structure panels',tr[0]?DM[tr[0]][0]:'Branding',s.code=='RV-26-101'||s.code=='RV-26-104'||s.code=='RV-26-107'?'T-41':'T-42'],['CR-26-0'+s.code.slice(-2)+'2','Lights and cables','Electric','same trip']]):'');
+ bindChips()}
+function vNotes(){$('#v-notes').innerHTML=`<h2>Notes and gaps</h2><div class="row"><div class="card show"><b>What is fictional</b><p>Exhibitor names, sizes, dates inside each stage, crew numbers, machine bookings and trucks. The two shows and their opening dates are as Narendra gave them.</p></div><div class="card show"><b>What comes from research</b><p>Departments and head counts (HR chart, 6 Nov), flows between them (told by Ali, Prateek, Akhil), table names (Prateek's 7th update and our proposed Build schema).</p></div><div class="card show"><b>Gaps this exposes</b><ul><li>Nothing in either schema holds passes and approvals (Q104).</li><li>The rep's go-ahead has no field yet (Q105).</li><li>Marketing, Finance and Production Coordination barely appear because we do not know what they do (Q96, Q106, Q107).</li><li>Outside labour is not counted in the crew sheet.</li></ul></div></div><h3>Question for Narendra</h3><p>The message said 7 stands from one show and "fire" (five?) from GITEX. Ten stands in total means 7 plus 3, so that is what is shown. If you meant a different split, tell me and I will change it.</p>`}
+function render(){vOver();vJourney();vDept();vAlloc();vData();vNotes()}render();
+</script></body></html>
