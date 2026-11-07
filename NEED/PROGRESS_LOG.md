@@ -252,3 +252,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra shared "Bashini list.pdf": every name and head count (CONFIRMED, Bashini, 7 Nov). Saved to NEED/ORG_CHART.md (confidential). Resolves Q97 in favour of Aman plus 3 PMs; raises Q111 to Q113.
 - Stands_Simulation.html: 90 real people from the chart replace the generic team entries; Hierarchy tab rebuilt from the roster; new Flow map tab: phases and who is in them, then a snowflake per department (people, creates, manages, receives, sends, tables, screens), then a person view with their portal tabs, tables and steps. 274 flow views and 800 person screens render without errors.
 - Contains real names: private repo only, inside the NDA circle.
+
+##  — Screen images for every person
+- Narendra asked for real images of each tab screen in the Flow map, and for every person and role in it.
+- Flow map: the Screens arm and the person page now show live thumbnails of every tab (click to enlarge) instead of tab names.
+- NEED/screens/: 90 JPG images, one per person on the roster, each showing every screen they can open (fictional data, 7 Nov 2026), plus index.html. Made by make_screens.sh (headless Chrome, about 90 seconds). Images are about 33 MB, so they are in .gitignore and regenerate with the script.
+- Honest limits: these are renders of our design, not photos of a built system; some tabs are empty on 7 Nov because nothing has happened yet (snags, lessons).

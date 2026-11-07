@@ -1,2 +1,4 @@
 .DS_Store
 *.swp
+NEED/screens/*.jpg
+NEED/screens/run.log
