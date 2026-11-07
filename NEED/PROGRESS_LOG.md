@@ -208,3 +208,8 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 
 - Narendra pasted his GitHub access token into the chat. Claude did not use it (typing credentials is not allowed for Claude). Advice given: revoke that token, create a new one, type it only in his own Terminal. Push still pending.
 - Narendra asked to keep context small without losing knowledge. Saved memory notes (token economy rule; project state) so a new or compacted session loses nothing. /compact is run by Narendra, not Claude.
+
+## 2026-11-07 09:47 +04 — GitHub push done
+- Narendra pushed main (67 objects, 85 MiB) to https://github.com/AI-Ravashing/Build.git (private) from his own Terminal. First 403 was a fine-grained token with no Contents read/write; fixed by adding it. CONFIRMED by terminal output.
+- Old token pasted in chat: to be revoked by Narendra (status not confirmed). New token typed only in Terminal.
+- Still open: Annex A check for GitHub (not confirmed approved).
