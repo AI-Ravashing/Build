@@ -199,3 +199,7 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 ## 2026-11-06 18:01 (+04): GitHub target changed
 
 - Prateek told Narendra to create a new Ravashing Gmail account and push the repo to GitHub under it, not under G-Narendra. Narendra will create it and send the new repo address. Nothing pushed. Local commits stay ready; the remote will be switched when the address arrives. Prateek's instruction covers the Annex A worry (told, not confirmed on paper).
+
+## 2026-11-07 09:15 (+04): GitHub remote switched
+
+- Narendra asked to drop the G-Narendra remote and connect https://github.com/AI-Ravashing/Build.git. Done locally (the old GitHub repo was never pushed to and is untouched). Push waits for GitHub sign-in on this computer.
