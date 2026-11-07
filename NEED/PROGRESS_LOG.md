@@ -213,3 +213,9 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra pushed main (67 objects, 85 MiB) to https://github.com/AI-Ravashing/Build.git (private) from his own Terminal. First 403 was a fine-grained token with no Contents read/write; fixed by adding it. CONFIRMED by terminal output.
 - Old token pasted in chat: to be revoked by Narendra (status not confirmed). New token typed only in Terminal.
 - Still open: Annex A check for GitHub (not confirmed approved).
+
+## 2026-11-07 09:56 +04 — UI screens board built
+- Narendra asked for visuals of the portal for every department (screens, access, data flow, photo and table transfer, WhatsApp removed), as a big Miro-style board.
+- Built NEED/UI_Board.html: pan/zoom board, 36 frames: access matrix, who does not need access, 4 Agency touchpoint screens, Top managers, Head PM, PM (desktop and phone), head (desktop) + staff (phone) for the 6 trades, and flow boards (stages, photos, tables, uses, changes). 14 lines carry BEFORE / NOW tags.
+- No Miro tool is connected and Miro is not on the Annex A list (ASSUMED not checked), so this is an HTML board; can be rebuilt in Miro later by hand.
+- All screens are mock-ups, fictional data, ASSUMED. Open: Q89 (doubt route), Q90 (phones, signal), Q96 (Production Coordination).
