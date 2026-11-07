@@ -203,3 +203,8 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 ## 2026-11-07 09:15 (+04): GitHub remote switched
 
 - Narendra asked to drop the G-Narendra remote and connect https://github.com/AI-Ravashing/Build.git. Done locally (the old GitHub repo was never pushed to and is untouched). Push waits for GitHub sign-in on this computer.
+
+## 2026-11-07 09:23 (+04): Push credentials, context economy
+
+- Narendra pasted his GitHub access token into the chat. Claude did not use it (typing credentials is not allowed for Claude). Advice given: revoke that token, create a new one, type it only in his own Terminal. Push still pending.
+- Narendra asked to keep context small without losing knowledge. Saved memory notes (token economy rule; project state) so a new or compacted session loses nothing. /compact is run by Narendra, not Claude.
