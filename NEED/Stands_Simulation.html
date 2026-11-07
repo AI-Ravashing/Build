@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ten Stands Simulation</title>
+<title>Stands Simulation</title>
 <style>
 :root{--bg:#f3f5f8;--ink:#1c2330;--mut:#667180;--line:#dbe0e7;--card:#fff;--A:#2f5fc4;--B:#b46a00;--C:#127a5a;--ss:#4f46e5;--bs:#0f766e;--bad:#b3261e;--ok:#1a7f4b;--wk:#8a5a00}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
@@ -29,11 +29,17 @@ tr.pick{cursor:pointer}tr.pick:hover td{background:#f4f8fb}tr.sel td{background:
 .bar{height:16px;background:#e8eaee;border-radius:8px;overflow:hidden;min-width:90px;position:relative}.bar i{display:block;height:100%;background:#4aa383}.bar.over i{background:var(--bad)}
 .note{background:#fff;border-left:5px solid var(--bad);padding:10px 14px;border-radius:8px;margin:10px 0}
 .dt table{font-size:12.5px}.dt td,.dt th{padding:5px 8px}
+.pf{display:grid;grid-template-columns:270px 1fr 310px;gap:16px;align-items:start}.pcard{position:sticky;top:70px}.pl{list-style:none;margin:6px 0 0;padding:0}.pl li{padding:7px 10px;border-radius:9px;cursor:pointer;margin:2px 0;border:1px solid transparent}.pl li:hover{background:#eef3f6}.pl li.on{background:#12343b;color:#fff}.pl li small{display:block;opacity:.75;font-size:12px}
+.portal{background:#fff;border-radius:14px;box-shadow:0 4px 18px #1c233025;overflow:hidden}.ptop{background:#12343b;color:#fff;padding:9px 14px;display:flex;gap:12px;align-items:center}.ptop .grow{flex:1}.pmid{display:flex;min-height:480px}.pnav{width:190px;background:#eef1f4;border-right:1px solid var(--line);padding:8px 0;flex:none}.pnav div{padding:9px 14px;cursor:pointer;font-size:14px}.pnav div:hover{background:#e3e8ee}.pnav div.on{background:#fff;border-left:4px solid #0f766e;font-weight:700}
+#pbody{flex:1;padding:14px 16px;min-width:0}#pbody h3{margin:0 0 8px}.portal.ph{max-width:400px;margin:0 auto}.portal.ph .pmid{flex-direction:column-reverse;min-height:560px}.portal.ph .pnav{width:auto;display:flex;overflow-x:auto;border-right:0;border-top:1px solid var(--line)}.portal.ph .pnav div{white-space:nowrap;font-size:12.5px;padding:10px 12px}.portal.ph .pnav div.on{border-left:0;border-bottom:3px solid #0f766e}
+.acc table{font-size:12.5px;box-shadow:none}.acc td{padding:5px 6px}.wr{background:#c7ecd6;color:#0b5a31;padding:0 6px;border-radius:5px;font-weight:700}.rd{background:#e0ecff;color:#1a3f99;padding:0 6px;border-radius:5px;font-weight:700}.hid{display:flex;flex-wrap:wrap;gap:4px}.hid span{font-size:12px;color:#8b95a3;text-decoration:line-through;background:#eef0f3;border-radius:6px;padding:0 7px}
+.btn{display:inline-block;background:#0f766e;color:#fff;border-radius:7px;padding:3px 11px;font-weight:600;font-size:13px}.btn.g{background:#e6e8eb;color:#222}.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}.tl>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fafbfc}.tl small{display:block;color:var(--mut)}
+@media(max-width:1100px){.pf{grid-template-columns:1fr}.pcard{position:static}}
 </style></head><body>
-<header><h1>Ten stands: how the work moves</h1><nav id="nav"></nav></header>
-<div class="ban">Mock data. The ten stands, exhibitors, dates and numbers are <b>fictional</b>, built to show how information would move. People and departments are from the HR chart. Everything is <b>ASSUMED</b> until confirmed. "Today" in this page is <b>7 Nov 2026</b>.</div>
+<header><h1>Twelve stands: how the work moves</h1><nav id="nav"></nav></header>
+<div class="ban">Mock data. The twelve stands, exhibitors, dates and numbers are <b>fictional</b>, built to show how information would move. People and departments are from the HR chart. Everything is <b>ASSUMED</b> until confirmed. "Today" in this page is <b>7 Nov 2026</b>.</div>
 <main>
-<div id="v-over" class="view on"></div><div id="v-journey" class="view"></div><div id="v-dept" class="view"></div><div id="v-alloc" class="view"></div><div id="v-data" class="view"></div><div id="v-notes" class="view"></div>
+<div id="v-over" class="view on"></div><div id="v-screens" class="view"></div><div id="v-journey" class="view"></div><div id="v-dept" class="view"></div><div id="v-alloc" class="view"></div><div id="v-data" class="view"></div><div id="v-notes" class="view"></div>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -52,7 +58,9 @@ const S=[
 {code:'RV-26-107',co:'Tidal Data',sh:'W',size:20,kind:'compact counter stand',pm:'Ali Asgar',rep:'Nisah',des:'Designer 3',cur:7,fl:'car,ele,pri',v:2,loops:1},
 {code:'RV-26-108',co:'Sandmark Energy',sh:'G',size:108,kind:'two-level hospitality stand',pm:'',rep:'Supriya',des:'Kalim',cur:2,fl:'car,wat,spr,ele,pri,acr,fur',v:3,loops:3},
 {code:'RV-26-109',co:'Aurum Logistics',sh:'G',size:54,kind:'custom stand with a branded wall',pm:'',rep:'April',des:'Mustafa',cur:3,fl:'car,wat,ele,pri',v:2,loops:2},
-{code:'RV-26-110',co:'Falcon Medical Devices',sh:'G',size:36,kind:'clean white custom stand',pm:'Shahanawaz (planned)',rep:'Nisah',des:'Designer 2',cur:4,fl:'car,wat,ele,pri,acr',v:2,loops:2}];
+{code:'RV-26-110',co:'Falcon Medical Devices',sh:'G',size:36,kind:'clean white custom stand',pm:'Shahanawaz (planned)',rep:'Nisah',des:'Designer 2',cur:4,fl:'car,wat,ele,pri,acr',v:2,loops:2},
+{code:'RV-26-111',co:'Zenith Mobility',sh:'G',size:63,kind:'custom stand with a product display',pm:'',rep:'Riza',des:'Designer 3',cur:1,fl:'car,wat,ele,pri,fur',v:1,loops:0},
+{code:'RV-26-112',co:'Harbor Fintech',sh:'G',size:36,kind:'open stand with a meeting area',pm:'',rep:'Supriya',des:'Designer 1',cur:3,fl:'car,wat,ele,pri',v:2,loops:2}];
 const has=(s,k)=>s.fl.includes(k);
 const trades=s=>[['carp',has(s,'car')],['water',has(s,'wat')],['spray',has(s,'spr')],['elec',has(s,'ele')],['brand',has(s,'pri')||has(s,'acr')||has(s,'cnc')]].filter(x=>x[1]).map(x=>x[0]);
 const tg=t=>{const m=t.match(/^(SS|BS|GAP) /);return m?`<span class="tg ${m[1]}">${m[1]}</span>${t.slice(3)}`:t};
@@ -83,18 +91,134 @@ function evs(s){const tr=trades(s),E=[],a=(st,d,t,x,tb,o)=>E.push({st,d,t,x,tb,o
 S.forEach(s=>s.E=evs(s));
 const status=s=>s.blocked?['bl','Blocked']:(s.late?['bl','Late']:(s.change||s.doubt?['wk','Needs attention']:['ok','On track']));
 const next=s=>{const e=s.E.find(x=>x.s=='blocked'||x.s=='open');return e?`${DM[e.d][0]}: ${e.x}`:'—'};
+const NEED=(s,d,k)=>{const b=has(s,'pri')||has(s,'acr')||has(s,'cnc'),h=x=>has(s,x),c=Math.ceil;
+  if(d<=8){if(s.cur==7)return k=='carp'&&h('car')&&d==7?2:k=='trans'?(d==7?2:d==8?2:0):0;
+   return k=='carp'?(h('car')?c(s.size/12)+1:0):k=='water'?(h('wat')?c(s.size/30):0):k=='spray'?(h('spr')&&(s.code!='RV-26-106'||d==8)?2:0):k=='elec'?(h('ele')?(s.cur==5?1:2):0):k=='brand'?(b?1:0):0}
+  return k=='carp'?(h('car')?c(s.size/12):0):k=='elec'?(h('ele')?(c((s.size>=50?2:1)/(d==9?1:2))):0):k=='water'?(h('wat')?(d==9?2:1):0):k=='brand'?(b&&d==9?1:0):k=='trans'?(d==9?(h('fur')?2:1):0):0};
+const MODS=[
+['board','Board','10 on track · 3 at risk · 1 blocked','BS derived','built from taps; nobody types it'],
+['load','Load by PM','PM 3: 4 stands, 1 late','BS derived','BuildStand.pmUserId, StandDepartment'],
+['alloc','Allocate stands','Pick a PM for RV-26-021','BS BuildStand','pmUserId'],
+['stands','Stands','RV-26-014 · Show C · Sun','SS Project + BS BuildStand','code, show, dates, buildStatus'],
+['pack','Pack and release','5 of 6 ready → Release','BS HandoverCheck','kind, state, releasedAt'],
+['goahead','Go-ahead, client changes','Client said go, 10:05','BS BuildStand, ChangeNotice','goAheadAt, kind=CLIENT_CHANGE'],
+['dset','Design set','Version 4 (replaces 3)','SS DesignRevision, FileAsset','no, summary, fileAssetId'],
+['spec','Colour and finish spec','Back wall: match render','GAP spec table (ask Prateek)','element, colour, finish'],
+['items','Item list (no prices)','LED strip 12 m · in stock','SS item list, price-free view','item, qty, spec'],
+['stock','Stock and furniture','Plywood 18 mm: ordered','SS StockUnit, StockMovement','status, place'],
+['doubts','Doubts','1 open: ceiling frame','BS Doubt','markX, markY, photo, status, answer'],
+['changes','Changes: NEW, Seen','Height 2.4 → 2.7 m · 3 of 6 seen','BS ChangeNotice, ChangeSeen','summary, severity, seenAt'],
+['tasks','Tasks and photos','Counter front: working','BS BuildTask, TaskEvent, BuildAttachment','status, blockReason, doneAt, photo'],
+['crates','Crates and trips','12 crates · 11 scanned','BS Crate, TruckTrip, TripStand','code, loadedAt, reachedAt'],
+['dates','Show dates and passes','Bay slot Sun 07:30','SS Exhibition + GAP passes','buildUpFrom, slot, passState'],
+['heads','Head count and crews','Carpentry: 8 own, 2 outside','BS HeadCount, CrewMember, Booking','onDate, ownCount, outsideCount'],
+['snags','Snags and sign-off','2 snags open','BS Snag, Signoff','kind, status, signedAt'],
+['lessons','Lessons','Three taps at close','BS Lesson','cause, note'],
+['quote','Quotes and estimating','Estimate revision 2','SS Estimate, EstimateLine (money)','money fields: Build never sees'],
+['po','Purchase orders','1 waiting approval','SS PurchaseOrder, GoodsReceipt','supplier, lines, state'],
+['approvals','Approvals, billable changes','2 changes to invoice','SS OrderApproval + BS ChangeNotice.billable','state, billable'],
+['leads','Leads and pipeline','Show D: quote sent','SS Lead, LeadInteraction','stage, nextStep'],
+['register','Companies and shows','Show C · Show D','SS Company, Exhibition','name, dates'],
+['people','People and roles','Roster, logins','SS User, ModuleRole + BS CrewMember','name, department, isHead'],
+['routing','Alert rules','Who sees which event','BS EventRoute, Watch','eventKind, consumer, delivery']];
+const ROLES={
+top:['Top managers','Raveena, Tariq, Prateek','desk','board:R load:R stands:R snags:R lessons:R','Top'],
+headpm:['Head of PM','Aman','desk','board:R load:R alloc:W stands:R pack:R dset:R doubts:R changes:R tasks:R crates:R dates:R heads:R snags:R lessons:R','Head PM'],
+pm:['Project manager','Ali Asgar, Shahanawaz, Hamraz','desk','stands:W pack:W goahead:R dset:R spec:R items:R stock:R doubts:R changes:R tasks:W crates:R dates:R heads:R snags:W lessons:W','PM'],
+prodco:['Production Coordination','Tabrej, Tayyab','desk','stands:R dset:R items:R changes:R tasks:R crates:R dates:R heads:W','Prod. Coord.'],
+foreman:['Head of a trade','Jayson, Happy, Kayum Ali, Jasvir, Zain (Water Paint head not named)','desk','stands:R dset:R spec:R items:R stock:R doubts:W changes:W tasks:W crates:W heads:W','Trade head'],
+trade:['Floor staff','Seniors Manoj, Talib, Ahmad, Sunny; carpenters, electricians, painters, sprayers, branding operators','phone','stands:R dset:R spec:R items:R doubts:W changes:W tasks:W crates:W','Staff'],
+loader:['Driver or loader','Zain\'s team of 6','phone','crates:W dates:R tasks:W','Driver'],
+designhead:['Head of Design','Kalim (Mustafa below him)','desk','board:R stands:R dset:W spec:W items:W doubts:W changes:W tasks:R dates:R lessons:R','Design head'],
+designer:['Designer','3 x 3D and 2 x 2D designers','desk','stands:R dset:W spec:W items:W doubts:W changes:W lessons:R','Designer'],
+rep:['Sales (the rep)','Nisah, Riza, Supriya, April','desk','stands:W goahead:W dset:R spec:R items:R changes:W tasks:R snags:W leads:W register:R','Sales'],
+mkt:['Marketing','Priyanka','desk','register:W leads:R','Marketing'],
+estproc:['Procurement and Estimation','Akil, Amal, Mukesh','desk','stands:R dset:R items:R stock:W quote:W po:W changes:R crates:R register:R','Proc. & Est.'],
+fin:['Finance','Zeeshan, Adil, Rahul','desk','quote:R po:R approvals:W register:R','Finance'],
+coord:['Project Coordination','Gloria, Lakshmi','desk','stands:R dates:W changes:R register:R','Coord.'],
+hr:['HR','Pooja, Bashini','desk','people:W heads:R','HR'],
+admin:['AI and Digitalization (admin)','Narendra','desk','board:R people:W routing:W register:R','Admin']};
+const view=r=>Object.fromEntries(ROLES[r][3].split(' ').map(s=>s.split(':')));
+/* ===== Screens by person ===== */
+const PEOPLE={
+ sales:[['Nisah','Senior BDE','rep'],['Riza','Junior BDE','rep'],['Supriya','Junior BDE','rep'],['April','BDE','rep']],
+ design:[['Kalim','Head of Design','designhead'],['Mustafa','Design, below Kalim','designer'],['Designer 1','3D designer','designer'],['Designer 2','3D designer','designer'],['Designer 3','3D designer','designer'],['Designer 4','2D designer','designer'],['Designer 5','2D designer','designer']],
+ est:[['Akil','Procurement manager','estproc'],['Amal','Procurement executive','estproc'],['Mukesh','Estimation executive','estproc']],
+ fin:[['Zeeshan','Senior','fin'],['Adil','Finance','fin'],['Rahul','Finance','fin']],
+ coord:[['Gloria','Project Coordination','coord'],['Lakshmi','Admin assistant','coord']],
+ mkt:[['Priyanka','Marketing executive','mkt']],
+ hr:[['Pooja','HR manager','hr'],['Bashini','HR executive','hr']],
+ admin:[['Narendra','AI and Digitalization','admin']],
+ top:[['Raveena','CEO','top'],['Tariq','General Manager','top'],['Prateek','International Division head','top']],
+ pm:[['Aman','Head of PM','headpm'],['Ali Asgar','PM','pm'],['Shahanawaz','PM','pm'],['Hamraz','PM','pm']],
+ prodco:[['Tabrej','Production Coordination','prodco'],['Tayyab','Production Coordination','prodco']],
+ carp:[['Jayson','Foreman','foreman'],['Manoj','Senior carpenter','trade'],['Talib','Senior carpenter','trade'],['Ahmad','Senior carpenter','trade'],['Carpenter (21)','a typical carpenter','trade']],
+ water:[['Head not named','vacant on the HR chart','foreman'],['Painter (9)','a typical painter','trade']],
+ spray:[['Kayum Ali','Head','foreman'],['Sprayer (2)','a typical sprayer','trade']],
+ elec:[['Happy','Foreman','foreman'],['Sunny','Senior electrician','trade'],['Electrician (5)','a typical electrician','trade']],
+ brand:[['Jasvir','Head','foreman'],['Printing operator (3)','','trade'],['Acrylic operator (1)','','trade'],['CNC operator (1)','','trade']],
+ trans:[['Zain','Head','foreman'],['Driver or loader (6)','','loader']]};
+const DN={sales:'Sales',design:'Design',est:'Procurement and Estimation',fin:'Finance',coord:'Project Coordination',mkt:'Marketing',hr:'HR',admin:'AI and Digitalization',top:'Top managers',pm:'Project Management',prodco:'Production Coordination',carp:'Carpentry',water:'Water Paint',spray:'Spray Paint',elec:'Electric',brand:'Branding',trans:'Transport'};
+const DZ={sales:'A',design:'A',est:'A',fin:'A',coord:'A',mkt:'A',hr:'A',admin:'A',top:'B',pm:'B',prodco:'B',carp:'C',water:'C',spray:'C',elec:'C',brand:'C',trans:'C'};
+
+let sdept='sales',sperson='Nisah',smod=null;
+const mineFor=(p,dept)=>{const f=p[0].split(' ')[0];switch(p[2]){case 'rep':return S.filter(s=>s.rep==f);case 'pm':return S.filter(s=>s.pm.startsWith(f));case 'designer':return S.filter(s=>s.des==p[0]);case 'trade':case 'foreman':return S.filter(s=>s.cur>=5&&trades(s).includes(dept));case 'loader':return S.filter(s=>s.cur>=7);default:return S}};
+const tb=(c,r)=>r.length?`<table><tr>${c.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table>`:'<p class="cp">Nothing for this person right now.</p>';
+const stp=s=>`<span class="p ${status(s)[0]}">${status(s)[1]}</span>`,sg=s=>`<b>${s.code.slice(-3)}</b> ${s.co}`;
+const ITEMS={car:'Plywood 18 mm',wat:'Water-based paint',spr:'Spray lacquer',ele:'LED strip and drivers',pri:'Printed panels',acr:'Acrylic logo',cnc:'CNC-cut signage',fur:'Furniture (reuse)'};
+const MR={
+ board:(L)=>`<div class="tl">${S.map(s=>`<div>${sg(s)}<small>${ST[s.cur]}</small>${stp(s)}</div>`).join('')}</div>`,
+ load:()=>tb(['PM','Stands','Needs attention'],['Ali Asgar','Shahanawaz','Hamraz'].map(p=>{const m=S.filter(s=>s.pm.startsWith(p));return[`<b>${p}</b>`,m.length,m.filter(s=>status(s)[0]!='ok').map(stp).join(' ')||'—']})),
+ alloc:()=>tb(['Stand','Stage','PM','Action'],S.filter(s=>!s.pm||s.pm.includes('planned')).map(s=>[sg(s),ST[s.cur],s.pm||'<span class="p ns">not yet</span>','<span class="btn">Pick a PM</span>'])),
+ stands:(L,p,d)=>tb(['Stand','Show','Stage','Status','Next open item'],L.map(s=>[sg(s),SHOW[s.sh].n.split(' ')[0],ST[s.cur],stp(s),next(s)])),
+ pack:(L)=>tb(['Stand','Technicals','Colour spec','Proofs','Purchase list','Release'],L.filter(s=>s.cur>=4).map(s=>{const o='<span class="p ok">✓</span>',m='<span class="p bl">missing</span>';return[sg(s),o,s.blocked?m:o,s.cur>=5?o:'<span class="p wk">pending</span>',s.cur>=5?o:'<span class="p wk">pending</span>',s.cur>=5?'released':'<span class="btn g">Not yet</span>']})),
+ goahead:(L)=>tb(['Stand','Go-ahead','Client change'],L.filter(s=>s.cur>=3).map(s=>[sg(s),s.cur>=5?'<span class="p ok">given</span>':'<span class="btn">Give go-ahead</span>',s.change?'height 2.4 to 2.7 m':'—'])),
+ dset:(L)=>tb(['Stand','Latest version','Replaces','Design status'],L.filter(s=>s.cur>=2).map(s=>[sg(s),'v'+s.v,s.v>1?'v'+(s.v-1):'—',s.cur>=4?'APPROVED':'CHECKING'])),
+ spec:(L)=>tb(['Stand','Colour and finish spec'],L.filter(s=>s.cur>=4).map(s=>[sg(s),s.blocked?'<span class="p bl">missing for back wall</span>':'<span class="p ok">complete</span>'])),
+ items:(L)=>tb(['Stand','Items (no prices)','Status'],L.filter(s=>s.cur>=3).map(s=>[sg(s),s.fl.split(',').map(f=>ITEMS[f]).filter(Boolean).join(', '),s.cur>=6?'arrived':s.cur>=4?'ordered':'to price'])),
+ stock:(L)=>tb(['Stand','Stock and furniture','Status'],L.filter(s=>s.cur>=4&&has(s,'fur')||s.cur>=6).map(s=>[sg(s),has(s,'fur')?'furniture and plywood':'plywood',s.cur>=7?'out to truck':s.cur>=6?'arrived':'ordered'])),
+ doubts:(L)=>tb(['Stand','Department','Mark on drawing','Status'],L.filter(s=>s.doubt).map(s=>[sg(s),'Carpentry','ceiling frame, x 0.62 y 0.31','<span class="p wk">OPEN, with Design</span>'])),
+ changes:(L)=>tb(['Stand','Change','Seen by','Action'],L.filter(s=>s.change).map(s=>[sg(s),'Counter height 2.4 to 2.7 m',Math.ceil(trades(s).length/2)+' of '+trades(s).length,'<span class="btn">Seen</span>'])),
+ tasks:(L,p,d)=>tb(['Stand','Task','Status','Action'],L.filter(s=>s.cur>=6).map(s=>{const b=s.blocked&&s.blocked[0]==d;return[sg(s),DN[d]||'all trades',b?'<span class="p bl">BLOCKED: '+s.blocked[1]+'</span>':s.cur>6?'<span class="p ok">DONE</span>':'<span class="p wk">WORKING</span>','<span class="btn">Done</span> <span class="btn g">📷 Photo</span>']})),
+ crates:(L)=>tb(['Stand','Crates','Trip'],L.filter(s=>s.cur>=7).map(s=>[sg(s),'3 packed, labelled',['RV-26-101','RV-26-104','RV-26-107'].includes(s.code)?'T-41, 8 Nov':'T-42, 9 Nov'])),
+ dates:()=>tb(['Show','Opening','Build-up','Bay slot','Passes'],[['Web Show 2026','12 Nov','9 to 11 Nov','Sun 07:30','<span class="p ok">issued</span>'],['GITEX 2026','15 Dec','12 to 14 Dec','not asked yet','<span class="p ns">not yet</span>']]),
+ heads:(L,p,d)=>{const W=S.filter(s=>s.sh=='W'),k=['carp','water','spray','elec','brand','trans'].includes(d)?d:'carp';return `<p class="cp">${DN[k]}: people needed per day for the Web Show (fictional)</p>`+tb(['Day','Needed'],[7,8,9,10,11].map(x=>[x+' Nov',W.reduce((a,s)=>a+NEED(s,x,k),0)+' of '+DM[k][2]]))},
+ snags:()=>'<p class="cp">No snags yet. The walk-through starts on site on 9 Nov. Open snags will list here with Fixed buttons.</p>',
+ lessons:()=>'<p class="cp">Lessons are recorded in three taps when a stand closes. None yet.</p>',
+ quote:(L)=>tb(['Stand','Estimate','Quote','Amount'],L.filter(s=>s.cur>=3).map(s=>[sg(s),'revision '+s.v,s.cur>=3?'sent':'drafting','hidden from Build roles (money)'])),
+ po:(L)=>tb(['Stand','Purchase orders','State'],L.filter(s=>s.cur>=4).map(s=>[sg(s),'plywood, paint, LED',s.cur>=6?'received':s.cur==5?'ordered':'<span class="p wk">awaiting approval</span>'])),
+ approvals:(L)=>tb(['Item','Stand','Action'],L.filter(s=>s.cur==4).map(s=>['Purchase order',sg(s),'<span class="btn">Approve</span>']).concat(L.filter(s=>s.change).map(s=>['Billable change: height',sg(s),'<span class="btn g">Add to invoice</span>']))),
+ leads:(L)=>tb(['Stand','Stage','Next step'],L.filter(s=>s.cur<=4).map(s=>[sg(s),ST[s.cur],next(s)])),
+ register:()=>tb(['Exhibitor','Show'],S.map(s=>[s.co,SHOW[s.sh].n])),
+ people:()=>tb(['Department','People','Logins'],Object.keys(PEOPLE).map(d=>[DN[d],PEOPLE[d].length+' listed','ASSUMED: office staff yes, floor staff by phone'])),
+ routing:()=>tb(['Event','Who sees it','How','Must tap Seen'],[['Release','each trade on the stand','instant','yes'],['Change','every department that relies on it','instant','yes'],['Doubt answered','everyone on the stand','instant','no'],['Step late','PM and Head of PM','instant','no'],['Daily summary','Top managers','digest 18:00','no']])};
+function vScreens(){
+ const sp=PEOPLE[sdept].find(p=>p[0]==sperson)||PEOPLE[sdept][0];sperson=sp[0];
+ const r=sp[2],v=view(r),mods=MODS.filter(m=>v[m[0]]);if(!smod||!v[smod])smod=mods[0]&&mods[0][0];
+ const ph=ROLES[r][2]=='phone',L=mineFor(sp,sdept),nW=Object.values(v).filter(x=>x=='W').length;
+ const group=(z,l)=>`<div class="cp" style="margin:10px 0 2px;font-weight:700">${l}</div>`+Object.keys(PEOPLE).filter(d=>DZ[d]==z).map(d=>`<span class="chip ${d==sdept?'on':''}" data-sd="${d}">${DN[d]}</span>`).join(' ');
+ const m=mods.find(x=>x[0]==smod);
+ $('#v-screens').innerHTML=`<h2>Screens by person</h2><p class="sub">Pick a department, then a person. You see the portal exactly as that person would: only their tabs, with the twelve stands filtered to what is theirs. The panel on the right lists the tables they read and write, and what is hidden from them.</p>
+ <div class="card">${group('A','Agency')}${group('B','Bridge')}${group('C','Build')}</div><br>
+ <div class="pf"><div class="card pcard"><b>${DN[sdept]}</b><ul class="pl">${PEOPLE[sdept].map(p=>`<li class="${p[0]==sperson?'on':''}" data-sp="${p[0]}">${p[0]}<small>${p[1]||ROLES[p[2]][0]} · ${ROLES[p[2]][0]}</small></li>`).join('')}</ul></div>
+ <div><div class="card" style="margin-bottom:12px"><b>${sp[0]}</b> · ${sp[1]||ROLES[r][0]} <div class="cp">Role in the portal: ${ROLES[r][0]} · ${ph?'phone, one-handed':'desktop or tablet'} · sees ${mods.length} of ${MODS.length} tabs · edits ${nW} · ${L.length} of the 12 stands are theirs</div></div>
+ <div class="portal ${ph?'ph':''}"><div class="ptop"><b>Ravashing Build</b><span class="p ns">${ROLES[r][0]}</span><span class="grow"></span><span>${sp[0]}</span></div><div class="pmid"><div class="pnav">${mods.map(x=>`<div class="${x[0]==smod?'on':''}" data-m="${x[0]}">${x[1]}${v[x[0]]=='W'?' ✎':''}</div>`).join('')}</div><div id="pbody"><h3>${m?m[1]:'—'} ${m?`<span class="${v[smod]=='W'?'wr':'rd'}">${v[smod]=='W'?'can edit':'read only'}</span>`:''}</h3>${m?MR[smod](L,sp,sdept):''}</div></div></div></div>
+ <div class="card acc"><b>What this person can reach</b><h5 style="margin:10px 0 4px;font-size:12px;text-transform:uppercase;color:#667180">Reads (R) and writes (W)</h5><table>${mods.map(x=>`<tr><td><span class="${v[x[0]]=='W'?'wr':'rd'}">${v[x[0]]}</span></td><td><b>${x[1]}</b><br>${tg(x[3])}<br><span class="cp">${x[4]}</span></td></tr>`).join('')}</table><h5 style="margin:12px 0 4px;font-size:12px;text-transform:uppercase;color:#667180">Hidden from this person</h5><div class="hid">${MODS.filter(x=>!v[x[0]]).map(x=>`<span>${x[1]}</span>`).join('')}</div></div></div>`;
+ document.querySelectorAll('[data-sd]').forEach(c=>c.onclick=()=>{sdept=c.dataset.sd;sperson=PEOPLE[sdept][0][0];smod=null;vScreens()});
+ document.querySelectorAll('[data-sp]').forEach(c=>c.onclick=()=>{sperson=c.dataset.sp;smod=null;vScreens()});
+ document.querySelectorAll('[data-m]').forEach(c=>c.onclick=()=>{smod=c.dataset.m;vScreens()})}
 let sel=S[1].code;const cs=()=>S.find(s=>s.code==sel);
-const TABS=[['over','Overview'],['journey','One stand, step by step'],['dept','Each department'],['alloc','Allocation'],['data','Data rows'],['notes','Notes and gaps']];
+const TABS=[['over','Overview'],['screens','Screens by person'],['journey','One stand, step by step'],['dept','Each department'],['alloc','Allocation'],['data','Data rows'],['notes','Notes and gaps']];
 TABS.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t[1];b.className=i?'':'on';b.onclick=()=>show(t[0]);b.id='t-'+t[0];$('#nav').appendChild(b)});
 function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id=='v-'+id));TABS.forEach(t=>$('#t-'+t[0]).classList.toggle('on',t[0]==id));scrollTo(0,0)}
 const chips=()=>`<div class="chips">${S.map(s=>`<span class="chip ${s.code==sel?'on':''}" data-c="${s.code}">${s.code.slice(-3)} ${s.co}</span>`).join('')}</div>`;
 const bindChips=()=>document.querySelectorAll('[data-c]').forEach(c=>c.onclick=()=>{sel=c.dataset.c;render()});
 /* ---------- overview ---------- */
 function vOver(){const dl=k=>Math.round((SHOW[k].d-TODAY)/864e5),n=k=>S.filter(s=>s.sh==k);
- $('#v-over').innerHTML=`<h2>Ten stands, two shows</h2><p class="sub">This is how Ravashing would hold ten live stands in one place. Click a row to follow that stand through every department.</p>
+ $('#v-over').innerHTML=`<h2>Twelve stands, two shows</h2><p class="sub">This is how Ravashing would hold twelve live stands in one place. Click a row to follow that stand through every department.</p>
 <div class="row">${['W','G'].map(k=>`<div class="card show"><b>${SHOW[k].n}</b><div class="cp">${SHOW[k].v}</div><div style="margin:10px 0"><span class="big">${dl(k)}</span> days to opening, ${fm(SHOW[k].d)} 2026</div><div>${n(k).length} stands · ${n(k).filter(s=>status(s)[0]=='bl').length} blocked or late · ${n(k).filter(s=>status(s)[0]=='wk').length} need attention</div></div>`).join('')}
-<div class="card show"><b>Where the ten stands are today</b><div style="margin-top:8px">${ST.map((x,i)=>{const c=S.filter(s=>s.cur==i).length;return c?`<div><span class="p ns">${x}</span> ${c} stand${c>1?'s':''}</div>`:''}).join('')}</div></div></div>
-<h3>All ten stands</h3><table><tr><th>Code</th><th>Exhibitor</th><th>Show</th><th>m²</th><th>What it is</th><th>Rep</th><th>PM</th><th>Stage today</th><th>Status</th><th>Next open item</th></tr>${S.map(s=>`<tr class="pick ${s.code==sel?'sel':''}" data-r="${s.code}"><td><b>${s.code}</b></td><td>${s.co}</td><td>${SHOW[s.sh].n.split(' ')[0]}</td><td>${s.size}</td><td>${s.kind}</td><td>${s.rep}</td><td>${s.pm||'<span class="p ns">not yet</span>'}</td><td><span class="p nw">${ST[s.cur]}</span></td><td><span class="p ${status(s)[0]}">${status(s)[1]}</span></td><td>${next(s)}</td></tr>`).join('')}</table>
+<div class="card show"><b>Where the twelve stands are today</b><div style="margin-top:8px">${ST.map((x,i)=>{const c=S.filter(s=>s.cur==i).length;return c?`<div><span class="p ns">${x}</span> ${c} stand${c>1?'s':''}</div>`:''}).join('')}</div></div></div>
+<h3>All twelve stands</h3><table><tr><th>Code</th><th>Exhibitor</th><th>Show</th><th>m²</th><th>What it is</th><th>Rep</th><th>PM</th><th>Stage today</th><th>Status</th><th>Next open item</th></tr>${S.map(s=>`<tr class="pick ${s.code==sel?'sel':''}" data-r="${s.code}"><td><b>${s.code}</b></td><td>${s.co}</td><td>${SHOW[s.sh].n.split(' ')[0]}</td><td>${s.size}</td><td>${s.kind}</td><td>${s.rep}</td><td>${s.pm||'<span class="p ns">not yet</span>'}</td><td><span class="p nw">${ST[s.cur]}</span></td><td><span class="p ${status(s)[0]}">${status(s)[1]}</span></td><td>${next(s)}</td></tr>`).join('')}</table>
 <h3>What this shows</h3><div class="row"><div class="card show"><b>Nobody typed a status</b><p class="cp">Stage, colour and next item come from taps and records in each department's own table.</p></div><div class="card show"><b>Risk is visible early</b><p class="cp">RV-26-106 was released five days before opening, and RV-26-105 is blocked by a missing colour spec. A PM would see both without asking.</p></div><div class="card show"><b>Agency and Build meet at one code</b><p class="cp">The stand code (RV-year-number) is the Project in Prateek's schema. Build adds its own rows beside it.</p></div></div>`;
  document.querySelectorAll('[data-r]').forEach(r=>r.onclick=()=>{sel=r.dataset.r;render();show('journey')})}
 /* ---------- journey ---------- */
@@ -110,17 +234,14 @@ function vDept(){const ids=Object.keys(DM);const rec=d=>S.flatMap(s=>s.E.filter(
  document.querySelectorAll('[data-f]').forEach(c=>c.onclick=()=>{df=c.dataset.f;vDept()})}
 /* ---------- allocation ---------- */
 function vAlloc(){const W=S.filter(s=>s.sh=='W'),days=[7,8,9,10,11],CAP={carp:25,water:9,spray:3,elec:7,brand:6,trans:7};
- const need=(s,d,k)=>{const b=has(s,'pri')||has(s,'acr')||has(s,'cnc'),h=x=>has(s,x),c=Math.ceil;
-  if(d<=8){if(s.cur==7)return k=='carp'&&h('car')&&d==7?2:k=='trans'?(d==7?2:d==8?2:0):0;
-   return k=='carp'?(h('car')?c(s.size/12)+1:0):k=='water'?(h('wat')?c(s.size/30):0):k=='spray'?(h('spr')&&(s.code!='RV-26-106'||d==8)?2:0):k=='elec'?(h('ele')?(s.cur==5?1:2):0):k=='brand'?(b?1:0):0}
-  return k=='carp'?(h('car')?c(s.size/12):0):k=='elec'?(h('ele')?(c((s.size>=50?2:1)/(d==9?1:2))):0):k=='water'?(h('wat')?(d==9?2:1):0):k=='brand'?(b&&d==9?1:0):k=='trans'?(d==9?(h('fur')?2:1):0):0};
+ const need=NEED;
  const tot=(d,k)=>W.reduce((a,s)=>a+need(s,d,k),0);
  const pms=['Ali Asgar','Shahanawaz','Hamraz'];
  $('#v-alloc').innerHTML=`<h2>Allocation: who is doing what, when</h2><p class="sub">Built from the stand records, nobody counts it by hand. The numbers are an illustration of the rules (fictional), not real labour data.</p>
 <h3>1. Project managers (set by the Head of PM)</h3><table><tr><th>PM</th><th>Stands</th><th>Stages</th><th>Needs attention</th></tr>${pms.map(p=>{const m=S.filter(s=>s.pm.startsWith(p));return `<tr><td><b>${p}</b></td><td>${m.map(s=>s.code.slice(-3)+' '+s.co).join(', ')}</td><td>${m.map(s=>ST[s.cur]).join(' · ')}</td><td>${m.filter(s=>status(s)[0]!='ok').map(s=>`<span class="p ${status(s)[0]}">${s.code.slice(-3)} ${status(s)[1]}</span>`).join(' ')||'—'}</td></tr>`}).join('')}<tr><td><b>Not allocated yet</b></td><td>${S.filter(s=>!s.pm).map(s=>s.code.slice(-3)+' '+s.co).join(', ')}</td><td>Design and Quote</td><td><span class="p ns">Head of PM sees these coming</span></td></tr></table>
 <h3>2. Crew needed against crew available (Web Show stands)</h3><table><tr><th>Department</th><th>People</th>${days.map(d=>`<th>${d} Nov<br><span class="cp" style="font-weight:400">${d<9?'Build area':d==9?'Site: offload':'Site'}</span></th>`).join('')}</tr>${Object.keys(CAP).map(k=>`<tr><td><b>${DM[k][0]}</b></td><td>${CAP[k]}</td>${days.map(d=>{const t=tot(d,k),o=t>CAP[k];return `<td><div class="bar ${o?'over':''}"><i style="width:${Math.min(100,t/CAP[k]*100)}%"></i></div>${t} of ${CAP[k]} ${o?'<span class="p bl">over</span>':''}</td>`}).join('')}</tr>`).join('')}</table><div class="note">The sheet shows days where more people are needed than the department has. Today this is found by phone calls. The fix is a decision for the Head of PM: move a stand, bring in outside labour, or add hours. Outside labour is not counted here.</div>
 <h3>3. Machines and areas (Resource and Booking)</h3><table><tr><th>Machine or area</th><th>Booked</th><th>Stand</th><th>Note</th></tr><tr><td>CNC router</td><td>7 Nov, 09:00 to 13:00</td><td>103 Bluepeak Cloud</td><td>Signage</td></tr><tr><td>Acrylic bench</td><td>7 to 8 Nov</td><td>101 and 105</td><td>Logo and acrylic wall</td></tr><tr><td>Spray booth (3 people)</td><td>7 Nov</td><td>102 Northwind Software</td><td>—</td></tr><tr><td>Spray booth</td><td>8 Nov</td><td>106 Lumen Games</td><td><span class="p bl">106 was released late, booth is tight</span></td></tr></table>
-<h3>4. Trucks (TruckTrip, TripStand)</h3><table><tr><th>Trip</th><th>Date</th><th>Stands</th><th>Check</th></tr><tr><td>T-41</td><td>8 Nov</td><td>101, 104, 107</td><td><span class="p ok">all packed or packing</span></td></tr><tr><td>T-42</td><td>9 Nov, early</td><td>102, 105</td><td><span class="p bl">105 blocked: colour spec</span></td></tr><tr><td>T-43</td><td>9 Nov</td><td>103, 106</td><td><span class="p bl">106 still in Release; a change on 103 is not fully seen</span></td></tr><tr><td>T-51</td><td>12 Dec</td><td>108, 109, 110</td><td><span class="p ns">too early to book</span></td></tr></table>`}
+<h3>4. Trucks (TruckTrip, TripStand)</h3><table><tr><th>Trip</th><th>Date</th><th>Stands</th><th>Check</th></tr><tr><td>T-41</td><td>8 Nov</td><td>101, 104, 107</td><td><span class="p ok">all packed or packing</span></td></tr><tr><td>T-42</td><td>9 Nov, early</td><td>102, 105</td><td><span class="p bl">105 blocked: colour spec</span></td></tr><tr><td>T-43</td><td>9 Nov</td><td>103, 106</td><td><span class="p bl">106 still in Release; a change on 103 is not fully seen</span></td></tr><tr><td>T-51</td><td>12 Dec</td><td>108 to 112</td><td><span class="p ns">too early to book</span></td></tr></table>`}
 /* ---------- data rows ---------- */
 function vData(){const s=cs(),tr=trades(s),rel=s.cur>=5,T=(t,h,r)=>`<h3>${tg(t)}</h3><div class="dt"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table></div>`;
  const pk=['TECHNICALS','COLOUR_SPEC','PRINT_PROOF','FINISH_SPEC','APPROVALS','PURCHASING_LIST'];
@@ -134,6 +255,6 @@ function vData(){const s=cs(),tr=trades(s),rel=s.cur>=5,T=(t,h,r)=>`<h3>${tg(t)}
  (s.cur>=6?T('BS BuildTask',['standId','department','part','status'],tr.map((d,i)=>[s.code.slice(-3),DM[d][0],['Structure','Paint','Spray finish','Lighting','Panels'][['carp','water','spray','elec','brand'].indexOf(d)],s.cur>6?'<span class="p ok">DONE</span>':(s.blocked&&s.blocked[0]==d)?'<span class="p bl">BLOCKED</span>':i%2?'<span class="p wk">WORKING</span>':'<span class="p ok">DONE</span>'])):'')+
  (s.cur>=7?T('BS Crate and TruckTrip',['crate','contents','packedBy','trip'],[['CR-26-0'+s.code.slice(-2)+'1','Structure panels',tr[0]?DM[tr[0]][0]:'Branding',s.code=='RV-26-101'||s.code=='RV-26-104'||s.code=='RV-26-107'?'T-41':'T-42'],['CR-26-0'+s.code.slice(-2)+'2','Lights and cables','Electric','same trip']]):'');
  bindChips()}
-function vNotes(){$('#v-notes').innerHTML=`<h2>Notes and gaps</h2><div class="row"><div class="card show"><b>What is fictional</b><p>Exhibitor names, sizes, dates inside each stage, crew numbers, machine bookings and trucks. The two shows and their opening dates are as Narendra gave them.</p></div><div class="card show"><b>What comes from research</b><p>Departments and head counts (HR chart, 6 Nov), flows between them (told by Ali, Prateek, Akhil), table names (Prateek's 7th update and our proposed Build schema).</p></div><div class="card show"><b>Gaps this exposes</b><ul><li>Nothing in either schema holds passes and approvals (Q104).</li><li>The rep's go-ahead has no field yet (Q105).</li><li>Marketing, Finance and Production Coordination barely appear because we do not know what they do (Q96, Q106, Q107).</li><li>Outside labour is not counted in the crew sheet.</li></ul></div></div><h3>Question for Narendra</h3><p>The message said 7 stands from one show and "fire" (five?) from GITEX. Ten stands in total means 7 plus 3, so that is what is shown. If you meant a different split, tell me and I will change it.</p>`}
-function render(){vOver();vJourney();vDept();vAlloc();vData();vNotes()}render();
+function vNotes(){$('#v-notes').innerHTML=`<h2>Notes and gaps</h2><div class="row"><div class="card show"><b>What is fictional</b><p>Exhibitor names, sizes, dates inside each stage, crew numbers, machine bookings and trucks. The two shows and their opening dates are as Narendra gave them.</p></div><div class="card show"><b>What comes from research</b><p>Departments and head counts (HR chart, 6 Nov), flows between them (told by Ali, Prateek, Akhil), table names (Prateek's 7th update and our proposed Build schema).</p></div><div class="card show"><b>Gaps this exposes</b><ul><li>Nothing in either schema holds passes and approvals (Q104).</li><li>The rep's go-ahead has no field yet (Q105).</li><li>Marketing, Finance and Production Coordination barely appear because we do not know what they do (Q96, Q106, Q107).</li><li>Outside labour is not counted in the crew sheet.</li></ul></div></div><h3>Question for Narendra</h3><p>Split confirmed by Narendra, 7 Nov: 7 stands at the Web Show and 5 at GITEX, twelve in total.</p>`}
+function render(){vScreens();vOver();vJourney();vDept();vAlloc();vData();vNotes()}render();
 </script></body></html>

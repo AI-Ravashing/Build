@@ -236,3 +236,8 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Narendra asked for 10 fictional stand projects (Web Show 12 Nov 2026, GITEX 15 Dec 2026) to show how information, allocation and the flow between departments would work, in a normal page (the pan/zoom boards felt wrong).
 - Built NEED/Stands_Simulation.html: 7 stands at Web Show, 3 at GITEX (ASSUMED split, message was unclear: "7 ... and fire"). Tabs: overview, one stand step by step (RECEIVES, MANAGES, CREATES, SENDS per department with SS/BS tables), each department as of 7 Nov, allocation (PMs, crew vs capacity, machines, trucks), data rows. All data fictional; real names only for staff roles from the HR chart.
 - Shows that RV-26-106 is released 5 days before opening and RV-26-105 is blocked by a missing colour spec.
+
+##  — 12 stands and Screens by person
+- Narendra CONFIRMED the split: 7 stands at the Web Show, 5 at GITEX (12 stands). Added RV-26-111 and 112 (GITEX).
+- Added a tab "Screens by person" to NEED/Stands_Simulation.html: pick a department, then a person (HR chart names for heads and leads; generic entries for ordinary staff), then see that person's portal tabs, filtered stands, and the tables they read and write. 390 person-and-tab screens render without errors.
+- Floor staff names are not in our files; Furniture division and Adhiraj (International) have no role yet.
