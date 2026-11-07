@@ -52,3 +52,16 @@ Prateek's box also connects to Procurement and Estimation. Project Coordination 
 - Logistics is called Transport Division on the chart.
 - Furniture appears **inside Production**. We were told Furniture is Agency (Prateek). Open Question 95.
 - Procurement and Estimation are one department.
+
+## Full roster (Bashini's chart "Bashini list.pdf", received 7 Nov 2026) — CONFIDENTIAL, real names
+`CONFIRMED — Bashini (HR), 7 Nov 2026` for names and counts. Reporting lines as drawn; not confirmed by Build.
+- **Top:** CEO Raveena Devnani; General Manager Tariq; International Division head Prateek.
+- **Prateek's division:** Marketing: Priyanka (1). International: Adhiraj, International PM (1; arrow to Project Coordination). AI and Digitalization: Narendra (1).
+- **Under Raveena:** HR: Pooja (manager), Bashini (executive). Sales: Nisah (senior BDE), Riza and Supriya (junior BDE), April (BDE). Finance: Zeeshan (senior), Adil, Rahul.
+- **Under Tariq:** Project Coordination: Gloria, Lakshmi (admin assistant). Design (7): Kalim (head), Mustafa; 3D: Azeem, Khaja, Kamil; 2D: Ameen, Niyaz. Procurement and Estimation (3): Akil (procurement manager), Amal (procurement executive), Mukesh (estimation executive). Printing, Acrylic and CNC: Jasvir (head); printing Aslam, Gafoor, Nisar; acrylic Sameer; CNC Nim.
+- **Production:** PM division "4 Pax": Aman, Ali Asgar, Shahanawaz, Hamraz, so Aman plus three PMs. Production Coordination (2): Tabrej, Tayyab.
+  - Carpenter division: Jayson; seniors Manoj, Talib, Ahmad; Sugreev, Kishore Sharma, Prabhu, Arun Sharma, Shyam Chorsiya, Mritunjay, Lallan, Balram Sharma, Tham Bahadur, Shrawan Kumar, Manohar (Gora), Juganu, Imteyaz, Gyan, Sandeep, MD Gulam, Hanshraj, Shrawan Kumar (second), MD Farukul. Chart says 24 without Jayson but lists 22 names.
+  - Electrician division (7): Happy; Sunny (senior); Sahil, Vijay, Ashutosh, Moeen, Bumanna.
+  - Painter division (no head named): Water Painter (9): Mujjmil Hussain, Rafiq, Suraj, Saif, Rana, Sarvesh, Shyam Sunder, Faijan, Ansar Ali. Spray Painter (3): Kayum Ali (head), Rishi, Nitesh Kumar.
+  - Transport division (7): Zain; Majeed, Jaspal, Tanveer, Ranjit, Amritpal, Pritpal.
+  - Furniture division (2 to 3): Davinder (Bindu), Govind. Mess (4, not Build): Karan; Jog, Farhan, Jethu, Manohar (office boy).

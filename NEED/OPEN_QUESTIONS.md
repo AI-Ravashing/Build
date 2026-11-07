@@ -219,3 +219,9 @@ Many people can use or update a fact; one keeps the master copy.
 - Prateek's answers, starting with the ★ ones.
 - A real name for your backup person (PT-23).
 - The Annex A list, before Phase 5 tool ideas.
+
+## Added 7 Nov 2026 (from Bashini's full roster)
+- **Q97 (PM count): evidence resolves it.** The chart says "4 Pax" for the PM division and lists three PMs under Aman, so Aman plus three PMs. Still to confirm with Aman. (Bashini's chart, 7 Nov.)
+- **Q111:** Carpentry chart says 24 Pax without Jayson but names 22 (3 seniors, 19 carpenters). Two missing names or a wrong count? Ask HR.
+- **Q112:** The Painter division box has no head. Who leads Water Paint? (Spray Paint: Kayum Ali.)
+- **Q113:** Adhiraj (International PM) and the Furniture division have no portal role yet. What should they see and do?

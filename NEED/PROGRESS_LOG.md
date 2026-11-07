@@ -247,3 +247,8 @@ Append-only. Newest entry at the bottom. Never overwrite an earlier entry.
 - Rebuilt NEED/Stands_Simulation.html: 12 stands (Stand A to L, Company A to L), 13 phases, 23 actors incl. outside parties (client, venue and organiser, supplier, outsourced AV and lighting, outside labour, outside PM, hired transport), dated events with people and escalation chain, a date bar (7 Nov to 31 Dec), 20 scenarios across the 12 stands, Alerts tab (desktop list, phone alert, 18:00 summary, routing table), Top managers tab (decisions, cost to markup to price, risks), Hierarchy tab, allocation with outside labour, data rows by table (SS, BS, GAP). Unknown staff names removed.
 - ASSUMED and unconfirmed: who adds the markup and in what order, the deal size that needs Raveena, Tariq approving outside labour, hired trucks and overtime, Finance advance invoice. New schema gaps: markup, discount approval, invoices and payments, passes (GAP).
 - Checked: all dates render, 427 person screens render without errors. Not every tab read at full size.
+
+##  — Bashini full roster in, Flow map added
+- Narendra shared "Bashini list.pdf": every name and head count (CONFIRMED, Bashini, 7 Nov). Saved to NEED/ORG_CHART.md (confidential). Resolves Q97 in favour of Aman plus 3 PMs; raises Q111 to Q113.
+- Stands_Simulation.html: 90 real people from the chart replace the generic team entries; Hierarchy tab rebuilt from the roster; new Flow map tab: phases and who is in them, then a snowflake per department (people, creates, manages, receives, sends, tables, screens), then a person view with their portal tabs, tables and steps. 274 flow views and 800 person screens render without errors.
+- Contains real names: private repo only, inside the NDA circle.
